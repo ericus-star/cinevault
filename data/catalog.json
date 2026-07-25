@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "title": "Sample Movie",
+    "genre": "Action",
+    "year": "2026",
+    "poster": "https://via.placeholder.com/200x300",
+    "description": "An exciting preview item.",
+    "downloadUrl": "https://example.com/file.mp4"
+  }
+]

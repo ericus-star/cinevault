@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineVault - Watch & Download Movies & Series</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo"><h1>CINE<span>VAULT</span></h1></div>
+        
+        <nav class="nav-links">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/?category=Chinese Drama" class="nav-item">Chinese Drama</a>
+            <a href="/?category=K-Drama" class="nav-item">K-Drama</a>
+            <a href="/?category=TV Series" class="nav-item">TV Series</a>
+            <div class="dropdown">
+                <a href="#" class="nav-item">Movies ▾</a>
+                <div class="dropdown-content">
+                    <a href="/?category=Action">Action</a>
+                    <a href="/?category=Hollywood">Hollywood</a>
+                    <a href="/?category=Animation">Animation</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#" class="nav-item">Genre ▾</a>
+                <div class="dropdown-content">
+                    <a href="/?category=Action">Action</a>
+                    <a href="/?category=Comedy">Comedy</a>
+                    <a href="/?category=Drama">Drama</a>
+                    <a href="/?category=Sci-Fi">Sci-Fi</a>
+                </div>
+            </div>
+            <a href="/how-to-download" class="nav-item">How to download</a>
+        </nav>
+
+        <form action="/" method="GET" class="search-box">
+            <input type="text" name="search" placeholder="Search..." value="<%= search %>">
+            <button type="submit">🔍</button>
+        </form>
+        <a href="/admin" class="btn admin-btn">+ Add Content</a>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title">Latest Releases</h2>
+        <div class="catalog-grid">
+            <% catalog.forEach(item => { %>
+                <div class="card">
+                    <div class="poster-container">
+                        <img src="<%= item.poster %>" alt="<%= item.title %>">
+                        <span class="badge"><%= item.year %></span>
+                    </div>
+                    <div class="card-body">
+                        <h3><%= item.title %></h3>
+                        <p class="genre"><%= item.genre %></p>
+                        <a href="<%= item.downloadUrl %>" target="_blank" class="download-btn">Download</a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </main>
+</body>
+</html>
