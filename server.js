@@ -3,8 +3,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const MovieLink = require('./models/MovieLink');
-
-const app = express();
+   const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Connect to MongoDB
@@ -80,7 +79,6 @@ app.post('/admin/add-link', async (req, res) => {
     try {
         const { movieId, quality, size, url } = req.body;
 
-        // Find if movie entry exists or create a new one
         let existingMovie = await MovieLink.findOne({ movieId: movieId });
 
         if (existingMovie) {
@@ -99,7 +97,7 @@ app.post('/admin/add-link', async (req, res) => {
         res.redirect('/admin?msg=Error+saving+link');
     }
 });
-// 3. Start Server
+    3. Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
