@@ -97,7 +97,7 @@ app.post('/admin/add-link', async (req, res) => {
         res.redirect('/admin?msg=Error+saving+link');
     }
 });
-    3. Start Server
+    // 3. Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
