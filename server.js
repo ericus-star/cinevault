@@ -1,9 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const mongoose = require('mongoose');
+const MovieLink = require('./models/MovieLink');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB database'))
+  .catch(err => console.error('Database connection error:', err));
 
 // Middleware setup
 app.set('view engine', 'ejs');
@@ -42,19 +49,21 @@ app.get('/', async (req, res) => {
     }
 });
 
-// 2. Movie Details Route
+// 2. Movie Details Route with Database Download Links
 app.get('/movie/:id', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
         const movieId = req.params.id;
         
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
-        
-        if (!response.ok) {
-            throw new Error(`Movie not found`);
-        }
+        if (!response.ok) throw new Error(`Movie not found`);
 
         const movieData = await response.json();
+
+        // Fetch download links matching this TMDB ID from MongoDB
+        const linkData = await MovieLink.findOne({ movieId: movieId });
+        movieData.downloadLinks = linkData ? linkData.links : [];
+
         res.render('details', { movie: movieData });
     } catch (error) {
         console.error("Error fetching movie details:", error.message);
