@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.urlencoded({ extended: true }));
 // 1. Homepage Route
 app.get('/', async (req, res) => {
     try {
@@ -70,7 +70,35 @@ app.get('/movie/:id', async (req, res) => {
         res.redirect('/');
     }
 });
+// Admin GET route - renders the form
+app.get('/admin', (req, res) => {
+    res.render('admin', { message: req.query.msg || null });
+});
 
+// Admin POST route - saves download links to MongoDB
+app.post('/admin/add-link', async (req, res) => {
+    try {
+        const { movieId, quality, size, url } = req.body;
+
+        // Find if movie entry exists or create a new one
+        let existingMovie = await MovieLink.findOne({ movieId: movieId });
+
+        if (existingMovie) {
+            existingMovie.links.push({ quality, size, url });
+            await existingMovie.save();
+        } else {
+            await MovieLink.create({
+                movieId: movieId,
+                links: [{ quality, size, url }]
+            });
+        }
+
+        res.redirect('/admin?msg=Link+saved+successfully!');
+    } catch (error) {
+        console.error("Error saving link:", error);
+        res.redirect('/admin?msg=Error+saving+link');
+    }
+});
 // 3. Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
