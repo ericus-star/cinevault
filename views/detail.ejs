@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= movie.title %> - CINEVAULT</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo"><h1><a href="/" style="color:white; text-decoration:none;">CINE<span>VAULT</span></a></h1></div>
+  </header>
+
+  <main class="container details-container">
+    <a href="/" class="btn back-btn">← Back to Home</a>
+    
+    <div class="details-content">
+      <div class="details-poster">
+        <img src="<%= movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : 'https://via.placeholder.com/500x750' %>" alt="<%= movie.title %>">
+      </div>
+      <div class="details-info">
+        <h1><%= movie.title %></h1>
+        <p class="meta">
+          <strong>Release Date:</strong> <%= movie.release_date || 'N/A' %> | 
+          <strong>Rating:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %>/10
+        </p>
+        <h3>Overview</h3>
+        <p class="overview"><%= movie.overview || 'No overview available for this title.' %></p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

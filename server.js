@@ -42,7 +42,25 @@ app.get('/', async (req, res) => {
         res.render('index', { catalog: [], movies: [], search: '' });
     }
 });
+// Movie Details Route
+app.get('/movie/:id', async (req, res) => {
+    try {
+        const apiKey = process.env.TMDB_API_KEY;
+        const movieId = req.params.id;
+        
+        const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
+        
+        if (!response.ok) {
+            throw new Error(`Movie not found`);
+        }
 
+        const movieData = await response.json();
+        res.render('details', { movie: movieData });
+    } catch (error) {
+        console.error("Error fetching movie details:", error.message);
+        res.redirect('/');
+    }
+});
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
