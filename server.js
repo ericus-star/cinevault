@@ -1,24 +1,34 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const path = require('path');
 
-// ... keep your existing app.set / express middleware settings here ...
+const PORT = process.env.PORT || 3000;
 
-// YOUR UPDATED HOMEPAGE ROUTE
+// Set up view engine and static folder
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Homepage Route (Fetches TMDB Trending Movies)
 app.get('/', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
-        
-        // Fetch trending movies from TMDB
         const response = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`);
-        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(`TMDB responded with status ${response.status}`);
+        }
 
-        // Pass real movies to your view template
-        res.render('index', { movies: data.results });
+        const data = await response.json();
+        res.render('index', { movies: data.results || [] });
     } catch (error) {
-        console.error("Error fetching TMDB data:", error);
+        console.error("Error fetching TMDB data:", error.message);
         res.render('index', { movies: [] });
     }
 });
 
-// ... keep your app.listen(PORT...) at the bottom ...
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
