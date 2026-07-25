@@ -2,7 +2,7 @@
   <% if (catalog && catalog.length > 0) { %>
     <% catalog.forEach(item => { %>
       <div class="card">
-        <a href="/movie/<%= item.id %>">
+        <a href="/movie/<%= item.id %>" style="text-decoration: none;">
           <div class="poster-container">
             <img src="<%= item.poster %>" alt="<%= item.title %>">
           </div>
