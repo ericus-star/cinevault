@@ -5,7 +5,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Set up view engine and static files
+// Middleware setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,17 +24,26 @@ app.get('/', async (req, res) => {
         const response = await fetch(url);
         const data = await response.json();
 
+        // Format raw TMDB data so item.poster and item.title match your index.ejs setup
+        const formattedCatalog = (data.results || []).map(item => ({
+            ...item,
+            poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750',
+            title: item.title || item.name || 'Untitled'
+        }));
+
+        // Pass catalog, movies, and search to prevent any EJS errors
         res.render('index', { 
-            movies: data.results || [], 
+            catalog: formattedCatalog,
+            movies: formattedCatalog, 
             search: searchQuery 
         });
     } catch (error) {
         console.error("Error fetching TMDB data:", error.message);
-        res.render('index', { movies: [], search: '' });
+        res.render('index', { catalog: [], movies: [], search: '' });
     }
 });
 
-// Start the server
+// Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
