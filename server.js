@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Homepage Route
+// 1. Homepage Route
 app.get('/', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
@@ -24,14 +24,13 @@ app.get('/', async (req, res) => {
         const response = await fetch(url);
         const data = await response.json();
 
-        // Format raw TMDB data so item.poster and item.title match your index.ejs setup
         const formattedCatalog = (data.results || []).map(item => ({
             ...item,
             poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750',
-            title: item.title || item.name || 'Untitled'
+            title: item.title || item.name || 'Untitled',
+            release_date: item.release_date || item.first_air_date || ''
         }));
 
-        // Pass catalog, movies, and search to prevent any EJS errors
         res.render('index', { 
             catalog: formattedCatalog,
             movies: formattedCatalog, 
@@ -42,7 +41,8 @@ app.get('/', async (req, res) => {
         res.render('index', { catalog: [], movies: [], search: '' });
     }
 });
-// Movie Details Route
+
+// 2. Movie Details Route
 app.get('/movie/:id', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
@@ -61,7 +61,8 @@ app.get('/movie/:id', async (req, res) => {
         res.redirect('/');
     }
 });
-// Start Server
+
+// 3. Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

@@ -1,130 +1,155 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-body { background-color: #0b0f19; color: #e2e8f0; padding-bottom: 50px; }
-.navbar { display: flex; justify-content: space-between; align-items: center; background-color: #151c2c; padding: 15px 30px; border-bottom: 2px solid #1e293b; }
-.logo h1 { font-size: 1.8rem; color: #ffffff; }
-.logo h1 span { color: #38bdf8; }
-.search-box { display: flex; gap: 8px; flex: 0 1 400px; }
-.search-box input, .form-container input, .form-container textarea { width: 100%%; padding: 10px 14px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 12px; }
-.search-box button { padding: 10px 18px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.admin-btn { padding: 10px 16px; background: #e11d48; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; }
-.container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-.section-title { font-size: 1.4rem; margin-bottom: 20px; border-left: 4px solid #38bdf8; padding-left: 10px; }
-.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
-.card { background: #151c2c; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; text-align: center; }
-.poster-container { position: relative; width: 100%%; height: 280px; }
-.poster-container img { width: 100%%; height: 100%%; object-fit: cover; }
-.badge { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: #38bdf8; padding: 4px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
-.card-body { padding: 15px; }
-.card-body h3 { font-size: 1rem; color: #fff; margin-bottom: 5px; }
-.genre { color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px; }
-.download-btn { display: block; width: 100%%; padding: 10px 0; background: #22c55e; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-.form-container { max-width: 500px; margin: 40px auto; background: #151c2c; padding: 25px; border-radius: 8px; border: 1px solid #1e293b; }
-.form-container label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: #94a3b8; }
-/* Navigation Bar Styling */
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+/* Base Layout */
+* {
+  box-sizing: border-box;
 }
 
-.nav-item {
-    color: #cbd5e1;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: color 0.2s ease;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #141414;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.nav-item:hover {
-    color: #38bdf8;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #000;
 }
 
-/* Dropdown Menu Styling */
-.dropdown {
-    position: relative;
-    display: inline-block;
+.logo h1 {
+  margin: 0;
+  font-size: 1.8rem;
 }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #1e293b;
-    min-width: 140px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
-    border-radius: 6px;
-    overflow: hidden;
-    z-index: 100;
+.logo span {
+  color: #e50914;
 }
 
-.dropdown-content a {
-    color: #e2e8f0;
-    padding: 10px 14px;
-    text-decoration: none;
-    display: block;
-    font-size: 0.88rem;
+.search-form input {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  outline: none;
 }
 
-.dropdown-content a:hover {
-    background-color: #334155;
-    color: #38bdf8;
+.search-form button {
+  padding: 8px 16px;
+  background-color: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.dropdown:hover .dropdown-content {
-    display: block;}
+.container {
+  padding: 20px 40px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Catalog Grid & Cards */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.poster-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Card Info (Titles & Release Years) */
 .card-info {
-  padding: 10px 5px;
+  padding: 12px;
   color: #fff;
 }
+
 .card-title {
-  font-size: 1rem;
-  margin: 0;
+  font-size: 0.95rem;
+  margin: 0 0 5px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #ffffff;
 }
+
 .card-year {
   font-size: 0.85rem;
-  color: #aaa;
+  color: #aaaaaa;
 }
 
 /* Movie Details Page Styles */
 .details-container {
-  padding: 20px;
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
+
 .back-btn {
   display: inline-block;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   background: #333;
   color: #fff;
-  padding: 8px 16px;
+  padding: 10px 20px;
   text-decoration: none;
   border-radius: 4px;
+  font-weight: bold;
 }
+
+.back-btn:hover {
+  background: #e50914;
+}
+
 .details-content {
   display: flex;
-  gap: 30px;
+  gap: 40px;
   flex-wrap: wrap;
 }
+
 .details-poster img {
   width: 300px;
   border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
+
 .details-info {
   flex: 1;
   color: #fff;
 }
+
 .details-info h1 {
   margin-top: 0;
-  font-size: 2.2rem;
+  font-size: 2.5rem;
 }
+
 .details-info .meta {
   color: #bbb;
   margin-bottom: 20px;
+  font-size: 1rem;
 }
+
 .details-info .overview {
   line-height: 1.6;
   font-size: 1.1rem;
+  color: #ddd;
 }
