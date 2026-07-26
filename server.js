@@ -1,24 +1,33 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Middleware & View Engine Setup
+// Middleware Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB Atlas
+// Session Configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'cinevault_fallback_secret_key_123',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+}));
+
+// MongoDB Atlas Connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB database'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// MongoDB Schema for Download Links
+// MongoDB Schema for Links
 const LinkSchema = new mongoose.Schema({
     tmdbId: { type: String, required: true },
     quality: { type: String, required: true },
@@ -49,7 +58,17 @@ function formatCatalog(results) {
     }));
 }
 
-// 1. Homepage Route (Trending)
+// Authentication Middleware
+function requireAdmin(req, res, next) {
+    if (req.session && req.session.isAdmin) {
+        return next();
+    }
+    res.redirect('/admin/login');
+}
+
+// --- PUBLIC ROUTES ---
+
+// 1. Homepage Route (Trending or Search)
 app.get('/', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
@@ -136,13 +155,31 @@ app.get('/movie/:id', async (req, res) => {
     }
 });
 
-// 6. Admin Panel Page
-app.get('/admin', (req, res) => {
-    res.render('admin');
+// --- ADMIN & AUTHENTICATION ROUTES ---
+
+// Render Login Page
+app.get('/admin/login', (req, res) => {
+    res.render('admin-login', { error: null });
 });
 
-// 7. Save Download Link (POST)
-app.post('/admin/add-link', async (req, res) => {
+// Handle Login Submission
+app.post('/admin/login', (req, res) => {
+    const { password } = req.body;
+    if (password === process.env.ADMIN_PASSWORD) {
+        req.session.isAdmin = true;
+        res.redirect('/admin');
+    } else {
+        res.render('admin-login', { error: 'Incorrect password!' });
+    }
+});
+
+// Protected Admin Dashboard
+app.get('/admin', requireAdmin, (req, res) => {
+    res.render('admin', { message: null });
+});
+
+// Save Download Link
+app.post('/admin/add-link', requireAdmin, async (req, res) => {
     try {
         const { tmdbId, quality, fileSize, downloadUrl } = req.body;
         await Link.create({ tmdbId, quality, fileSize, downloadUrl });
@@ -151,6 +188,14 @@ app.post('/admin/add-link', async (req, res) => {
         console.error('Save Link Error:', error.message);
         res.status(500).send('Failed to save download link');
     }
+});
+
+// Logout Route
+app.get('/admin/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) console.error('Logout error:', err);
+        res.redirect('/admin/login');
+    });
 });
 
 // Start Server

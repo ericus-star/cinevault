@@ -9,7 +9,7 @@
     .admin-container {
       max-width: 600px;
       margin: 40px auto;
-      padding: 20px;
+      padding: 25px;
       background: #1f1f1f;
       border-radius: 8px;
     }
@@ -28,6 +28,7 @@
       border: 1px solid #333;
       background: #121212;
       color: #fff;
+      box-sizing: border-box;
     }
     .btn-submit {
       background: #e50914;
@@ -38,6 +39,7 @@
       border-radius: 4px;
       cursor: pointer;
       width: 100%;
+      margin-top: 10px;
     }
     .logout-link {
       display: inline-block;
@@ -55,7 +57,7 @@
   </header>
 
   <main class="admin-container">
-    <h2>➕ Add Download Links</h2>
+    <h2>➕ Add Download Link</h2>
 
     <form action="/admin/add-link" method="POST">
       <div class="form-group">
