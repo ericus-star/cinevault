@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CINEVAULT Admin - Manage Download Links</title>
+  <title>CINEVAULT Admin - Manage Links</title>
   <link rel="stylesheet" href="/style.css">
   <style>
     .admin-layout {
@@ -24,7 +24,7 @@
     }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 10px;
       border-radius: 4px;
@@ -33,6 +33,7 @@
       color: #fff;
       box-sizing: border-box;
     }
+    .tv-fields { display: flex; gap: 10px; }
     .btn-submit {
       background: #e50914;
       color: white;
@@ -85,24 +86,50 @@
     <div class="admin-card">
       <h2>➕ Add Download Link</h2>
       <form action="/admin/add-link" method="POST">
+        
         <div class="form-group">
-          <label>TMDB Movie ID:</label>
-          <input type="text" name="tmdbId" placeholder="e.g. 550" required>
+          <label>Content Type:</label>
+          <select name="type" id="contentType" onchange="toggleTvFields()">
+            <option value="movie">Movie</option>
+            <option value="tv">TV Show</option>
+          </select>
         </div>
+
+        <div class="form-group">
+          <label>TMDB ID:</label>
+          <input type="text" name="tmdbId" placeholder="e.g. 550 or 1399" required>
+        </div>
+
+        <!-- TV Specific Fields -->
+        <div id="tvInputs" style="display: none;" class="form-group tv-fields">
+          <div>
+            <label>Season:</label>
+            <input type="number" name="season" value="1" min="1">
+          </div>
+          <div>
+            <label>Episode:</label>
+            <input type="number" name="episode" value="1" min="1">
+          </div>
+        </div>
+
         <div class="form-group">
           <label>Quality:</label>
           <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required>
         </div>
+
         <div class="form-group">
           <label>File Size:</label>
           <input type="text" name="fileSize" placeholder="e.g. 850 MB" required>
         </div>
+
         <div class="form-group">
           <label>Download URL:</label>
           <input type="url" name="downloadUrl" placeholder="https://..." required>
         </div>
+
         <button type="submit" class="btn-submit">Save Link</button>
       </form>
+
       <a href="/admin/logout" class="logout-link">← Logout</a>
     </div>
 
@@ -113,18 +140,27 @@
         <table class="link-table">
           <thead>
             <tr>
-              <th>TMDB ID</th>
+              <th>Type / ID</th>
+              <th>Info</th>
               <th>Quality</th>
-              <th>Size</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <% links.forEach(link => { %>
               <tr>
-                <td><a href="/movie/<%= link.tmdbId %>" style="color: #e50914;" target="_blank"><%= link.tmdbId %></a></td>
-                <td><%= link.quality %></td>
-                <td><%= link.fileSize %></td>
+                <td>
+                  <span style="text-transform: uppercase; font-size: 11px; padding: 2px 5px; background: #333; border-radius: 3px;"><%= link.type || 'movie' %></span>
+                  <a href="<%= link.type === 'tv' ? '/tv/' : '/movie/' %><%= link.tmdbId %>" style="color: #e50914;" target="_blank"><%= link.tmdbId %></a>
+                </td>
+                <td>
+                  <% if (link.type === 'tv') { %>
+                    S<%= link.season %>E<%= link.episode %>
+                  <% } else { %>
+                    Movie
+                  <% } %>
+                </td>
+                <td><%= link.quality %> (<%= link.fileSize %>)</td>
                 <td>
                   <form action="/admin/delete-link/<%= link._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this link?');">
                     <button type="submit" class="btn-delete">Delete</button>
@@ -139,5 +175,13 @@
       <% } %>
     </div>
   </main>
+
+  <script>
+    function toggleTvFields() {
+      const type = document.getElementById('contentType').value;
+      const tvInputs = document.getElementById('tvInputs');
+      tvInputs.style.display = type === 'tv' ? 'flex' : 'none';
+    }
+  </script>
 </body>
 </html>

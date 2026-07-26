@@ -27,9 +27,12 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB database'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// MongoDB Schema for Links
+// MongoDB Schema for Links (Supports Movies & TV Episodes)
 const LinkSchema = new mongoose.Schema({
     tmdbId: { type: String, required: true },
+    type: { type: String, enum: ['movie', 'tv'], default: 'movie' },
+    season: { type: Number, default: 1 },
+    episode: { type: Number, default: 1 },
     quality: { type: String, required: true },
     fileSize: { type: String, required: true },
     downloadUrl: { type: String, required: true },
@@ -54,7 +57,8 @@ function formatCatalog(results) {
         id: item.id,
         poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750',
         title: item.title || item.name || 'Untitled',
-        release_date: item.release_date || item.first_air_date || ''
+        release_date: item.release_date || item.first_air_date || '',
+        media_type: item.media_type || (item.title ? 'movie' : 'tv')
     }));
 }
 
@@ -68,7 +72,7 @@ function requireAdmin(req, res, next) {
 
 // --- PUBLIC ROUTES ---
 
-// 1. Homepage Route (Trending or Search)
+// 1. Homepage Route
 app.get('/', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
@@ -146,12 +150,30 @@ app.get('/movie/:id', async (req, res) => {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
         const movie = await response.json();
 
-        const downloadLinks = await Link.find({ tmdbId: movieId });
+        const downloadLinks = await Link.find({ tmdbId: movieId, type: 'movie' });
 
         res.render('movie', { movie, downloadLinks });
     } catch (error) {
         console.error('Movie Details Error:', error.message);
         res.status(500).send('Error loading title details');
+    }
+});
+
+// 6. Single TV Show Details Page
+app.get('/tv/:id', async (req, res) => {
+    try {
+        const apiKey = process.env.TMDB_API_KEY;
+        const tvId = req.params.id;
+
+        const response = await fetch(`https://api.themoviedb.org/3/tv/${tvId}?api_key=${apiKey}`);
+        const show = await response.json();
+
+        const downloadLinks = await Link.find({ tmdbId: tvId, type: 'tv' }).sort({ season: 1, episode: 1 });
+
+        res.render('tv-details', { show, downloadLinks });
+    } catch (error) {
+        console.error('TV Details Error:', error.message);
+        res.status(500).send('Error loading TV show details');
     }
 });
 
@@ -173,7 +195,7 @@ app.post('/admin/login', (req, res) => {
     }
 });
 
-// Protected Admin Dashboard (Fetches active links for table view)
+// Protected Admin Dashboard
 app.get('/admin', requireAdmin, async (req, res) => {
     try {
         const links = await Link.find().sort({ createdAt: -1 });
@@ -187,8 +209,16 @@ app.get('/admin', requireAdmin, async (req, res) => {
 // Save Download Link
 app.post('/admin/add-link', requireAdmin, async (req, res) => {
     try {
-        const { tmdbId, quality, fileSize, downloadUrl } = req.body;
-        await Link.create({ tmdbId, quality, fileSize, downloadUrl });
+        const { tmdbId, type, season, episode, quality, fileSize, downloadUrl } = req.body;
+        await Link.create({ 
+            tmdbId, 
+            type: type || 'movie', 
+            season: season ? parseInt(season) : 1, 
+            episode: episode ? parseInt(episode) : 1, 
+            quality, 
+            fileSize, 
+            downloadUrl 
+        });
         res.redirect('/admin');
     } catch (error) {
         console.error('Save Link Error:', error.message);

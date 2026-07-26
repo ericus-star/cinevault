@@ -42,7 +42,7 @@
             <% if (catalog && catalog.length > 0) { %>
                 <% catalog.forEach(item => { %>
                     <div class="movie-card">
-                        <a href="/movie/<%= item.id %>">
+                        <a href="<%= item.media_type === 'tv' || activeCategory.includes('TV') ? '/tv/' + item.id : '/movie/' + item.id %>">
                             <img src="<%= item.poster %>" alt="<%= item.title %>">
                             <div class="movie-info">
                                 <h3><%= item.title %></h3>
