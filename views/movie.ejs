@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= movie.title %> - CINEVAULT</title>
+  <title><%= movie.title || 'Movie Details' %> - CINEVAULT</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -13,17 +13,17 @@
     </div>
   </header>
 
-  <main class="details-container">
-    <a href="/" class="back-btn">&larr; Back to Catalog</a>
+  <main class="details-container" style="max-width: 1000px; margin: 30px auto; padding: 0 20px;">
+    <a href="/" class="back-btn" style="color: #e50914; text-decoration: none; font-weight: bold;">&larr; Back to Catalog</a>
     
-    <div class="details-content">
+    <div class="details-content" style="display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
       <div class="details-poster">
-        <img src="https://image.tmdb.org/t/p/w500<%= movie.poster_path %>" alt="<%= movie.title %>">
+        <img src="https://image.tmdb.org/t/p/w500<%= movie.poster_path %>" alt="<%= movie.title %>" style="border-radius: 8px; width: 300px;">
       </div>
       
-      <div class="details-info">
+      <div class="details-info" style="flex: 1;">
         <h1><%= movie.title %></h1>
-        <p class="meta">
+        <p class="meta" style="margin: 10px 0; color: #aaa;">
           <strong>Release Date:</strong> <%= movie.release_date %> | 
           <strong>Rating:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %>/10
         </p>
@@ -33,13 +33,13 @@
         <!-- Download Section -->
         <div class="download-section" style="margin-top: 30px; padding: 20px; background: #1f1f1f; border-radius: 8px;">
           <h3>📥 Download Options</h3>
-          <% if (movie.downloadLinks && movie.downloadLinks.length > 0) { %>
+          <% if (typeof downloadLinks !== 'undefined' && downloadLinks.length > 0) { %>
             <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
-              <% movie.downloadLinks.forEach(link => { %>
-                <a href="<%= link.url %>" target="_blank" style="background: #e50914; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                  Download <%= link.quality %> (<%= link.size %>)
+              <% downloadLinks.forEach(link => { %>
+                <a href="<%= link.downloadUrl %>" target="_blank" style="background: #e50914; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                  Download <%= link.quality %> (<%= link.fileSize %>)
                 </a>
-              <% }) %>
+              <% }); %>
             </div>
           <% } else { %>
             <p style="color: #aaa; margin: 10px 0 0 0;">No download links available for this title yet.</p>

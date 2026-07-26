@@ -5,6 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CINEVAULT Admin - Add Download Links</title>
   <link rel="stylesheet" href="/style.css">
+  <style>
+    .admin-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1f1f1f;
+      border-radius: 8px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: #121212;
+      color: #fff;
+    }
+    .btn-submit {
+      background: #e50914;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .logout-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #aaa;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
   <header class="navbar">
@@ -13,40 +54,34 @@
     </div>
   </header>
 
-  <main style="max-width: 600px; margin: 40px auto; padding: 20px; background: #1f1f1f; border-radius: 8px;">
+  <main class="admin-container">
     <h2>➕ Add Download Links</h2>
-    
-    <% if (message) { %>
-      <div style="background: #28a745; color: white; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
-        <%= message %>
-      </div>
-    <% } %>
 
     <form action="/admin/add-link" method="POST">
-      <div style="margin-bottom: 15px;">
-        <label style="display:block; margin-bottom: 5px;">TMDB Movie ID:</label>
-        <input type="text" name="movieId" placeholder="e.g. 550" required style="width: 100%; padding: 10px; border-radius: 4px; border: none;">
+      <div class="form-group">
+        <label>TMDB Movie ID:</label>
+        <input type="text" name="tmdbId" placeholder="e.g. 550" required>
       </div>
 
-      <div style="margin-bottom: 15px;">
-        <label style="display:block; margin-bottom: 5px;">Quality:</label>
-        <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required style="width: 100%; padding: 10px; border-radius: 4px; border: none;">
+      <div class="form-group">
+        <label>Quality:</label>
+        <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required>
       </div>
 
-      <div style="margin-bottom: 15px;">
-        <label style="display:block; margin-bottom: 5px;">File Size:</label>
-        <input type="text" name="size" placeholder="e.g. 850 MB" required style="width: 100%; padding: 10px; border-radius: 4px; border: none;">
+      <div class="form-group">
+        <label>File Size:</label>
+        <input type="text" name="fileSize" placeholder="e.g. 850 MB" required>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <label style="display:block; margin-bottom: 5px;">Download URL:</label>
-        <input type="url" name="url" placeholder="https://..." required style="width: 100%; padding: 10px; border-radius: 4px; border: none;">
+      <div class="form-group">
+        <label>Download URL:</label>
+        <input type="url" name="downloadUrl" placeholder="https://..." required>
       </div>
 
-      <button type="submit" style="background: #e50914; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-        Save Download Link
-      </button>
+      <button type="submit" class="btn-submit">Save Download Link</button>
     </form>
+
+    <a href="/admin/logout" class="logout-link">← Logout</a>
   </main>
 </body>
 </html>
