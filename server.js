@@ -1,103 +1,86 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
-const mongoose = require('mongoose');
-const MovieLink = require('./models/MovieLink');
-   const app = express();
-const PORT = process.env.PORT || 10000;
+// List of common TMDB genres for quick filtering
+const GENRES = [
+    { id: 28, name: 'Action' },
+    { id: 35, name: 'Comedy' },
+    { id: 18, name: 'Drama' },
+    { id: 27, name: 'Horror' },
+    { id: 878, name: 'Sci-Fi' },
+    { id: 53, name: 'Thriller' },
+    { id: 16, name: 'Animation' }
+];
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB database'))
-  .catch(err => console.error('Database connection error:', err));
+// Helper function to format TMDB results consistently
+function formatCatalog(results) {
+    return (results || []).map(item => ({
+        ...item,
+        poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750',
+        title: item.title || item.name || 'Untitled',
+        release_date: item.release_date || item.first_air_date || '',
+        media_type: item.title ? 'movie' : 'tv'
+    }));
+}
 
-// Middleware setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-// 1. Homepage Route
+// 1. Homepage (Trending Content)
 app.get('/', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
         const searchQuery = req.query.search || '';
         
-        let url = `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`;
+        let url = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}`;
         if (searchQuery) {
-            url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(searchQuery)}`;
+            url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(searchQuery)}`;
         }
 
         const response = await fetch(url);
         const data = await response.json();
+        const catalog = formatCatalog(data.results);
 
-        const formattedCatalog = (data.results || []).map(item => ({
-            ...item,
-            poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750',
-            title: item.title || item.name || 'Untitled',
-            release_date: item.release_date || item.first_air_date || ''
-        }));
-
-        res.render('index', { 
-            catalog: formattedCatalog,
-            movies: formattedCatalog, 
-            search: searchQuery 
-        });
+        res.render('index', { catalog, search: searchQuery, genres: GENRES, activeCategory: 'Home' });
     } catch (error) {
-        console.error("Error fetching TMDB data:", error.message);
-        res.render('index', { catalog: [], movies: [], search: '' });
+        console.error("Error fetching home data:", error.message);
+        res.render('index', { catalog: [], search: '', genres: GENRES, activeCategory: 'Home' });
     }
 });
 
-// 2. Movie Details Route with Database Download Links
-app.get('/movie/:id', async (req, res) => {
+// 2. Movies Only Route
+app.get('/movies', async (req, res) => {
     try {
         const apiKey = process.env.TMDB_API_KEY;
-        const movieId = req.params.id;
-        
-        const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
-        if (!response.ok) throw new Error(`Movie not found`);
+        const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`);
+        const data = await response.json();
 
-        const movieData = await response.json();
-
-        // Fetch download links matching this TMDB ID from MongoDB
-        const linkData = await MovieLink.findOne({ movieId: movieId });
-        movieData.downloadLinks = linkData ? linkData.links : [];
-
-        res.render('details', { movie: movieData });
+        res.render('index', { catalog: formatCatalog(data.results), search: '', genres: GENRES, activeCategory: 'Movies' });
     } catch (error) {
-        console.error("Error fetching movie details:", error.message);
-        res.redirect('/');
+        res.render('index', { catalog: [], search: '', genres: GENRES, activeCategory: 'Movies' });
     }
 });
-// Admin GET route - renders the form
-app.get('/admin', (req, res) => {
-    res.render('admin', { message: req.query.msg || null });
-});
 
-// Admin POST route - saves download links to MongoDB
-app.post('/admin/add-link', async (req, res) => {
+// 3. TV Shows Only Route
+app.get('/tv', async (req, res) => {
     try {
-        const { movieId, quality, size, url } = req.body;
+        const apiKey = process.env.TMDB_API_KEY;
+        const response = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}`);
+        const data = await response.json();
 
-        let existingMovie = await MovieLink.findOne({ movieId: movieId });
-
-        if (existingMovie) {
-            existingMovie.links.push({ quality, size, url });
-            await existingMovie.save();
-        } else {
-            await MovieLink.create({
-                movieId: movieId,
-                links: [{ quality, size, url }]
-            });
-        }
-
-        res.redirect('/admin?msg=Link+saved+successfully!');
+        res.render('index', { catalog: formatCatalog(data.results), search: '', genres: GENRES, activeCategory: 'TV Shows' });
     } catch (error) {
-        console.error("Error saving link:", error);
-        res.redirect('/admin?msg=Error+saving+link');
+        res.render('index', { catalog: [], search: '', genres: GENRES, activeCategory: 'TV Shows' });
     }
 });
-    // 3. Start Server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+
+// 4. Genre Filter Route
+app.get('/genre/:id', async (req, res) => {
+    try {
+        const apiKey = process.env.TMDB_API_KEY;
+        const genreId = req.params.id;
+        
+        const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`);
+        const data = await response.json();
+
+        const selectedGenre = GENRES.find(g => g.id == genreId)?.name || 'Genre';
+
+        res.render('index', { catalog: formatCatalog(data.results), search: '', genres: GENRES, activeCategory: selectedGenre });
+    } catch (error) {
+        res.render('index', { catalog: [], search: '', genres: GENRES, activeCategory: 'Genre' });
+    }
 });

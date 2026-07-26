@@ -1,155 +1,193 @@
-/* Base Layout */
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: #141414;
-  color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #141414;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Navigation Bar */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background-color: #0b0b0b;
+    border-bottom: 1px solid #222;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.logo h1 {
-  margin: 0;
-  font-size: 1.8rem;
+.logo h1 span {
+    color: #e50914;
 }
 
-.logo span {
-  color: #e50914;
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: #b3b3b3;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.nav-links a.active, 
+.nav-links a:hover {
+    color: #ffffff;
+}
+
+/* Dropdown Menu */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.dropbtn:hover {
+    color: #ffffff;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #1f1f1f;
+    min-width: 150px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.7);
+    z-index: 100;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.dropdown-content a {
+    color: #ccc;
+    padding: 10px 16px;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #333;
+    color: #e50914;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Search Form */
+.search-form {
+    display: flex;
+    gap: 8px;
 }
 
 .search-form input {
-  padding: 8px 12px;
-  border-radius: 4px;
-  border: none;
-  outline: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background-color: #1f1f1f;
+    color: #fff;
+    outline: none;
 }
 
 .search-form button {
-  padding: 8px 16px;
-  background-color: #e50914;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #e50914;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
 }
 
+.search-form button:hover {
+    background-color: #b80710;
+}
+
+/* Main Layout */
 .container {
-  padding: 20px 40px;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    border-left: 4px solid #e50914;
+    padding-left: 10px;
 }
 
-/* Catalog Grid & Cards */
-.catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+/* Movie Grid */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
 }
 
-.card {
-  background-color: #1f1f1f;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.movie-card {
+    background-color: #1f1f1f;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
 }
 
-.poster-container img {
-  width: 100%;
-  height: auto;
-  display: block;
+.movie-card a {
+    text-decoration: none;
+    color: white;
 }
 
-/* Card Info (Titles & Release Years) */
-.card-info {
-  padding: 12px;
-  color: #fff;
+.movie-card img {
+    width: 100%;
+    height: 270px;
+    object-fit: cover;
 }
 
-.card-title {
-  font-size: 0.95rem;
-  margin: 0 0 5px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #ffffff;
+.movie-info {
+    padding: 10px;
 }
 
-.card-year {
-  font-size: 0.85rem;
-  color: #aaaaaa;
+.movie-info h3 {
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Movie Details Page Styles */
-.details-container {
-  padding: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
+.movie-info p {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 4px;
 }
 
-.back-btn {
-  display: inline-block;
-  margin-bottom: 25px;
-  background: #333;
-  color: #fff;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.back-btn:hover {
-  background: #e50914;
-}
-
-.details-content {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-
-.details-poster img {
-  width: 300px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-}
-
-.details-info {
-  flex: 1;
-  color: #fff;
-}
-
-.details-info h1 {
-  margin-top: 0;
-  font-size: 2.5rem;
-}
-
-.details-info .meta {
-  color: #bbb;
-  margin-bottom: 20px;
-  font-size: 1rem;
-}
-
-.details-info .overview {
-  line-height: 1.6;
-  font-size: 1.1rem;
-  color: #ddd;
+footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+    color: #666;
+    border-top: 1px solid #222;
 }

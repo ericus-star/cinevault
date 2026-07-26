@@ -1,42 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CINEVAULT</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CINEVAULT</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo"><h1><a href="/" style="color:white; text-decoration:none;">CINE<span>VAULT</span></a></h1></div>
-    <form action="/" method="GET" class="search-form">
-      <input type="text" name="search" placeholder="Search..." value="<%= search %>">
-      <button type="submit">Search</button>
-    </form>
-  </header>
+    <header class="navbar">
+        <div class="logo">
+            <h1><a href="/" style="color:white; text-decoration:none;">CINE<span>VAULT</span></a></h1>
+        </div>
 
-  <main class="container">
-    <h2 class="section-title">Trending Movies</h2>
+        <div class="nav-links">
+            <a href="/" class="<%= activeCategory === 'Home' ? 'active' : '' %>">Home</a>
+            <a href="/movies" class="<%= activeCategory === 'Movies' ? 'active' : '' %>">Movies</a>
+            <a href="/tv" class="<%= activeCategory === 'TV Shows' ? 'active' : '' %>">TV Shows</a>
 
-    <div class="catalog-grid">
-      <% if (catalog && catalog.length > 0) { %>
-        <% catalog.forEach(item => { %>
-          <div class="card">
-            <a href="/movie/<%= item.id %>" style="text-decoration: none;">
-              <div class="poster-container">
-                <img src="<%= item.poster %>" alt="<%= item.title %>">
-              </div>
-              <div class="card-info">
-                <h3 class="card-title"><%= item.title %></h3>
-                <span class="card-year"><%= item.release_date ? item.release_date.split('-')[0] : '' %></span>
-              </div>
-            </a>
-          </div>
-        <% }) %>
-      <% } else { %>
-        <p>No movies found.</p>
-      <% } %>
-    </div>
-  </main>
+            <div class="dropdown">
+                <button class="dropbtn">Genres ▼</button>
+                <div class="dropdown-content">
+                    <% if (typeof genres !== 'undefined' && genres.length > 0) { %>
+                        <% genres.forEach(genre => { %>
+                            <a href="/genre/<%= genre.id %>"><%= genre.name %></a>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <form action="/" method="GET" class="search-form">
+            <input type="text" name="search" placeholder="Search..." value="<%= typeof search !== 'undefined' ? search : '' %>">
+            <button type="submit">Search</button>
+        </form>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title"><%= typeof activeCategory !== 'undefined' ? activeCategory : 'Catalog' %></h2>
+
+        <div class="movie-grid">
+            <% if (catalog && catalog.length > 0) { %>
+                <% catalog.forEach(item => { %>
+                    <div class="movie-card">
+                        <a href="/movie/<%= item.id %>">
+                            <img src="<%= item.poster %>" alt="<%= item.title %>">
+                            <div class="movie-info">
+                                <h3><%= item.title %></h3>
+                                <p><%= item.release_date ? item.release_date.substring(0, 4) : 'N/A' %></p>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p class="no-results">No content found.</p>
+            <% } %>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; <%= new Date().getFullYear() %> CINEVAULT. All rights reserved.</p>
+    </footer>
 </body>
 </html>
