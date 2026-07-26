@@ -173,9 +173,15 @@ app.post('/admin/login', (req, res) => {
     }
 });
 
-// Protected Admin Dashboard
-app.get('/admin', requireAdmin, (req, res) => {
-    res.render('admin', { message: null });
+// Protected Admin Dashboard (Fetches active links for table view)
+app.get('/admin', requireAdmin, async (req, res) => {
+    try {
+        const links = await Link.find().sort({ createdAt: -1 });
+        res.render('admin', { links });
+    } catch (error) {
+        console.error('Fetch Links Error:', error.message);
+        res.render('admin', { links: [] });
+    }
 });
 
 // Save Download Link
@@ -183,10 +189,21 @@ app.post('/admin/add-link', requireAdmin, async (req, res) => {
     try {
         const { tmdbId, quality, fileSize, downloadUrl } = req.body;
         await Link.create({ tmdbId, quality, fileSize, downloadUrl });
-        res.redirect(`/movie/${tmdbId}`);
+        res.redirect('/admin');
     } catch (error) {
         console.error('Save Link Error:', error.message);
         res.status(500).send('Failed to save download link');
+    }
+});
+
+// Delete Download Link Action
+app.post('/admin/delete-link/:id', requireAdmin, async (req, res) => {
+    try {
+        await Link.findByIdAndDelete(req.params.id);
+        res.redirect('/admin');
+    } catch (error) {
+        console.error('Delete Link Error:', error.message);
+        res.status(500).send('Failed to delete download link');
     }
 });
 
@@ -200,5 +217,5 @@ app.get('/admin/logout', (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

@@ -3,24 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CINEVAULT Admin - Add Download Links</title>
+  <title>CINEVAULT Admin - Manage Download Links</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    .admin-container {
-      max-width: 600px;
+    .admin-layout {
+      max-width: 1000px;
       margin: 40px auto;
-      padding: 25px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    @media (max-width: 768px) {
+      .admin-layout { grid-template-columns: 1fr; }
+    }
+    .admin-card {
       background: #1f1f1f;
+      padding: 25px;
       border-radius: 8px;
     }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
     .form-group input {
       width: 100%;
       padding: 10px;
@@ -34,16 +37,37 @@
       background: #e50914;
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 12px;
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
       width: 100%;
       margin-top: 10px;
     }
+    .link-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .link-table th, .link-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+    }
+    .link-table th { color: #aaa; }
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
     .logout-link {
       display: inline-block;
-      margin-top: 15px;
+      margin-top: 20px;
       color: #aaa;
       text-decoration: none;
     }
@@ -56,34 +80,64 @@
     </div>
   </header>
 
-  <main class="admin-container">
-    <h2>➕ Add Download Link</h2>
+  <main class="admin-layout">
+    <!-- Add Link Form -->
+    <div class="admin-card">
+      <h2>➕ Add Download Link</h2>
+      <form action="/admin/add-link" method="POST">
+        <div class="form-group">
+          <label>TMDB Movie ID:</label>
+          <input type="text" name="tmdbId" placeholder="e.g. 550" required>
+        </div>
+        <div class="form-group">
+          <label>Quality:</label>
+          <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required>
+        </div>
+        <div class="form-group">
+          <label>File Size:</label>
+          <input type="text" name="fileSize" placeholder="e.g. 850 MB" required>
+        </div>
+        <div class="form-group">
+          <label>Download URL:</label>
+          <input type="url" name="downloadUrl" placeholder="https://..." required>
+        </div>
+        <button type="submit" class="btn-submit">Save Link</button>
+      </form>
+      <a href="/admin/logout" class="logout-link">← Logout</a>
+    </div>
 
-    <form action="/admin/add-link" method="POST">
-      <div class="form-group">
-        <label>TMDB Movie ID:</label>
-        <input type="text" name="tmdbId" placeholder="e.g. 550" required>
-      </div>
-
-      <div class="form-group">
-        <label>Quality:</label>
-        <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required>
-      </div>
-
-      <div class="form-group">
-        <label>File Size:</label>
-        <input type="text" name="fileSize" placeholder="e.g. 850 MB" required>
-      </div>
-
-      <div class="form-group">
-        <label>Download URL:</label>
-        <input type="url" name="downloadUrl" placeholder="https://..." required>
-      </div>
-
-      <button type="submit" class="btn-submit">Save Download Link</button>
-    </form>
-
-    <a href="/admin/logout" class="logout-link">← Logout</a>
+    <!-- Active Links List -->
+    <div class="admin-card">
+      <h2>📂 Existing Links (<%= links ? links.length : 0 %>)</h2>
+      <% if (links && links.length > 0) { %>
+        <table class="link-table">
+          <thead>
+            <tr>
+              <th>TMDB ID</th>
+              <th>Quality</th>
+              <th>Size</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% links.forEach(link => { %>
+              <tr>
+                <td><a href="/movie/<%= link.tmdbId %>" style="color: #e50914;" target="_blank"><%= link.tmdbId %></a></td>
+                <td><%= link.quality %></td>
+                <td><%= link.fileSize %></td>
+                <td>
+                  <form action="/admin/delete-link/<%= link._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this link?');">
+                    <button type="submit" class="btn-delete">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p style="color: #aaa; margin-top: 15px;">No links stored in database yet.</p>
+      <% } %>
+    </div>
   </main>
 </body>
 </html>
