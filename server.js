@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// MongoDB Connection Setup (Safe handling for local & production)
+// MongoDB Connection Setup
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (MONGODB_URI && (MONGODB_URI.startsWith('mongodb://') || MONGODB_URI.startsWith('mongodb+srv://'))) {
@@ -21,7 +21,7 @@ if (MONGODB_URI && (MONGODB_URI.startsWith('mongodb://') || MONGODB_URI.startsWi
     .then(() => console.log('Connected to MongoDB database'))
     .catch(err => console.error('MongoDB Connection Error:', err));
 } else {
-  console.log('⚠️ Warning: MONGODB_URI is not set or invalid locally. Running in offline/bypass mode.');
+  console.log('⚠️ Warning: MONGODB_URI is not set or invalid locally.');
 }
 
 // TMDB API Key from Environment
@@ -48,7 +48,7 @@ app.get('/', async (req, res) => {
   res.render('index', { movies }, (err, html) => {
     if (err) {
       console.error('Error rendering index.ejs:', err);
-      res.send('<h1>Welcome to ERIVOX</h1><p>Visit <code>/movie/550</code> to test the streaming page.</p>');
+      res.send('<h1>Welcome to ERIVOX</h1>');
     } else {
       res.send(html);
     }
@@ -81,7 +81,7 @@ app.get('/search', async (req, res) => {
   });
 });
 
-// 3. Movie Details & Dynamic Streaming / Download Route
+// 3. Movie Details Route
 app.get('/movie/:tmdbId', async (req, res) => {
   const { tmdbId } = req.params;
 
@@ -93,7 +93,6 @@ app.get('/movie/:tmdbId', async (req, res) => {
       vote_average: 0 
     };
 
-    // Fetch TMDB data if API Key is configured
     if (TMDB_API_KEY) {
       const response = await fetch(
         `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}`
@@ -103,7 +102,6 @@ app.get('/movie/:tmdbId', async (req, res) => {
       }
     }
 
-    // Safely check MongoDB for custom Gofile links if model exists
     let customLink = null;
     try {
       if (typeof Link !== 'undefined') {
@@ -113,7 +111,6 @@ app.get('/movie/:tmdbId', async (req, res) => {
       console.log('Database lookup bypassed or model not found');
     }
 
-    // Render EJS with dynamic embed sources
     res.render('movie', {
       movie: {
         tmdbId: tmdbId,
@@ -121,10 +118,11 @@ app.get('/movie/:tmdbId', async (req, res) => {
         overview: movieData.overview || 'No description available.',
         releaseYear: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
         voteAverage: movieData.vote_average ? Number(movieData.vote_average).toFixed(1) : 'N/A',
-        // Reliable Embed Providers
-        embedPrimary: `https://vidsrc.to/embed/movie/${tmdbId}`,
+        // Embed Sources
+        embedPrimary: `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
         embedSecondary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
-        // Custom Gofile direct link from MongoDB (if added via admin panel)
+        embedTertiary: `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`,
+        // Custom Gofile link from MongoDB
         customDownloadUrl: customLink ? customLink.downloadUrl : null,
         fileSize: customLink ? customLink.fileSize : null,
         quality: customLink ? customLink.quality : null
