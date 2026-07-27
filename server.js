@@ -29,7 +29,7 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 
 // --- ROUTES ---
 
-// 1. Home Page Route (Fetches Trending Movies if API key exists)
+// 1. Home Page Route
 app.get('/', async (req, res) => {
   let movies = [];
   
@@ -113,7 +113,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
       console.log('Database lookup bypassed or model not found');
     }
 
-    // Render EJS with stable, working embed providers
+    // Render EJS with dynamic embed sources & download parameters
     res.render('movie', {
       movie: {
         tmdbId: tmdbId,
@@ -121,12 +121,9 @@ app.get('/movie/:tmdbId', async (req, res) => {
         overview: movieData.overview || 'No description available.',
         releaseYear: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
         voteAverage: movieData.vote_average ? Number(movieData.vote_average).toFixed(1) : 'N/A',
-        
-        // Active & Stable Embed Providers (Replacing timed-out vidsrc.cc)
-        embedPrimary: `https://vidsrc.to/embed/movie/${tmdbId}`,
-        embedSecondary: `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`,
-        embedTertiary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
-
+        // Reliable Embed Providers
+        embedPrimary: `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
+        embedSecondary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
         // Custom Gofile direct link from MongoDB (if added via admin panel)
         customDownloadUrl: customLink ? customLink.downloadUrl : null,
         fileSize: customLink ? customLink.fileSize : null,

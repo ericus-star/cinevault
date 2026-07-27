@@ -1,168 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= movie.title %> (<%= movie.releaseYear %>) - ERIVOX</title>
-  
-  <style>
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= movie.title %> - ERIVOX</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; padding: 2rem 1rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #38bdf8; text-decoration: none; }
+        .back-btn { color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
+        .back-btn:hover { color: #fff; }
+        
+        .server-selector { display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+        .server-btn { padding: 0.6rem 1.2rem; background: #1e293b; color: #94a3b8; border: 1px solid #334155; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .server-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+        .player-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; border: 1px solid #334155; margin-bottom: 1.5rem; }
+        .player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
-    /* Responsive Iframe Player Container */
-    .player-wrapper {
-      position: relative;
-      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-      height: 0;
-      overflow: hidden;
-      border-radius: 12px;
-      background: #000;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      margin-bottom: 25px;
-    }
+        .download-box { background: #1e293b; padding: 1.5rem; border-radius: 12px; border: 1px solid #334155; margin-bottom: 1.5rem; }
+        .download-box h3 { font-size: 1.2rem; margin-bottom: 1rem; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0.8rem 1.5rem; background: #10b981; color: white; text-decoration: none; font-weight: 700; border-radius: 8px; transition: background 0.2s; }
+        .download-btn:hover { background: #059669; }
+        .meta-tag { display: inline-block; background: #334155; color: #cbd5e1; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; margin-left: 8px; }
 
-    .player-wrapper iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-
-    .source-selector {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .source-btn {
-      background: #334155;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .source-btn:hover, .source-btn.active {
-      background: #2563eb;
-    }
-
-    .details-box {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-    }
-
-    .download-section {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-    }
-
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      padding: 12px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      color: #ffffff;
-      background-color: #3b82f6;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-
-    .download-btn:hover {
-      background-color: #2563eb;
-      transform: translateY(-2px);
-    }
-
-    .download-btn.gofile {
-      background-color: #10b981;
-    }
-
-    .download-btn.gofile:hover {
-      background-color: #059669;
-    }
-  </style>
+        .movie-details h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .movie-meta { color: #94a3b8; margin-bottom: 1rem; font-size: 0.95rem; }
+        .overview { color: #cbd5e1; line-height: 1.6; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo">ERIVOX</a>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </header>
 
-<div class="container">
-  <h1><%= movie.title %> (<%= movie.releaseYear %>)</h1>
-  <p>⭐ Rating: <%= movie.voteAverage %>/10</p>
+        <!-- Server Selector -->
+        <div class="server-selector">
+            <button class="server-btn active" onclick="switchServer('<%= movie.embedPrimary %>', this)">Server 1 (VidSrc)</button>
+            <button class="server-btn" onclick="switchServer('<%= movie.embedSecondary %>', this)">Server 2 (AutoEmbed)</button>
+        </div>
 
-  <!-- Player Server Selector -->
-  <div class="source-selector">
-    <button class="source-btn active" onclick="switchServer('<%= movie.embedPrimary %>', this)">Server 1 (VidSrc)</button>
-    <button class="source-btn" onclick="switchServer('<%= movie.embedSecondary %>', this)">Server 2 (AutoEmbed)</button>
-  </div>
+        <!-- Video Player (With sandbox to block ad redirects & popups) -->
+        <div class="player-wrapper">
+            <iframe id="video-player" src="<%= movie.embedPrimary %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+        </div>
 
-  <!-- Video Player -->
-  <div class="player-wrapper">
-    <iframe id="videoPlayer" src="<%= movie.embedPrimary %>" allowfullscreen="true"></iframe>
-  </div>
+        <!-- Direct Download Section -->
+        <div class="download-box">
+            <h3>📥 Download Options</h3>
+            <% if (movie.customDownloadUrl) { %>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">High-speed direct download link available:</p>
+                <a href="<%= movie.customDownloadUrl %>" target="_blank" class="download-btn">
+                    Download Movie
+                    <% if (movie.quality) { %><span class="meta-tag"><%= movie.quality %></span><% } %>
+                    <% if (movie.fileSize) { %><span class="meta-tag"><%= movie.fileSize %></span><% } %>
+                </a>
+            <% } else { %>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">Direct Gofile link not added for this title yet. You can fetch direct files via secondary source:</p>
+                <a href="https://dl.vidsrc.vip/movie/<%= movie.tmdbId %>" target="_blank" class="download-btn" style="background-color: #0284c7;">
+                    Fast Download Link (External)
+                </a>
+            <% } %>
+        </div>
 
-  <!-- Movie Overview -->
-  <div class="details-box">
-    <h3>Overview</h3>
-    <p><%= movie.overview %></p>
-  </div>
-
-  <!-- Download Section -->
-  <div class="download-section">
-    <h3>Download Links</h3>
-    <p style="color: #94a3b8; font-size: 0.9em;">Stream providers have download options inside the player window, or use direct links below:</p>
-    
-    <div class="btn-group">
-      <!-- Option A: Custom Gofile Link (Only shows if you added it in Admin) -->
-      <% if (movie.customDownloadUrl) { %>
-        <a href="<%= movie.customDownloadUrl %>" target="_blank" class="download-btn gofile">
-          ⚡ Direct Gofile Download (<%= movie.quality || '720p' %> - <%= movie.fileSize || 'HD' %>)
-        </a>
-      <% } %>
-
-      <!-- Option B: Embedded Stream/Download Server Links -->
-      <a href="<%= movie.embedPrimary %>" target="_blank" class="download-btn">
-        📥 Open Server 1 Player / Download
-      </a>
-      <a href="<%= movie.embedSecondary %>" target="_blank" class="download-btn">
-        📥 Open Server 2 Player / Download
-      </a>
+        <!-- Movie Details -->
+        <div class="movie-details">
+            <h1><%= movie.title %></h1>
+            <div class="movie-meta">
+                <span><%= movie.releaseYear %></span> • <span>★ <%= movie.voteAverage %></span>
+            </div>
+            <p class="overview"><%= movie.overview %></p>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-  // Script to switch server source on button click
-  function switchServer(url, element) {
-    document.getElementById('videoPlayer').src = url;
-    const buttons = document.querySelectorAll('.source-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    element.classList.add('active');
-  }
-</script>
-
+    <script>
+        function switchServer(url, btn) {
+            document.getElementById('video-player').src = url;
+            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
 </body>
 </html>
