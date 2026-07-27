@@ -1,12 +1,22 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
 const path = require('path');
 
 const app = express();
 
+// Body Parser Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Configure Session Middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'erivox-super-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 Hours
+}));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -29,15 +39,21 @@ if (MONGODB_URI && (MONGODB_URI.startsWith('mongodb://') || MONGODB_URI.startsWi
   mongoose.connect(MONGODB_URI)
     .then(() => console.log('Connected to MongoDB database'))
     .catch(err => console.error('MongoDB Connection Error:', err));
-} else {
-  console.log('⚠️ Warning: MONGODB_URI is not set or invalid.');
 }
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+// Auth Protection Middleware
+const requireAuth = (req, res, next) => {
+  if (req.session && req.session.isAdmin) {
+    return next();
+  }
+  res.redirect('/login');
+};
 
 // --- PUBLIC ROUTES ---
 
-// 1. Home Page
 app.get('/', async (req, res) => {
   let movies = [];
   if (TMDB_API_KEY) {
@@ -48,13 +64,12 @@ app.get('/', async (req, res) => {
         movies = data.results || [];
       }
     } catch (e) {
-      console.error('Error fetching trending movies:', e);
+      console.error(e);
     }
   }
   res.render('index', { movies, title: 'Home' });
 });
 
-// 2. Movies Category Route
 app.get('/movies', async (req, res) => {
   let movies = [];
   if (TMDB_API_KEY) {
@@ -71,7 +86,6 @@ app.get('/movies', async (req, res) => {
   res.render('index', { movies, title: 'Popular Movies' });
 });
 
-// 3. TV Shows Category Route
 app.get('/tv', async (req, res) => {
   let movies = [];
   if (TMDB_API_KEY) {
@@ -92,7 +106,6 @@ app.get('/tv', async (req, res) => {
   res.render('index', { movies, title: 'Popular TV Shows' });
 });
 
-// 4. Genre Route
 app.get('/genre/:genreId', async (req, res) => {
   const { genreId } = req.params;
   let movies = [];
@@ -110,11 +123,9 @@ app.get('/genre/:genreId', async (req, res) => {
   res.render('index', { movies, title: 'Genre Results' });
 });
 
-// 5. Search Route
 app.get('/search', async (req, res) => {
   const query = req.query.q;
   let movies = [];
-
   if (query && TMDB_API_KEY) {
     try {
       const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
@@ -127,20 +138,16 @@ app.get('/search', async (req, res) => {
         }));
       }
     } catch (e) {
-      console.error('Search fetch error:', e);
+      console.error(e);
     }
   }
-
   res.render('index', { movies, title: `Search: ${query}` });
 });
 
-// 6. Movie Download Page
 app.get('/movie/:tmdbId', async (req, res) => {
   const { tmdbId } = req.params;
-
   try {
     let movieData = { title: `Movie #${tmdbId}`, overview: '', release_date: '', vote_average: 0, poster_path: null };
-
     if (TMDB_API_KEY) {
       const response = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}`);
       if (response.ok) {
@@ -163,30 +170,49 @@ app.get('/movie/:tmdbId', async (req, res) => {
         quality: customLink ? customLink.quality : null
       }
     });
-
   } catch (error) {
-    console.error('Error loading movie page:', error);
     res.status(500).send('Server Error loading download page.');
   }
 });
 
-// --- ADMIN PANEL ROUTES ---
+// --- LOGIN & AUTH ROUTES ---
 
-// 7. GET Admin Dashboard Page
-app.get('/admin', async (req, res) => {
+app.get('/login', (req, res) => {
+  if (req.session && req.session.isAdmin) {
+    return res.redirect('/admin');
+  }
+  res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+  const { password } = req.body;
+  if (password === ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    res.redirect('/admin');
+  } else {
+    res.render('login', { error: 'Incorrect Password. Please try again.' });
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
+
+// --- PROTECTED ADMIN ROUTES ---
+
+app.get('/admin', requireAuth, async (req, res) => {
   try {
     const links = await Link.find().sort({ createdAt: -1 });
     res.render('admin', { links });
   } catch (err) {
-    console.error('Error loading admin page:', err);
     res.status(500).send('Database Error loading Admin Dashboard.');
   }
 });
 
-// 8. POST Add/Update Download Link
-app.post('/admin/add-link', async (req, res) => {
+app.post('/admin/add-link', requireAuth, async (req, res) => {
   const { tmdbId, title, downloadUrl, quality, fileSize } = req.body;
-
   try {
     await Link.findOneAndUpdate(
       { tmdbId: tmdbId.trim() },
@@ -201,22 +227,18 @@ app.post('/admin/add-link', async (req, res) => {
     );
     res.redirect('/admin');
   } catch (err) {
-    console.error('Error saving link:', err);
     res.status(500).send('Failed to save download link.');
   }
 });
 
-// 9. POST Delete Link
-app.post('/admin/delete-link/:id', async (req, res) => {
+app.post('/admin/delete-link/:id', requireAuth, async (req, res) => {
   try {
     await Link.findByIdAndDelete(req.params.id);
     res.redirect('/admin');
   } catch (err) {
-    console.error('Error deleting link:', err);
     res.status(500).send('Failed to delete link.');
   }
 });
 
-// --- SERVER STARTUP ---
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
