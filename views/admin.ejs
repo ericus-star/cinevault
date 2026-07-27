@@ -1,187 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX Admin - Manage Links</title>
-  <link rel="stylesheet" href="/style.css">
-  <style>
-    .admin-layout {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-    }
-    @media (max-width: 768px) {
-      .admin-layout { grid-template-columns: 1fr; }
-    }
-    .admin-card {
-      background: #1f1f1f;
-      padding: 25px;
-      border-radius: 8px;
-    }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #333;
-      background: #121212;
-      color: #fff;
-      box-sizing: border-box;
-    }
-    .tv-fields { display: flex; gap: 10px; }
-    .btn-submit {
-      background: #e50914;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .link-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    .link-table th, .link-table td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #333;
-      font-size: 14px;
-    }
-    .link-table th { color: #aaa; }
-    .btn-delete {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .logout-link {
-      display: inline-block;
-      margin-top: 20px;
-      color: #aaa;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERIVOX - Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 2rem 1rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 2rem; color: #38bdf8; margin-bottom: 1.5rem; }
+        
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 600; }
+        input { width: 100%; padding: 0.7rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.95rem; }
+        input:focus { border-color: #38bdf8; outline: none; }
+        
+        button.btn-submit { width: 100%; padding: 0.8rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        button.btn-submit:hover { background: #059669; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #0f172a; color: #38bdf8; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
+        .btn-delete:hover { background: #dc2626; }
+    </style>
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">
-      <h1><a href="/" style="color:white; text-decoration:none;">ERI<span>VOX</span></a></h1>
+    <div class="container">
+        <h1>ERIVOX Admin Dashboard</h1>
+
+        <!-- Add Link Form -->
+        <div class="card">
+            <h2 style="margin-bottom: 1rem;">Add Gofile Direct Download Link</h2>
+            <form action="/admin/add-link" method="POST">
+                <div class="form-group">
+                    <label>TMDB ID (e.g. 1339713 for Bullet Train)</label>
+                    <input type="text" name="tmdbId" placeholder="1339713" required>
+                </div>
+                <div class="form-group">
+                    <label>Title Name</label>
+                    <input type="text" name="title" placeholder="Bullet Train (2022)">
+                </div>
+                <div class="form-group">
+                    <label>Gofile Download Link</label>
+                    <input type="url" name="downloadUrl" placeholder="https://gofile.io/d/XXXXXX" required>
+                </div>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex:1;">
+                        <label>Quality</label>
+                        <input type="text" name="quality" value="1080p">
+                    </div>
+                    <div style="flex:1;">
+                        <label>File Size</label>
+                        <input type="text" name="fileSize" placeholder="850 MB">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Save Link to Database</button>
+            </form>
+        </div>
+
+        <!-- Saved Links Table -->
+        <div class="card">
+            <h2>Active Download Links</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>TMDB ID</th>
+                        <th>Title</th>
+                        <th>Quality / Size</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (links && links.length > 0) { %>
+                        <% links.forEach(link => { %>
+                            <tr>
+                                <td><%= link.tmdbId %></td>
+                                <td><%= link.title %></td>
+                                <td><%= link.quality %> (<%= link.fileSize %>)</td>
+                                <td>
+                                    <form action="/admin/delete-link/<%= link._id %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn-delete">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="color: #94a3b8; text-align: center;">No download links saved yet.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
-  </header>
-
-  <main class="admin-layout">
-    <!-- Add Link Form -->
-    <div class="admin-card">
-      <h2>➕ Add Download Link</h2>
-      <form action="/admin/add-link" method="POST">
-        
-        <div class="form-group">
-          <label>Content Type:</label>
-          <select name="type" id="contentType" onchange="toggleTvFields()">
-            <option value="movie">Movie</option>
-            <option value="tv">TV Show</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>TMDB ID:</label>
-          <input type="text" name="tmdbId" placeholder="e.g. 550 or 1399" required>
-        </div>
-
-        <!-- TV Specific Fields -->
-        <div id="tvInputs" style="display: none;" class="form-group tv-fields">
-          <div>
-            <label>Season:</label>
-            <input type="number" name="season" value="1" min="1">
-          </div>
-          <div>
-            <label>Episode:</label>
-            <input type="number" name="episode" value="1" min="1">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Quality:</label>
-          <input type="text" name="quality" placeholder="e.g. 720p WEBRip" required>
-        </div>
-
-        <div class="form-group">
-          <label>File Size:</label>
-          <input type="text" name="fileSize" placeholder="e.g. 850 MB" required>
-        </div>
-
-        <div class="form-group">
-          <label>Download URL:</label>
-          <input type="url" name="downloadUrl" placeholder="https://..." required>
-        </div>
-
-        <button type="submit" class="btn-submit">Save Link</button>
-      </form>
-
-      <a href="/admin/logout" class="logout-link">← Logout</a>
-    </div>
-
-    <!-- Active Links List -->
-    <div class="admin-card">
-      <h2>📂 Existing Links (<%= links ? links.length : 0 %>)</h2>
-      <% if (links && links.length > 0) { %>
-        <table class="link-table">
-          <thead>
-            <tr>
-              <th>Type / ID</th>
-              <th>Info</th>
-              <th>Quality</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% links.forEach(link => { %>
-              <tr>
-                <td>
-                  <span style="text-transform: uppercase; font-size: 11px; padding: 2px 5px; background: #333; border-radius: 3px;"><%= link.type || 'movie' %></span>
-                  <a href="<%= link.type === 'tv' ? '/tv/' : '/movie/' %><%= link.tmdbId %>" style="color: #e50914;" target="_blank"><%= link.tmdbId %></a>
-                </td>
-                <td>
-                  <% if (link.type === 'tv') { %>
-                    S<%= link.season %>E<%= link.episode %>
-                  <% } else { %>
-                    Movie
-                  <% } %>
-                </td>
-                <td><%= link.quality %> (<%= link.fileSize %>)</td>
-                <td>
-                  <form action="/admin/delete-link/<%= link._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this link?');">
-                    <button type="submit" class="btn-delete">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
-      <% } else { %>
-        <p style="color: #aaa; margin-top: 15px;">No links stored in database yet.</p>
-      <% } %>
-    </div>
-  </main>
-
-  <script>
-    function toggleTvFields() {
-      const type = document.getElementById('contentType').value;
-      const tvInputs = document.getElementById('tvInputs');
-      tvInputs.style.display = type === 'tv' ? 'flex' : 'none';
-    }
-  </script>
 </body>
 </html>

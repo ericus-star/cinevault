@@ -11,15 +11,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// MongoDB Setup & Link Model Schema
 const MONGODB_URI = process.env.MONGODB_URI;
+
+const linkSchema = new mongoose.Schema({
+  tmdbId: { type: String, required: true, unique: true },
+  title: { type: String },
+  downloadUrl: { type: String, required: true },
+  quality: { type: String, default: '1080p' },
+  fileSize: { type: String, default: 'N/A' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Link = mongoose.models.Link || mongoose.model('Link', linkSchema);
 
 if (MONGODB_URI && (MONGODB_URI.startsWith('mongodb://') || MONGODB_URI.startsWith('mongodb+srv://'))) {
   mongoose.connect(MONGODB_URI)
     .then(() => console.log('Connected to MongoDB database'))
     .catch(err => console.error('MongoDB Connection Error:', err));
+} else {
+  console.log('⚠️ Warning: MONGODB_URI is not set or invalid.');
 }
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
+
+// --- PUBLIC ROUTES ---
 
 // 1. Home Page
 app.get('/', async (req, res) => {
@@ -94,7 +110,7 @@ app.get('/genre/:genreId', async (req, res) => {
   res.render('index', { movies, title: 'Genre Results' });
 });
 
-// 5. Search Route (Fixes 'Cannot GET /search')
+// 5. Search Route
 app.get('/search', async (req, res) => {
   const query = req.query.q;
   let movies = [];
@@ -118,7 +134,7 @@ app.get('/search', async (req, res) => {
   res.render('index', { movies, title: `Search: ${query}` });
 });
 
-// 6. Movie Download Details
+// 6. Movie Download Page
 app.get('/movie/:tmdbId', async (req, res) => {
   const { tmdbId } = req.params;
 
@@ -132,14 +148,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
       }
     }
 
-    let customLink = null;
-    try {
-      if (typeof Link !== 'undefined') {
-        customLink = await Link.findOne({ tmdbId: tmdbId });
-      }
-    } catch (dbErr) {
-      console.log('Database lookup bypassed');
-    }
+    let customLink = await Link.findOne({ tmdbId: tmdbId });
 
     res.render('movie', {
       movie: {
@@ -161,5 +170,53 @@ app.get('/movie/:tmdbId', async (req, res) => {
   }
 });
 
+// --- ADMIN PANEL ROUTES ---
+
+// 7. GET Admin Dashboard Page
+app.get('/admin', async (req, res) => {
+  try {
+    const links = await Link.find().sort({ createdAt: -1 });
+    res.render('admin', { links });
+  } catch (err) {
+    console.error('Error loading admin page:', err);
+    res.status(500).send('Database Error loading Admin Dashboard.');
+  }
+});
+
+// 8. POST Add/Update Download Link
+app.post('/admin/add-link', async (req, res) => {
+  const { tmdbId, title, downloadUrl, quality, fileSize } = req.body;
+
+  try {
+    await Link.findOneAndUpdate(
+      { tmdbId: tmdbId.trim() },
+      { 
+        tmdbId: tmdbId.trim(),
+        title: title || 'Custom Movie',
+        downloadUrl: downloadUrl.trim(),
+        quality: quality || '1080p',
+        fileSize: fileSize || 'N/A'
+      },
+      { upsert: true, new: true }
+    );
+    res.redirect('/admin');
+  } catch (err) {
+    console.error('Error saving link:', err);
+    res.status(500).send('Failed to save download link.');
+  }
+});
+
+// 9. POST Delete Link
+app.post('/admin/delete-link/:id', async (req, res) => {
+  try {
+    await Link.findByIdAndDelete(req.params.id);
+    res.redirect('/admin');
+  } catch (err) {
+    console.error('Error deleting link:', err);
+    res.status(500).send('Failed to delete link.');
+  }
+});
+
+// --- SERVER STARTUP ---
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
