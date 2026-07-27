@@ -3,62 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERIVOX</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>ERIVOX - Stream & Download Movies</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #1e293b;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #38bdf8;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        main {
+            flex: 1;
+            padding: 3rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: #f1f5f9;
+        }
+        .hero p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .search-box {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 10px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #1e293b;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+        .search-box button {
+            padding: 0.8rem 1.5rem;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-box button:hover {
+            background-color: #0369a1;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .movie-card {
+            background-color: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid #334155;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            border-color: #38bdf8;
+        }
+        .movie-poster {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            background-color: #0f172a;
+        }
+        .movie-info {
+            padding: 1rem;
+        }
+        .movie-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-meta {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #334155;
+        }
+    </style>
 </head>
 <body>
-    <header class="navbar">
-        <div class="logo">
-            <h1><a href="/" style="color:white; text-decoration:none;">ERI<span>VOX</span></a></h1>
-        </div>
-
-        <div class="nav-links">
-            <a href="/" class="<%= activeCategory === 'Home' ? 'active' : '' %>">Home</a>
-            <a href="/movies" class="<%= activeCategory === 'Movies' ? 'active' : '' %>">Movies</a>
-            <a href="/tv" class="<%= activeCategory === 'TV Shows' ? 'active' : '' %>">TV Shows</a>
-
-            <div class="dropdown">
-                <button class="dropbtn">Genres ▼</button>
-                <div class="dropdown-content">
-                    <% if (typeof genres !== 'undefined' && genres.length > 0) { %>
-                        <% genres.forEach(genre => { %>
-                            <a href="/genre/<%= genre.id %>"><%= genre.name %></a>
-                        <% }); %>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-
-        <form action="/" method="GET" class="search-form">
-            <input type="text" name="search" placeholder="Search..." value="<%= typeof search !== 'undefined' ? search : '' %>">
-            <button type="submit">Search</button>
-        </form>
+    <header>
+        <a href="/" class="logo">ERIVOX</a>
     </header>
 
-    <main class="container">
-        <h2 class="section-title"><%= typeof activeCategory !== 'undefined' ? activeCategory : 'Catalog' %></h2>
+    <main>
+        <section class="hero">
+            <h1>Stream & Download Free Movies</h1>
+            <p>Fast streaming and direct links powered by ERIVOX</p>
+            
+            <form action="/search" method="GET" class="search-box">
+                <input type="text" name="q" placeholder="Search by movie title..." required>
+                <button type="submit">Search</button>
+            </form>
+        </section>
 
+        <h2 style="margin-bottom: 1rem; color: #cbd5e1;">Featured Movies</h2>
+        
         <div class="movie-grid">
-            <% if (catalog && catalog.length > 0) { %>
-                <% catalog.forEach(item => { %>
-                    <div class="movie-card">
-                        <a href="<%= item.media_type === 'tv' || activeCategory.includes('TV') ? '/tv/' + item.id : '/movie/' + item.id %>">
-                            <img src="<%= item.poster %>" alt="<%= item.title %>">
-                            <div class="movie-info">
-                                <h3><%= item.title %></h3>
-                                <p><%= item.release_date ? item.release_date.substring(0, 4) : 'N/A' %></p>
+            <% if (typeof movies !== 'undefined' && movies.length > 0) { %>
+                <% movies.forEach(movie => { %>
+                    <a href="/movie/<%= movie.id %>" class="movie-card">
+                        <img class="movie-poster" src="<%= movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster' %>" alt="<%= movie.title %>">
+                        <div class="movie-info">
+                            <div class="movie-title"><%= movie.title %></div>
+                            <div class="movie-meta">
+                                <span><%= movie.release_date ? movie.release_date.split('-')[0] : 'N/A' %></span>
+                                <span>★ <%= movie.vote_average ? Number(movie.vote_average).toFixed(1) : 'N/A' %></span>
                             </div>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                 <% }); %>
             <% } else { %>
-                <p class="no-results">No content found.</p>
+                <!-- Fallback Featured Cards if API key isn't provided -->
+                <a href="/movie/550" class="movie-card">
+                    <div class="movie-info">
+                        <div class="movie-title">Fight Club</div>
+                        <div class="movie-meta"><span>1999</span><span>★ 8.4</span></div>
+                    </div>
+                </a>
+                <a href="/movie/27205" class="movie-card">
+                    <div class="movie-info">
+                        <div class="movie-title">Inception</div>
+                        <div class="movie-meta"><span>2010</span><span>★ 8.4</span></div>
+                    </div>
+                </a>
+                <a href="/movie/157336" class="movie-card">
+                    <div class="movie-info">
+                        <div class="movie-title">Interstellar</div>
+                        <div class="movie-meta"><span>2014</span><span>★ 8.4</span></div>
+                    </div>
+                </a>
             <% } %>
         </div>
     </main>
 
     <footer>
-        <p>&copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved.</p>
+        &copy; ERIVOX. All rights reserved.
     </footer>
 </body>
 </html>

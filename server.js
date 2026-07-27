@@ -29,9 +29,23 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 
 // --- ROUTES ---
 
-// 1. Home Page Route (With Error Fallback)
-app.get('/', (req, res) => {
-  res.render('index', (err, html) => {
+// 1. Home Page Route (Fetches Trending Movies if API key exists)
+app.get('/', async (req, res) => {
+  let movies = [];
+  
+  if (TMDB_API_KEY) {
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}`);
+      if (response.ok) {
+        const data = await response.json();
+        movies = data.results || [];
+      }
+    } catch (e) {
+      console.error('Error fetching trending movies:', e);
+    }
+  }
+
+  res.render('index', { movies }, (err, html) => {
     if (err) {
       console.error('Error rendering index.ejs:', err);
       res.send('<h1>Welcome to ERIVOX</h1><p>Visit <code>/movie/550</code> to test the streaming page.</p>');
@@ -41,7 +55,33 @@ app.get('/', (req, res) => {
   });
 });
 
-// 2. Movie Details & Dynamic Streaming / Download Route
+// 2. Movie Search Route
+app.get('/search', async (req, res) => {
+  const query = req.query.q;
+  let movies = [];
+
+  if (query && TMDB_API_KEY) {
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        movies = data.results || [];
+      }
+    } catch (e) {
+      console.error('Search fetch error:', e);
+    }
+  }
+
+  res.render('index', { movies }, (err, html) => {
+    if (err) {
+      res.status(500).send('Error rendering search results.');
+    } else {
+      res.send(html);
+    }
+  });
+});
+
+// 3. Movie Details & Dynamic Streaming / Download Route
 app.get('/movie/:tmdbId', async (req, res) => {
   const { tmdbId } = req.params;
 
