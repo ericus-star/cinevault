@@ -113,7 +113,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
       console.log('Database lookup bypassed or model not found');
     }
 
-    // Render EJS with dynamic embed sources
+    // Render EJS with stable, working embed providers
     res.render('movie', {
       movie: {
         tmdbId: tmdbId,
@@ -121,9 +121,12 @@ app.get('/movie/:tmdbId', async (req, res) => {
         overview: movieData.overview || 'No description available.',
         releaseYear: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
         voteAverage: movieData.vote_average ? Number(movieData.vote_average).toFixed(1) : 'N/A',
-        // Reliable Embed Providers
-        embedPrimary: `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
-        embedSecondary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
+        
+        // Active & Stable Embed Providers (Replacing timed-out vidsrc.cc)
+        embedPrimary: `https://vidsrc.to/embed/movie/${tmdbId}`,
+        embedSecondary: `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`,
+        embedTertiary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
+
         // Custom Gofile direct link from MongoDB (if added via admin panel)
         customDownloadUrl: customLink ? customLink.downloadUrl : null,
         fileSize: customLink ? customLink.fileSize : null,
