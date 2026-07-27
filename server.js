@@ -29,9 +29,16 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 
 // --- ROUTES ---
 
-// 1. Home Page Route
+// 1. Home Page Route (With Error Fallback)
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', (err, html) => {
+    if (err) {
+      console.error('Error rendering index.ejs:', err);
+      res.send('<h1>Welcome to ERIVOX</h1><p>Visit <code>/movie/550</code> to test the streaming page.</p>');
+    } else {
+      res.send(html);
+    }
+  });
 });
 
 // 2. Movie Details & Dynamic Streaming / Download Route
