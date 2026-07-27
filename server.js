@@ -58,23 +58,23 @@ const requireAuth = (req, res, next) => {
 app.get('/sitemap.xml', (req, res) => {
   res.header('Content-Type', 'application/xml');
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-      <loc>https://erivox.onrender.com/</loc>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
-    </url>
-    <url>
-      <loc>https://erivox.onrender.com/movies</loc>
-      <changefreq>daily</changefreq>
-      <priority>0.8</priority>
-    </url>
-    <url>
-      <loc>https://erivox.onrender.com/tv</loc>
-      <changefreq>daily</changefreq>
-      <priority>0.8</priority>
-    </url>
-  </urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://erivox.onrender.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://erivox.onrender.com/movies</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://erivox.onrender.com/tv</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>`.trim();
   res.send(sitemapXml);
 });
 
