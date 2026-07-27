@@ -113,7 +113,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
       console.log('Database lookup bypassed or model not found');
     }
 
-    // Render EJS with dynamic embed sources & download parameters
+    // Render EJS with dynamic embed sources
     res.render('movie', {
       movie: {
         tmdbId: tmdbId,
