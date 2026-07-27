@@ -122,7 +122,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
         releaseYear: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
         voteAverage: movieData.vote_average ? Number(movieData.vote_average).toFixed(1) : 'N/A',
         // Reliable Embed Providers
-        embedPrimary: `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
+        embedPrimary: `https://vidsrc.to/embed/movie/${tmdbId}`,
         embedSecondary: `https://player.autoembed.cc/embed/movie/${tmdbId}`,
         // Custom Gofile direct link from MongoDB (if added via admin panel)
         customDownloadUrl: customLink ? customLink.downloadUrl : null,

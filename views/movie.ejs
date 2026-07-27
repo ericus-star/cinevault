@@ -22,8 +22,11 @@
 
         .download-box { background: #1e293b; padding: 1.5rem; border-radius: 12px; border: 1px solid #334155; margin-bottom: 1.5rem; }
         .download-box h3 { font-size: 1.2rem; margin-bottom: 1rem; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .download-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
         .download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0.8rem 1.5rem; background: #10b981; color: white; text-decoration: none; font-weight: 700; border-radius: 8px; transition: background 0.2s; }
         .download-btn:hover { background: #059669; }
+        .download-btn.secondary { background: #0284c7; }
+        .download-btn.secondary:hover { background: #0369a1; }
         .meta-tag { display: inline-block; background: #334155; color: #cbd5e1; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; margin-left: 8px; }
 
         .movie-details h1 { font-size: 2rem; margin-bottom: 0.5rem; }
@@ -44,26 +47,31 @@
             <button class="server-btn" onclick="switchServer('<%= movie.embedSecondary %>', this)">Server 2 (AutoEmbed)</button>
         </div>
 
-        <!-- Video Player (With sandbox to block ad redirects & popups) -->
+        <!-- Video Player (Fixed permissions: allows video play while blocking raw popups) -->
         <div class="player-wrapper">
-            <iframe id="video-player" src="<%= movie.embedPrimary %>" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+            <iframe id="video-player" src="<%= movie.embedPrimary %>" allowfullscreen allow="autoplay; encrypted-media"></iframe>
         </div>
 
         <!-- Direct Download Section -->
         <div class="download-box">
             <h3>📥 Download Options</h3>
             <% if (movie.customDownloadUrl) { %>
-                <p style="margin-bottom: 1rem; color: #94a3b8;">High-speed direct download link available:</p>
-                <a href="<%= movie.customDownloadUrl %>" target="_blank" class="download-btn">
-                    Download Movie
+                <p style="margin-bottom: 1rem; color: #94a3b8;">High-speed Gofile direct download link:</p>
+                <a href="<%= movie.customDownloadUrl %>" target="_blank" rel="noopener noreferrer" class="download-btn">
+                    Download File
                     <% if (movie.quality) { %><span class="meta-tag"><%= movie.quality %></span><% } %>
                     <% if (movie.fileSize) { %><span class="meta-tag"><%= movie.fileSize %></span><% } %>
                 </a>
             <% } else { %>
-                <p style="margin-bottom: 1rem; color: #94a3b8;">Direct Gofile link not added for this title yet. You can fetch direct files via secondary source:</p>
-                <a href="https://dl.vidsrc.vip/movie/<%= movie.tmdbId %>" target="_blank" class="download-btn" style="background-color: #0284c7;">
-                    Fast Download Link (External)
-                </a>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">Choose a download source for this movie:</p>
+                <div class="download-buttons">
+                    <a href="https://vidsrc.pro/embed/movie/<%= movie.tmdbId %>" target="_blank" rel="noopener noreferrer" class="download-btn">
+                        Download via VidSrc Pro
+                    </a>
+                    <a href="https://dl.vidsrc.vip/movie/<%= movie.tmdbId %>" target="_blank" rel="noopener noreferrer" class="download-btn secondary">
+                        Download Mirror
+                    </a>
+                </div>
             <% } %>
         </div>
 
