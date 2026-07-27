@@ -21,7 +21,7 @@ if (MONGODB_URI && (MONGODB_URI.startsWith('mongodb://') || MONGODB_URI.startsWi
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 
-// 1. Home Route
+// 1. Home Page
 app.get('/', async (req, res) => {
   let movies = [];
   if (TMDB_API_KEY) {
@@ -35,36 +35,90 @@ app.get('/', async (req, res) => {
       console.error('Error fetching trending movies:', e);
     }
   }
-  res.render('index', { movies });
+  res.render('index', { movies, title: 'Home' });
 });
 
-// 2. Movie Search Route (Restored)
+// 2. Movies Category Route
+app.get('/movies', async (req, res) => {
+  let movies = [];
+  if (TMDB_API_KEY) {
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}`);
+      if (response.ok) {
+        const data = await response.json();
+        movies = data.results || [];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  res.render('index', { movies, title: 'Popular Movies' });
+});
+
+// 3. TV Shows Category Route
+app.get('/tv', async (req, res) => {
+  let movies = [];
+  if (TMDB_API_KEY) {
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_API_KEY}`);
+      if (response.ok) {
+        const data = await response.json();
+        movies = (data.results || []).map(tv => ({
+          ...tv,
+          title: tv.name,
+          release_date: tv.first_air_date
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  res.render('index', { movies, title: 'Popular TV Shows' });
+});
+
+// 4. Genre Route
+app.get('/genre/:genreId', async (req, res) => {
+  const { genreId } = req.params;
+  let movies = [];
+  if (TMDB_API_KEY) {
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreId}`);
+      if (response.ok) {
+        const data = await response.json();
+        movies = data.results || [];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  res.render('index', { movies, title: 'Genre Results' });
+});
+
+// 5. Search Route (Fixes 'Cannot GET /search')
 app.get('/search', async (req, res) => {
   const query = req.query.q;
   let movies = [];
 
   if (query && TMDB_API_KEY) {
     try {
-      const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
-        movies = data.results || [];
+        movies = (data.results || []).map(item => ({
+          ...item,
+          title: item.title || item.name,
+          release_date: item.release_date || item.first_air_date
+        }));
       }
     } catch (e) {
       console.error('Search fetch error:', e);
     }
   }
 
-  res.render('index', { movies }, (err, html) => {
-    if (err) {
-      res.status(500).send('Error rendering search results.');
-    } else {
-      res.send(html);
-    }
-  });
+  res.render('index', { movies, title: `Search: ${query}` });
 });
 
-// 3. Movie Details & Download Page
+// 6. Movie Download Details
 app.get('/movie/:tmdbId', async (req, res) => {
   const { tmdbId } = req.params;
 
@@ -95,7 +149,6 @@ app.get('/movie/:tmdbId', async (req, res) => {
         releaseYear: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
         voteAverage: movieData.vote_average ? Number(movieData.vote_average).toFixed(1) : 'N/A',
         posterPath: movieData.poster_path,
-        // Gofile Link saved in DB
         customDownloadUrl: customLink ? customLink.downloadUrl : null,
         fileSize: customLink ? customLink.fileSize : null,
         quality: customLink ? customLink.quality : null

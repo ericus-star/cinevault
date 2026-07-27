@@ -1,0 +1,61 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <!-- Two-Color ERIVOX Logo -->
+        <a href="/" class="logo">ERI<span>VOX</span></a>
+
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/movies" class="nav-item">Movies</a>
+            <a href="/tv" class="nav-item">TV Shows</a>
+            
+            <!-- Genres Dropdown -->
+            <div class="dropdown">
+                <button class="dropbtn">Genres ▾</button>
+                <div class="dropdown-content">
+                    <a href="/genre/28">Action</a>
+                    <a href="/genre/35">Comedy</a>
+                    <a href="/genre/18">Drama</a>
+                    <a href="/genre/27">Horror</a>
+                    <a href="/genre/878">Sci-Fi</a>
+                    <a href="/genre/53">Thriller</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <form action="/search" method="GET" class="search-form">
+            <input type="text" name="q" placeholder="Search movies or TV..." required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+<style>
+    .navbar { background: #1e293b; border-bottom: 1px solid #334155; padding: 1rem 1.5rem; }
+    .nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    
+    /* 2-Color Logo */
+    .logo { font-size: 1.8rem; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: 1.5px; }
+    .logo span { color: #38bdf8; } /* Second color accent */
+
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-item { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: color 0.2s; }
+    .nav-item:hover { color: #38bdf8; }
+
+    /* Dropdown Styling */
+    .dropdown { position: relative; display: inline-block; }
+    .dropbtn { background: none; border: none; color: #cbd5e1; font-weight: 600; font-size: 0.95rem; cursor: pointer; padding: 5px 0; }
+    .dropbtn:hover { color: #38bdf8; }
+    .dropdown-content { display: none; position: absolute; background-color: #1e293b; min-width: 140px; box-shadow: 0px 8px 16px rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 6px; z-index: 10; margin-top: 5px; }
+    .dropdown-content a { color: #cbd5e1; padding: 10px 14px; text-decoration: none; display: block; font-size: 0.9rem; }
+    .dropdown-content a:hover { background-color: #334155; color: #38bdf8; }
+    .dropdown:hover .dropdown-content { display: block; }
+
+    /* Search Input */
+    .search-form { display: flex; gap: 8px; }
+    .search-form input { padding: 0.5rem 0.9rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; outline: none; font-size: 0.9rem; }
+    .search-form input:focus { border-color: #38bdf8; }
+    .search-form button { padding: 0.5rem 1rem; background: #0284c7; border: none; border-radius: 6px; color: white; font-weight: 600; cursor: pointer; }
+    .search-form button:hover { background: #0369a1; }
+</style>
