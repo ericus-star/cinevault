@@ -18,12 +18,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'erivox_secret_key_99',
+  secret: process.env.SESSION_SECRET || 'cinevault_secret_key_99',
   resave: false,
   saveUninitialized: false
 }));
 
-// Authentication Middleware for Admin routes
+// Admin Protection Middleware
 function requireAdmin(req, res, next) {
   if (req.session && req.session.isAdmin) {
     return next();
@@ -32,17 +32,27 @@ function requireAdmin(req, res, next) {
 }
 
 // -------------------------------------------------------------
-// PUBLIC ROUTES
+// PUBLIC NAVIGATION ROUTES
 // -------------------------------------------------------------
 
-// Home Route
+// Home
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-// Movies Route
+// Movies Page
 app.get('/movies', (req, res) => {
   res.render('movie');
+});
+
+// TV Shows Page
+app.get('/tvshows', (req, res) => {
+  res.render('tvshows');
+});
+
+// Genres Page
+app.get('/genres', (req, res) => {
+  res.render('genres');
 });
 
 // Login Page GET
@@ -55,7 +65,7 @@ app.post('/login', (req, res) => {
   const { password } = req.body;
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (password === adminPassword) {
+  if (password && password === adminPassword) {
     req.session.isAdmin = true;
     return res.redirect('/admin');
   }
@@ -63,7 +73,7 @@ app.post('/login', (req, res) => {
   res.render('login', { error: 'Invalid password. Access denied.' });
 });
 
-// Logout Route
+// Logout
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
@@ -71,31 +81,30 @@ app.get('/logout', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// PROTECTED ADMIN ROUTES
+// ADMIN & AUTO-FETCH ROUTES
 // -------------------------------------------------------------
 
-// Admin Dashboard (Protected)
+// Admin Dashboard GET
 app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin');
 });
 
-// Add Content POST (Protected)
+// Save Content POST
 app.post('/admin/add', requireAdmin, (req, res) => {
-  const { title, tmdbId, posterUrl, overview, gofileUrl } = req.body;
+  const { title, tmdbId, posterUrl, overview, gofileUrl, genre } = req.body;
 
   console.log('--- NEW CONTENT ADDED ---');
   console.log('Title:', title);
   console.log('TMDB ID:', tmdbId);
+  console.log('Genre:', genre);
   console.log('Poster:', posterUrl);
   console.log('Overview:', overview);
   console.log('Gofile Link:', gofileUrl);
 
-  // TODO: Save item into MongoDB collection here if connected
-
   res.redirect('/admin');
 });
 
-// TMDB Auto-Fetch API (Protected)
+// TMDB Auto-Fetch Endpoint
 app.get('/admin/autofetch', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
 
@@ -107,7 +116,7 @@ app.get('/admin/autofetch', requireAdmin, async (req, res) => {
     const apiKey = process.env.TMDB_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'TMDB_API_KEY is missing from environment variables' });
+      return res.status(500).json({ error: 'TMDB_API_KEY is missing in Render environment variables' });
     }
 
     const mediaType = type === 'tv' ? 'tv' : 'movie';
@@ -127,10 +136,13 @@ app.get('/admin/autofetch', requireAdmin, async (req, res) => {
     const detailsRes = await axios.get(detailsUrl);
     const media = detailsRes.data;
 
+    const genreNames = media.genres ? media.genres.map(g => g.name).join(', ') : '';
+
     return res.json({
       tmdbId: media.id,
       title: media.title || media.name,
       overview: media.overview || '',
+      genres: genreNames,
       posterPath: media.poster_path ? `https://image.tmdb.org/t/p/w500${media.poster_path}` : '',
       releaseDate: media.release_date || media.first_air_date || '',
       rating: media.vote_average || 0

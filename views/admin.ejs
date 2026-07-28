@@ -3,16 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX - Admin Panel</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>ERIVOX - Admin Dashboard</title>
   <style>
-    .admin-container {
-      max-width: 800px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #0b0b0b;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+    /* Navbar Header */
+    header {
+      background: #141414;
+      border-bottom: 2px solid #e50914;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+    }
+    .logo span {
+      color: #e50914;
+    }
+    nav a {
+      color: #b3b3b3;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: #e50914;
+    }
+
+    /* Container & Forms */
+    .container {
+      max-width: 900px;
       margin: 40px auto;
-      padding: 20px;
-      background: #1e1e1e;
-      color: #fff;
+      padding: 0 20px;
+    }
+    .card {
+      background: #181818;
       border-radius: 8px;
+      border: 1px solid #282828;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .card-title {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #ffffff;
+      border-bottom: 1px solid #282828;
+      padding-bottom: 10px;
     }
     .form-group {
       margin-bottom: 20px;
@@ -21,14 +72,26 @@
     }
     .form-group label {
       margin-bottom: 8px;
-      font-weight: bold;
+      font-size: 14px;
+      font-weight: 600;
+      color: #cccccc;
     }
-    .form-group input, .form-group select, .form-group textarea {
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #444;
-      background: #2b2b2b;
-      color: #fff;
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+      background: #222222;
+      border: 1px solid #333333;
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+      border-color: #e50914;
     }
     .fetch-row {
       display: flex;
@@ -38,77 +101,109 @@
       flex: 1;
     }
     .btn-fetch {
-      padding: 10px 16px;
       background: #e50914;
-      color: white;
+      color: #ffffff;
       border: none;
-      border-radius: 4px;
+      padding: 0 20px;
+      border-radius: 6px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: bold;
+      transition: background 0.2s;
     }
     .btn-fetch:hover {
       background: #b80710;
     }
     .btn-submit {
-      padding: 12px;
-      background: #28a745;
-      color: white;
+      width: 100%;
+      background: #e50914;
+      color: #ffffff;
       border: none;
-      border-radius: 4px;
+      padding: 14px;
+      border-radius: 6px;
       font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: bold;
+      margin-top: 10px;
+      transition: background 0.2s;
     }
     .btn-submit:hover {
-      background: #218838;
+      background: #b80710;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
     }
   </style>
 </head>
 <body>
 
-  <%- include('partials/navbar') %>
+  <!-- ERIVOX Header -->
+  <header>
+    <div class="logo">ERI<span>VOX</span></div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+      <a href="/admin" class="active">Admin Panel</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
 
-  <div class="admin-container">
-    <h2>ERIVOX Content Manager</h2>
-    <form action="/admin/add" method="POST">
+  <div class="container">
+    <div class="card">
+      <h2 class="card-title">Add Movie or TV Show</h2>
       
-      <!-- TITLE & AUTO FETCH ROW -->
-      <div class="form-group">
-        <label for="fetchTitle">Search Title</label>
-        <div class="fetch-row">
-          <input type="text" id="fetchTitle" name="title" placeholder="Enter title (e.g. Agent Kim)" required>
-          <select id="fetchType">
-            <option value="movie">Movie</option>
-            <option value="tv">TV Show</option>
-          </select>
-          <button type="button" class="btn-fetch" onclick="autoFetchFromTMDB()">Auto-Fetch ID</button>
+      <form action="/admin/add" method="POST">
+        
+        <!-- Search & Auto-Fetch Row -->
+        <div class="form-group">
+          <label for="fetchTitle">Search Title</label>
+          <div class="fetch-row">
+            <input type="text" id="fetchTitle" placeholder="Enter title (e.g. Agent Kim)" required>
+            <select id="fetchType">
+              <option value="movie">Movie</option>
+              <option value="tv">TV Show</option>
+            </select>
+            <button type="button" class="btn-fetch" onclick="autoFetchFromTMDB()">Auto-Fetch ID</button>
+          </div>
         </div>
-      </div>
 
-      <!-- AUTO-FILLED FIELDS -->
-      <div class="form-group">
-        <label for="tmdbIdInput">TMDB ID</label>
-        <input type="text" name="tmdbId" id="tmdbIdInput" placeholder="Auto-generated TMDB ID" readonly required>
-      </div>
+        <div class="grid-2">
+          <!-- TMDB ID -->
+          <div class="form-group">
+            <label for="tmdbIdInput">TMDB ID</label>
+            <input type="text" name="tmdbId" id="tmdbIdInput" placeholder="TMDB ID" readonly required>
+          </div>
 
-      <div class="form-group">
-        <label for="posterUrlInput">Poster URL</label>
-        <input type="text" name="posterUrl" id="posterUrlInput" placeholder="Auto-generated Poster URL">
-      </div>
+          <!-- Genre -->
+          <div class="form-group">
+            <label for="genre">Genre</label>
+            <input type="text" name="genre" id="genreInput" placeholder="e.g. Action, Thriller">
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label for="overviewInput">Overview / Description</label>
-        <textarea name="overview" id="overviewInput" rows="5" placeholder="Auto-generated Overview"></textarea>
-      </div>
+        <!-- Poster Link -->
+        <div class="form-group">
+          <label for="posterUrlInput">Poster URL</label>
+          <input type="text" name="posterUrl" id="posterUrlInput" placeholder="https://image.tmdb.org/t/p/w500/...">
+        </div>
 
-      <!-- GOFILE DOWNLOAD LINK FIELD -->
-      <div class="form-group">
-        <label for="gofileUrl">Gofile Link</label>
-        <input type="text" name="gofileUrl" id="gofileUrl" placeholder="Paste Gofile link (e.g. https://gofile.io/d/XXXXXX)" required>
-      </div>
+        <!-- Description -->
+        <div class="form-group">
+          <label for="overviewInput">Overview / Synopsis</label>
+          <textarea name="overview" id="overviewInput" rows="4" placeholder="Story details..."></textarea>
+        </div>
 
-      <button type="submit" class="btn-submit">Save Content to ERIVOX</button>
-    </form>
+        <!-- Gofile Link -->
+        <div class="form-group">
+          <label for="gofileUrl">Gofile Link</label>
+          <input type="text" name="gofileUrl" id="gofileUrl" placeholder="https://gofile.io/d/XXXXXX" required>
+        </div>
+
+        <button type="submit" class="btn-submit">Publish to ERIVOX</button>
+      </form>
+    </div>
   </div>
 
   <script>
@@ -129,13 +224,16 @@
         document.getElementById('tmdbIdInput').value = data.tmdbId;
         document.getElementById('posterUrlInput').value = data.posterPath;
         document.getElementById('overviewInput').value = data.overview;
+        if (data.genres) {
+          document.getElementById('genreInput').value = data.genres;
+        }
         alert(`Successfully fetched details for: ${data.title}`);
       } else {
         alert(data.error || 'Content not found on TMDB');
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to connect to server. Check your connection or backend logs.');
+      alert('Failed to connect to backend server');
     }
   }
   </script>
