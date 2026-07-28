@@ -1,117 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERIVOX - Admin Dashboard</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; padding: 2rem 1rem; min-height: 100vh; }
-        .container { max-width: 900px; margin: 0 auto; }
-        
-        /* Header Bar */
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        h1 { font-size: 1.8rem; color: #38bdf8; font-weight: 800; }
-        .btn-logout { background: #64748b; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; }
-        .btn-logout:hover { background: #475569; }
-        
-        /* Cards */
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .card h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #f8fafc; border-left: 3px solid #38bdf8; padding-left: 0.5rem; }
-        
-        /* Form Inputs */
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 600; font-size: 0.9rem; }
-        input { width: 100%; padding: 0.7rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.95rem; outline: none; }
-        input:focus { border-color: #38bdf8; }
-        
-        button.btn-submit { width: 100%; padding: 0.8rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: background 0.2s; margin-top: 0.5rem; }
-        button.btn-submit:hover { background: #059669; }
-
-        /* Table */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; text-align: left; }
-        th, td { padding: 0.8rem; border-bottom: 1px solid #334155; font-size: 0.95rem; }
-        th { background: #0f172a; color: #38bdf8; font-weight: 700; }
-        td { color: #cbd5e1; }
-        
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
-        .btn-delete:hover { background: #dc2626; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERIVOX - Admin Panel</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #fff;
+      border-radius: 8px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #2b2b2b;
+      color: #fff;
+    }
+    .fetch-row {
+      display: flex;
+      gap: 10px;
+    }
+    .fetch-row input {
+      flex: 1;
+    }
+    .btn-fetch {
+      padding: 10px 16px;
+      background: #e50914;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-fetch:hover {
+      background: #b80710;
+    }
+    .btn-submit {
+      padding: 12px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-submit:hover {
+      background: #218838;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header-bar">
-            <h1>ERIVOX Admin Dashboard</h1>
-            <a href="/logout" class="btn-logout">Logout</a>
-        </div>
 
-        <!-- Add Link Form -->
-        <div class="card">
-            <h2>Add Direct Download Link</h2>
-            <form action="/admin/add-link" method="POST">
-                <div class="form-group">
-                    <label>TMDB ID (e.g., 1339713)</label>
-                    <input type="text" name="tmdbId" placeholder="1339713" required>
-                </div>
-                <div class="form-group">
-                    <label>Title Name</label>
-                    <input type="text" name="title" placeholder="Movie or TV Show Title">
-                </div>
-                <div class="form-group">
-                    <label>Download Link (e.g., Gofile URL)</label>
-                    <input type="url" name="downloadUrl" placeholder="https://gofile.io/d/XXXXXX" required>
-                </div>
-                <div class="form-group" style="display: flex; gap: 10px;">
-                    <div style="flex:1;">
-                        <label>Quality</label>
-                        <input type="text" name="quality" value="1080p">
-                    </div>
-                    <div style="flex:1;">
-                        <label>File Size</label>
-                        <input type="text" name="fileSize" placeholder="850 MB">
-                    </div>
-                </div>
-                <button type="submit" class="btn-submit">Save Link to Database</button>
-            </form>
-        </div>
+  <%- include('partials/navbar') %>
 
-        <!-- Saved Links Table -->
-        <div class="card">
-            <h2>Active Download Links</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>TMDB ID</th>
-                            <th>Title</th>
-                            <th>Quality / Size</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
-                            <% links.forEach(link => { %>
-                                <tr>
-                                    <td><%= link.tmdbId %></td>
-                                    <td><%= link.title %></td>
-                                    <td><%= link.quality %> (<%= link.fileSize %>)</td>
-                                    <td>
-                                        <form action="/admin/delete-link/<%= link._id %>" method="POST" style="display:inline;">
-                                            <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this link?')">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="4" style="color: #94a3b8; text-align: center; padding: 1.5rem 0;">No download links saved yet.</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+  <div class="admin-container">
+    <h2>ERIVOX Content Manager</h2>
+    <form action="/admin/add" method="POST">
+      
+      <!-- TITLE & AUTO FETCH ROW -->
+      <div class="form-group">
+        <label for="fetchTitle">Search Title</label>
+        <div class="fetch-row">
+          <input type="text" id="fetchTitle" name="title" placeholder="Enter title (e.g. Agent Kim)" required>
+          <select id="fetchType">
+            <option value="movie">Movie</option>
+            <option value="tv">TV Show</option>
+          </select>
+          <button type="button" class="btn-fetch" onclick="autoFetchFromTMDB()">Auto-Fetch ID</button>
         </div>
-    </div>
+      </div>
+
+      <!-- AUTO-FILLED FIELDS -->
+      <div class="form-group">
+        <label for="tmdbIdInput">TMDB ID</label>
+        <input type="text" name="tmdbId" id="tmdbIdInput" placeholder="Auto-generated TMDB ID" readonly required>
+      </div>
+
+      <div class="form-group">
+        <label for="posterUrlInput">Poster URL</label>
+        <input type="text" name="posterUrl" id="posterUrlInput" placeholder="Auto-generated Poster URL">
+      </div>
+
+      <div class="form-group">
+        <label for="overviewInput">Overview / Description</label>
+        <textarea name="overview" id="overviewInput" rows="5" placeholder="Auto-generated Overview"></textarea>
+      </div>
+
+      <!-- GOFILE DOWNLOAD LINK FIELD -->
+      <div class="form-group">
+        <label for="gofileUrl">Gofile Link</label>
+        <input type="text" name="gofileUrl" id="gofileUrl" placeholder="Paste Gofile link (e.g. https://gofile.io/d/XXXXXX)" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Save Content to ERIVOX</button>
+    </form>
+  </div>
+
+  <script>
+  async function autoFetchFromTMDB() {
+    const titleInput = document.getElementById('fetchTitle').value.trim();
+    const typeSelect = document.getElementById('fetchType').value;
+
+    if (!titleInput) {
+      alert('Please type a title first!');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/admin/autofetch?title=${encodeURIComponent(titleInput)}&type=${typeSelect}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        document.getElementById('tmdbIdInput').value = data.tmdbId;
+        document.getElementById('posterUrlInput').value = data.posterPath;
+        document.getElementById('overviewInput').value = data.overview;
+        alert(`Successfully fetched details for: ${data.title}`);
+      } else {
+        alert(data.error || 'Content not found on TMDB');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to connect to server. Check your connection or backend logs.');
+    }
+  }
+  </script>
+
 </body>
 </html>
