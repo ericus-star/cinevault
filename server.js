@@ -16,7 +16,7 @@ if (MONGODB_URI && !MONGODB_URI.includes('your_actual_mongodb')) {
     .catch(err => console.error('MongoDB Connection Error:', err.message));
 }
 
-// Media Schema & Model
+// Media Schema & Model (Updated with subtitleUrl)
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' }, // 'movie' or 'tv'
@@ -24,6 +24,7 @@ const mediaSchema = new mongoose.Schema({
   posterUrl: String,
   overview: String,
   gofileUrl: String,
+  subtitleUrl: String, // Added subtitle URL field
   genre: String,
   createdAt: { type: Date, default: Date.now }
 });
@@ -132,9 +133,9 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin');
 });
 
-// Save Content
+// Save Content (Updated to handle subtitleUrl)
 app.post('/admin/add', requireAdmin, async (req, res) => {
-  const { title, type, tmdbId, posterUrl, overview, gofileUrl, genre } = req.body;
+  const { title, type, tmdbId, posterUrl, overview, gofileUrl, subtitleUrl, genre } = req.body;
 
   try {
     if (mongoose.connection.readyState === 1) {
@@ -145,6 +146,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
         posterUrl,
         overview,
         gofileUrl,
+        subtitleUrl: subtitleUrl || '',
         genre
       });
       await newMedia.save();
@@ -157,7 +159,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   res.redirect('/');
 });
 
-// Delete Content (Fixed Redirect)
+// Delete Content (Admin Only)
 app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
@@ -167,7 +169,6 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Delete Error:', err.message);
   }
-  // Redirect back to referring page or homepage safely
   res.redirect(req.get('Referrer') || '/');
 });
 
