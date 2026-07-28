@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'cinevault_secret_key_99',
+  secret: process.env.SESSION_SECRET || 'erivox_secret_key_99',
   resave: false,
   saveUninitialized: false
 }));
@@ -37,27 +37,81 @@ function requireAdmin(req, res, next) {
 
 // Home
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', (err, html) => {
+    if (err) {
+      console.error('Render Error (index.ejs):', err.message);
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ERIVOX - Stream & Download</title>
+          <style>
+            body { background: #0b0b0b; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
+            h1 { font-size: 48px; letter-spacing: 2px; }
+            h1 span { color: #e50914; }
+            a { color: #e50914; font-weight: bold; text-decoration: none; font-size: 18px; }
+          </style>
+        </head>
+        <body>
+          <h1>ERI<span>VOX</span></h1>
+          <p style="margin: 20px 0; color: #aaa;">Welcome to ERIVOX. Movies and TV shows platform.</p>
+          <p><a href="/admin">Go to Admin Panel</a> | <a href="/login">Login</a></p>
+        </body>
+        </html>
+      `);
+    }
+    res.send(html);
+  });
 });
 
 // Movies Page
 app.get('/movies', (req, res) => {
-  res.render('movie');
+  res.render('movie', (err, html) => {
+    if (err) return res.redirect('/');
+    res.send(html);
+  });
 });
 
 // TV Shows Page
 app.get('/tvshows', (req, res) => {
-  res.render('tvshows');
-});
-
-// Genres Page
-app.get('/genres', (req, res) => {
-  res.render('genres');
+  res.render('tvshows', (err, html) => {
+    if (err) return res.redirect('/');
+    res.send(html);
+  });
 });
 
 // Login Page GET
 app.get('/login', (req, res) => {
-  res.render('login', { error: null });
+  res.render('login', { error: null }, (err, html) => {
+    if (err) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ERIVOX - Login</title>
+          <style>
+            body { background: #0b0b0b; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .login-card { background: #181818; padding: 40px; border-radius: 8px; border: 1px solid #282828; width: 320px; }
+            h2 { margin-bottom: 20px; text-align: center; }
+            h2 span { color: #e50914; }
+            input { width: 100%; padding: 12px; margin-bottom: 20px; background: #222; border: 1px solid #333; color: white; border-radius: 4px; box-sizing: border-box; }
+            button { width: 100%; padding: 12px; background: #e50914; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+          </style>
+        </head>
+        <body>
+          <div class="login-card">
+            <h2>ERI<span>VOX</span> Admin</h2>
+            <form action="/login" method="POST">
+              <input type="password" name="password" placeholder="Admin Password" required>
+              <button type="submit">Access Dashboard</button>
+            </form>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+    res.send(html);
+  });
 });
 
 // Login Form POST
@@ -70,7 +124,7 @@ app.post('/login', (req, res) => {
     return res.redirect('/admin');
   }
 
-  res.render('login', { error: 'Invalid password. Access denied.' });
+  res.send('<p style="color: red; background: #0b0b0b; font-family: sans-serif; padding: 20px;">Invalid password. <a href="/login" style="color: white;">Try again</a></p>');
 });
 
 // Logout
@@ -81,12 +135,18 @@ app.get('/logout', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// ADMIN & AUTO-FETCH ROUTES
+// PROTECTED ADMIN & AUTO-FETCH ROUTES
 // -------------------------------------------------------------
 
 // Admin Dashboard GET
 app.get('/admin', requireAdmin, (req, res) => {
-  res.render('admin');
+  res.render('admin', (err, html) => {
+    if (err) {
+      console.error('Render Error (admin.ejs):', err.message);
+      return res.status(500).send(`<h2>Error loading admin template:</h2><p>${err.message}</p>`);
+    }
+    res.send(html);
+  });
 });
 
 // Save Content POST

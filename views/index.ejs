@@ -1,120 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-KXJQ68SF');</script>
-    <!-- End Google Tag Manager -->
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERIVOX - Watch & Download Movies</title>
-    
-    <!-- Google Site Verification Tag -->
-    <meta name="google-site-verification" content="XmN1F6c4qj-Nc42NvQmPrK9ImD9xuXcaB9kPf0flEUo" />
-
-    <!-- Google SEO Meta Tags -->
-    <meta name="description" content="Download and stream HD movies and TV series directly on ERIVOX. Fast, simple, and high quality direct downloads.">
-    <meta name="keywords" content="ERIVOX, download movies, movie download, full movies, HD movies">
-    <meta name="author" content="ERIVOX">
-    <meta name="robots" content="index, follow">
-    
-    <!-- Open Graph for Social Links -->
-    <meta property="og:title" content="ERIVOX - Watch & Download Movies">
-    <meta property="og:description" content="Download and stream HD movies and TV series directly on ERIVOX.">
-    <meta property="og:url" content="https://erivox.onrender.com">
-    <meta property="og:type" content="website">
-
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; min-height: 100vh; }
-        
-        /* Navigation */
-        header { background: #1e293b; padding: 1rem 2rem; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .logo { font-size: 1.8rem; font-weight: 900; color: #fff; text-decoration: none; letter-spacing: 1px; }
-        .logo span { color: #38bdf8; }
-        
-        nav { display: flex; gap: 1.5rem; align-items: center; }
-        nav a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.2s; }
-        nav a:hover { color: #38bdf8; }
-        
-        .search-box { display: flex; background: #0f172a; border: 1px solid #334155; border-radius: 6px; overflow: hidden; }
-        .search-box input { background: transparent; border: none; padding: 0.5rem 1rem; color: #fff; outline: none; font-size: 0.95rem; }
-        .search-box button { background: #38bdf8; border: none; padding: 0.5rem 1rem; color: #0f172a; font-weight: bold; cursor: pointer; }
-        
-        /* Main Layout */
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; color: #38bdf8; font-weight: 700; border-left: 4px solid #38bdf8; padding-left: 0.5rem; }
-        
-        /* Movie Grid */
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; }
-        .movie-card { background: #1e293b; border-radius: 8px; overflow: hidden; border: 1px solid #334155; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
-        .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); border-color: #38bdf8; }
-        
-        .poster { width: 100%; aspect-ratio: 2/3; background: #334155; object-fit: cover; }
-        .movie-info { padding: 1rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .movie-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; color: #f8fafc; }
-        .movie-meta { font-size: 0.85rem; color: #94a3b8; display: flex; justify-content: space-between; margin-top: auto; }
-        .rating { color: #f59e0b; font-weight: bold; }
-
-        footer { text-align: center; padding: 2rem; background: #1e293b; border-top: 1px solid #334155; margin-top: 4rem; color: #64748b; font-size: 0.9rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERIVOX - Stream & Download Movies & TV Shows</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #0b0b0b;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+    header {
+      background: #141414;
+      border-bottom: 2px solid #e50914;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .logo span {
+      color: #e50914;
+    }
+    nav a {
+      color: #b3b3b3;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: #e50914;
+    }
+    .hero {
+      text-align: center;
+      padding: 100px 20px;
+      background: linear-gradient(180deg, rgba(20,20,20,0.8) 0%, rgba(11,11,11,1) 100%);
+    }
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .hero p {
+      color: #aaa;
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .btn-main {
+      background: #e50914;
+      color: white;
+      padding: 12px 30px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    .btn-main:hover {
+      background: #b80710;
+    }
+  </style>
 </head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KXJQ68SF"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
 
-    <header>
-        <a href="/" class="logo">ERI<span>VOX</span></a>
-        
-        <nav>
-            <a href="/">Home</a>
-            <a href="/movies">Movies</a>
-            <a href="/tv">TV Shows</a>
-        </nav>
+  <header>
+    <a href="/" class="logo">ERI<span>VOX</span></a>
+    <nav>
+      <a href="/" class="active">Home</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+      <a href="/admin">Admin Panel</a>
+    </nav>
+  </header>
 
-        <form action="/search" method="GET" class="search-box">
-            <input type="text" name="q" placeholder="Search title..." required>
-            <button type="submit">Search</button>
-        </form>
-    </header>
-
-    <div class="container">
-        <h2 class="section-title"><%= typeof title !== 'undefined' ? title : 'Trending Content' %></h2>
-        
-        <div class="movie-grid">
-            <% if (movies && movies.length > 0) { %>
-                <% movies.forEach(movie => { %>
-                    <a href="/movie/<%= movie.id %>" class="movie-card">
-                        <img 
-                            src="<%= movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster' %>" 
-                            alt="<%= movie.title || movie.name %>" 
-                            class="poster"
-                            loading="lazy"
-                        >
-                        <div class="movie-info">
-                            <div class="movie-title"><%= movie.title || movie.name %></div>
-                            <div class="movie-meta">
-                                <span><%= (movie.release_date || movie.first_air_date || '').split('-')[0] || 'N/A' %></span>
-                                <span class="rating">★ <%= movie.vote_average ? Number(movie.vote_average).toFixed(1) : 'N/A' %></span>
-                            </div>
-                        </div>
-                    </a>
-                <% }); %>
-            <% } else { %>
-                <p style="grid-column: 1 / -1; color: #94a3b8; text-align: center; padding: 3rem 0;">No media titles found.</p>
-            <% } %>
-        </div>
-    </div>
-
-    <footer>
-        <p>&copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved.</p>
-    </footer>
+  <div class="hero">
+    <h1>Welcome to ERI<span>VOX</span></h1>
+    <p>Your portal for fast, direct media streaming and high-speed downloads.</p>
+    <a href="/admin" class="btn-main">Go to Admin Dashboard</a>
+  </div>
 
 </body>
 </html>
