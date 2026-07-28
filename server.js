@@ -10,17 +10,16 @@ const PORT = process.env.PORT || 10000;
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
-if (MONGODB_URI && MONGODB_URI !== 'your_actual_mongodb_connection_string_here') {
+if (MONGODB_URI && !MONGODB_URI.includes('your_actual_mongodb')) {
   mongoose.connect(MONGODB_URI)
     .then(() => console.log('Connected to MongoDB successfully'))
     .catch(err => console.error('MongoDB Connection Error:', err.message));
-} else {
-  console.log('MongoDB URI missing or using default placeholder. Media will not be saved permanently until set.');
 }
 
-// Define Media Schema & Model
+// Schema & Model
 const mediaSchema = new mongoose.Schema({
   title: String,
+  type: { type: String, default: 'movie' }, // 'movie' or 'tv'
   tmdbId: String,
   posterUrl: String,
   overview: String,
@@ -31,7 +30,7 @@ const mediaSchema = new mongoose.Schema({
 
 const Media = mongoose.models.Media || mongoose.model('Media', mediaSchema);
 
-// View Engine Setup
+// View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -59,41 +58,67 @@ function requireAdmin(req, res, next) {
 // PUBLIC NAVIGATION ROUTES
 // -------------------------------------------------------------
 
-// Home - Fetches all saved media from MongoDB and displays it
+// Home Route
 app.get('/', async (req, res) => {
   try {
     let mediaList = [];
     if (mongoose.connection.readyState === 1) {
       mediaList = await Media.find().sort({ createdAt: -1 });
     }
-    res.render('index', { mediaList });
+    res.render('index', { mediaList }, (err, html) => {
+      if (err) return res.status(500).send(`<h2>Error loading home view:</h2><p>${err.message}</p>`);
+      res.send(html);
+    });
   } catch (err) {
-    console.error('Render Error (index.ejs):', err.message);
     res.render('index', { mediaList: [] });
   }
 });
 
-// Movies Page
+// Movies Page Route
 app.get('/movies', async (req, res) => {
   try {
     let movies = [];
     if (mongoose.connection.readyState === 1) {
-      movies = await Media.find().sort({ createdAt: -1 });
+      movies = await Media.find({ type: 'movie' }).sort({ createdAt: -1 });
     }
-    res.render('movie', { movies });
+    res.render('movie', { movies }, (err, html) => {
+      if (err) {
+        console.error('Render Error (movie.ejs):', err.message);
+        // Safe fallback render if movie.ejs is missing
+        return res.status(200).send(`
+          <!DOCTYPE html><html><head><title>ERIVOX - Movies</title>
+          <style>body{background:#0b0b0b;color:white;font-family:sans-serif;padding:40px;text-align:center;}
+          a{color:#e50914;font-weight:bold;text-decoration:none;}</style></head>
+          <body><h1>ERI<span style="color:#e50914">VOX</span> Movies</h1>
+          <p>No movies template active yet or no movies published.</p><p><a href="/">Back Home</a></p></body></html>
+        `);
+      }
+      res.send(html);
+    });
   } catch (err) {
     res.redirect('/');
   }
 });
 
-// TV Shows Page
+// TV Shows Page Route
 app.get('/tvshows', async (req, res) => {
   try {
     let tvshows = [];
     if (mongoose.connection.readyState === 1) {
-      tvshows = await Media.find().sort({ createdAt: -1 });
+      tvshows = await Media.find({ type: 'tv' }).sort({ createdAt: -1 });
     }
-    res.render('tvshows', { tvshows });
+    res.render('tvshows', { tvshows }, (err, html) => {
+      if (err) {
+        return res.status(200).send(`
+          <!DOCTYPE html><html><head><title>ERIVOX - TV Shows</title>
+          <style>body{background:#0b0b0b;color:white;font-family:sans-serif;padding:40px;text-align:center;}
+          a{color:#e50914;font-weight:bold;text-decoration:none;}</style></head>
+          <body><h1>ERI<span style="color:#e50914">VOX</span> TV Shows</h1>
+          <p><a href="/">Back Home</a></p></body></html>
+        `);
+      }
+      res.send(html);
+    });
   } catch (err) {
     res.redirect('/');
   }
@@ -104,72 +129,55 @@ app.get('/login', (req, res) => {
   res.render('login', { error: null }, (err, html) => {
     if (err) {
       return res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>ERIVOX - Login</title>
-          <style>
-            body { background: #0b0b0b; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .login-card { background: #181818; padding: 40px; border-radius: 8px; border: 1px solid #282828; width: 320px; }
-            h2 { margin-bottom: 20px; text-align: center; }
-            h2 span { color: #e50914; }
-            input { width: 100%; padding: 12px; margin-bottom: 20px; background: #222; border: 1px solid #333; color: white; border-radius: 4px; box-sizing: border-box; }
-            button { width: 100%; padding: 12px; background: #e50914; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-          </style>
-        </head>
-        <body>
-          <div class="login-card">
-            <h2>ERI<span>VOX</span> Admin</h2>
-            <form action="/login" method="POST">
-              <input type="password" name="password" placeholder="Admin Password" required>
-              <button type="submit">Access Dashboard</button>
-            </form>
-          </div>
-        </body>
-        </html>
+        <!DOCTYPE html><html><head><title>ERIVOX - Admin Login</title>
+        <style>body{background:#0b0b0b;color:white;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}
+        .card{background:#181818;padding:30px;border-radius:8px;border:1px solid #282828;}
+        input,button{width:100%;padding:10px;margin-top:10px;box-sizing:border-box;}
+        button{background:#e50914;color:white;border:none;font-weight:bold;cursor:pointer;}</style></head>
+        <body><div class="card"><h2>ERI<span style="color:#e50914">VOX</span> Admin</h2>
+        <form action="/login" method="POST"><input type="password" name="password" placeholder="Password" required><button type="submit">Login</button></form></div></body></html>
       `);
     }
     res.send(html);
   });
 });
 
-// Login Form POST
+// Login POST
 app.post('/login', (req, res) => {
   const { password } = req.body;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (password && password === adminPassword) {
+  if (password && password === process.env.ADMIN_PASSWORD) {
     req.session.isAdmin = true;
     return res.redirect('/admin');
   }
-
-  res.send('<p style="color: red; background: #0b0b0b; font-family: sans-serif; padding: 20px;">Invalid password. <a href="/login" style="color: white;">Try again</a></p>');
+  res.send('<p style="color:red;background:#0b0b0b;padding:20px;">Invalid password. <a href="/login" style="color:white;">Try again</a></p>');
 });
 
 // Logout
 app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
+  req.session.destroy(() => res.redirect('/login'));
+});
+
+// -------------------------------------------------------------
+// ADMIN & AUTO-FETCH ROUTES
+// -------------------------------------------------------------
+
+// Admin Dashboard
+app.get('/admin', requireAdmin, (req, res) => {
+  res.render('admin', (err, html) => {
+    if (err) return res.status(500).send(`<h2>Error loading admin dashboard:</h2><p>${err.message}</p>`);
+    res.send(html);
   });
 });
 
-// -------------------------------------------------------------
-// PROTECTED ADMIN & AUTO-FETCH ROUTES
-// -------------------------------------------------------------
-
-// Admin Dashboard GET
-app.get('/admin', requireAdmin, (req, res) => {
-  res.render('admin');
-});
-
-// Save Content POST (Saves directly to MongoDB)
+// Save Content
 app.post('/admin/add', requireAdmin, async (req, res) => {
-  const { title, tmdbId, posterUrl, overview, gofileUrl, genre } = req.body;
+  const { title, type, tmdbId, posterUrl, overview, gofileUrl, genre } = req.body;
 
   try {
     if (mongoose.connection.readyState === 1) {
       const newMedia = new Media({
         title,
+        type: type || 'movie',
         tmdbId,
         posterUrl,
         overview,
@@ -177,40 +185,31 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
         genre
       });
       await newMedia.save();
-      console.log('Saved to database:', title);
-    } else {
-      console.log('MongoDB not connected. Logged entry:', { title, tmdbId, gofileUrl });
     }
   } catch (err) {
-    console.error('Error saving media:', err.message);
+    console.error('Save Error:', err.message);
   }
 
   res.redirect('/');
 });
 
-// TMDB Auto-Fetch Endpoint
+// TMDB Auto-Fetch
 app.get('/admin/autofetch', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
 
-  if (!title) {
-    return res.status(400).json({ error: 'Title is required' });
-  }
+  if (!title) return res.status(400).json({ error: 'Title is required' });
 
   try {
     const apiKey = process.env.TMDB_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({ error: 'TMDB_API_KEY is missing in Render environment variables' });
-    }
+    if (!apiKey) return res.status(500).json({ error: 'TMDB_API_KEY missing' });
 
     const mediaType = type === 'tv' ? 'tv' : 'movie';
-
     const searchUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
     const searchRes = await axios.get(searchUrl);
     const results = searchRes.data.results;
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ error: 'No matching media found on TMDB' });
+      return res.status(404).json({ error: 'No media found on TMDB' });
     }
 
     const tmdbId = results[0].id;
@@ -218,25 +217,17 @@ app.get('/admin/autofetch', requireAdmin, async (req, res) => {
     const detailsRes = await axios.get(detailsUrl);
     const media = detailsRes.data;
 
-    const genreNames = media.genres ? media.genres.map(g => g.name).join(', ') : '';
-
     return res.json({
       tmdbId: media.id,
       title: media.title || media.name,
       overview: media.overview || '',
-      genres: genreNames,
-      posterPath: media.poster_path ? `https://image.tmdb.org/t/p/w500${media.poster_path}` : '',
-      releaseDate: media.release_date || media.first_air_date || '',
-      rating: media.vote_average || 0
+      genres: media.genres ? media.genres.map(g => g.name).join(', ') : '',
+      posterPath: media.poster_path ? `https://image.tmdb.org/t/p/w500${media.poster_path}` : ''
     });
 
   } catch (error) {
-    console.error('TMDB Auto-Fetch Error:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch details from TMDB' });
+    return res.status(500).json({ error: 'TMDB Fetch failed' });
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`ERIVOX server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`ERIVOX running on port ${PORT}`));

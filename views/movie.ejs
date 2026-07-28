@@ -1,65 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= movie.title %> - ERIVOX</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; }
-        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
-        
-        .movie-card { display: flex; gap: 2rem; background: #1e293b; border-radius: 12px; padding: 2rem; border: 1px solid #334155; margin-bottom: 2rem; flex-wrap: wrap; }
-        .poster { width: 220px; height: 330px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #0f172a; }
-        .movie-info { flex: 1; min-width: 280px; }
-        .movie-info h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: #fff; }
-        .movie-meta { color: #38bdf8; font-weight: 600; margin-bottom: 1.2rem; font-size: 1rem; }
-        .overview { color: #cbd5e1; line-height: 1.7; font-size: 1rem; }
-
-        .download-box { background: #1e293b; padding: 2rem; border-radius: 12px; border: 1px solid #334155; text-align: center; }
-        .download-box h3 { font-size: 1.4rem; margin-bottom: 0.5rem; color: #f8fafc; }
-        .download-box p { color: #94a3b8; margin-bottom: 1.5rem; }
-        
-        .download-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 420px; padding: 1.1rem 2rem; background: #10b981; color: white; text-decoration: none; font-weight: 800; font-size: 1.1rem; border-radius: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
-        .download-btn-primary:hover { background: #059669; transform: translateY(-2px); }
-        .meta-tag { background: rgba(0,0,0,0.25); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; }
-
-        .no-link-box { padding: 1.5rem; background: #0f172a; border-radius: 8px; border: 1px dashed #334155; color: #94a3b8; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERIVOX - Movies</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; }
+    header { background: #141414; border-bottom: 2px solid #e50914; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    .logo span { color: #e50914; }
+    nav a { color: #b3b3b3; text-decoration: none; margin-left: 20px; font-weight: 600; }
+    nav a:hover, nav a.active { color: #e50914; }
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .section-title { font-size: 24px; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .media-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #282828; display: flex; flex-direction: column; }
+    .poster { width: 100%; height: 300px; object-fit: cover; background: #222; }
+    .card-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+    .card-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #ffffff; }
+    .card-genre { font-size: 12px; color: #e50914; margin-bottom: 10px; font-weight: 600; }
+    .btn-download { margin-top: auto; background: #e50914; color: white; text-align: center; padding: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .no-content { color: #888; text-align: center; grid-column: 1 / -1; padding: 40px; }
+  </style>
 </head>
 <body>
-    <!-- Navbar Partial Included Here -->
-    <%- include('partials/navbar') %>
 
-    <div class="container">
-        <div class="movie-card">
-            <% if (movie.posterPath) { %>
-                <img src="https://image.tmdb.org/t/p/w500<%= movie.posterPath %>" alt="<%= movie.title %>" class="poster">
-            <% } %>
-            <div class="movie-info">
-                <h1><%= movie.title %></h1>
-                <div class="movie-meta">
-                    <span><%= movie.releaseYear %></span> • <span>★ <%= movie.voteAverage %></span>
-                </div>
-                <p class="overview"><%= movie.overview %></p>
+  <header>
+    <a href="/" class="logo">ERI<span>VOX</span></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/movies" class="active">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+      <a href="/admin">Admin Panel</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 class="section-title">Movies Collection</h2>
+    <div class="media-grid">
+      <% if (typeof movies !== 'undefined' && movies.length > 0) { %>
+        <% movies.forEach(item => { %>
+          <div class="media-card">
+            <img class="poster" src="<%= item.posterUrl || 'https://via.placeholder.com/200x300?text=No+Poster' %>" alt="<%= item.title %>">
+            <div class="card-body">
+              <div class="card-title"><%= item.title %></div>
+              <% if (item.genre) { %><div class="card-genre"><%= item.genre %></div><% } %>
+              <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
             </div>
-        </div>
-
-        <div class="download-box">
-            <h3>Download Links</h3>
-            <% if (movie.customDownloadUrl) { %>
-                <p>Direct Gofile download link:</p>
-                <a href="<%= movie.customDownloadUrl %>" target="_blank" rel="noopener noreferrer" class="download-btn-primary">
-                    📥 Download Movie
-                    <% if (movie.quality) { %><span class="meta-tag"><%= movie.quality %></span><% } %>
-                    <% if (movie.fileSize) { %><span class="meta-tag"><%= movie.fileSize %></span><% } %>
-                </a>
-            <% } else { %>
-                <div class="no-link-box">
-                    <p>⚠️ Direct download link is being updated for this title. Check back shortly!</p>
-                </div>
-            <% } %>
-        </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="no-content">No movies added yet.</div>
+      <% } %>
     </div>
+  </div>
+
 </body>
 </html>
