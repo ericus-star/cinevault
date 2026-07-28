@@ -157,7 +157,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   res.redirect('/');
 });
 
-// Delete Content (Admin Only)
+// Delete Content (Fixed Redirect)
 app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
@@ -167,7 +167,8 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Delete Error:', err.message);
   }
-  res.redirect('back');
+  // Redirect back to referring page or homepage safely
+  res.redirect(req.get('Referrer') || '/');
 });
 
 // TMDB Auto-Fetch
