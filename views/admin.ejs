@@ -5,237 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ERIVOX - Admin Dashboard</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      background-color: #0b0b0b;
-      color: #ffffff;
-      min-height: 100vh;
-    }
-    /* Navbar Header */
-    header {
-      background: #141414;
-      border-bottom: 2px solid #e50914;
-      padding: 15px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: #ffffff;
-    }
-    .logo span {
-      color: #e50914;
-    }
-    nav a {
-      color: #b3b3b3;
-      text-decoration: none;
-      margin-left: 20px;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    nav a:hover, nav a.active {
-      color: #e50914;
-    }
-
-    /* Container & Forms */
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    .card {
-      background: #181818;
-      border-radius: 8px;
-      border: 1px solid #282828;
-      padding: 30px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    .card-title {
-      font-size: 22px;
-      margin-bottom: 20px;
-      color: #ffffff;
-      border-bottom: 1px solid #282828;
-      padding-bottom: 10px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-    .form-group label {
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #cccccc;
-    }
-    .form-group input, 
-    .form-group select, 
-    .form-group textarea {
-      background: #222222;
-      border: 1px solid #333333;
-      color: #ffffff;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus, 
-    .form-group select:focus, 
-    .form-group textarea:focus {
-      border-color: #e50914;
-    }
-    .fetch-row {
-      display: flex;
-      gap: 10px;
-    }
-    .fetch-row input {
-      flex: 1;
-    }
-    .btn-fetch {
-      background: #e50914;
-      color: #ffffff;
-      border: none;
-      padding: 0 20px;
-      border-radius: 6px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-fetch:hover {
-      background: #b80710;
-    }
-    .btn-submit {
-      width: 100%;
-      background: #e50914;
-      color: #ffffff;
-      border: none;
-      padding: 14px;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-    .btn-submit:hover {
-      background: #b80710;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; padding: 20px; }
+    .admin-container { max-width: 600px; margin: 40px auto; background: #141414; padding: 30px; border-radius: 8px; border: 1px solid #282828; }
+    h2 { font-size: 24px; margin-bottom: 20px; color: #ffffff; }
+    h2 span { color: #e50914; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #b3b3b3; }
+    input, select, textarea { width: 100%; padding: 12px; background: #222; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 14px; }
+    textarea { height: 80px; resize: vertical; }
+    .btn-autofetch { background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-weight: bold; width: 100%; }
+    .btn-autofetch:hover { background: #444; }
+    .btn-publish { background: #e50914; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 15px; }
+    .btn-publish:hover { background: #b80710; }
+    .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #282828; padding-bottom: 15px; }
+    .header-nav a { color: #e50914; text-decoration: none; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <!-- ERIVOX Header -->
-  <header>
-    <div class="logo">ERI<span>VOX</span></div>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/movies">Movies</a>
-      <a href="/tvshows">TV Shows</a>
-      <a href="/admin" class="active">Admin Panel</a>
-      <a href="/logout">Logout</a>
-    </nav>
-  </header>
-
-  <div class="container">
-    <div class="card">
-      <h2 class="card-title">Add Movie or TV Show</h2>
-      
-      <form action="/admin/add" method="POST">
-        
-        <!-- Search & Auto-Fetch Row -->
-        <div class="form-group">
-          <label for="fetchTitle">Search Title</label>
-          <div class="fetch-row">
-            <input type="text" id="fetchTitle" placeholder="Enter title (e.g. Agent Kim)" required>
-            <select id="fetchType">
-              <option value="movie">Movie</option>
-              <option value="tv">TV Show</option>
-            </select>
-            <button type="button" class="btn-fetch" onclick="autoFetchFromTMDB()">Auto-Fetch ID</button>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <!-- TMDB ID -->
-          <div class="form-group">
-            <label for="tmdbIdInput">TMDB ID</label>
-            <input type="text" name="tmdbId" id="tmdbIdInput" placeholder="TMDB ID" readonly required>
-          </div>
-
-          <!-- Genre -->
-          <div class="form-group">
-            <label for="genre">Genre</label>
-            <input type="text" name="genre" id="genreInput" placeholder="e.g. Action, Thriller">
-          </div>
-        </div>
-
-        <!-- Poster Link -->
-        <div class="form-group">
-          <label for="posterUrlInput">Poster URL</label>
-          <input type="text" name="posterUrl" id="posterUrlInput" placeholder="https://image.tmdb.org/t/p/w500/...">
-        </div>
-
-        <!-- Description -->
-        <div class="form-group">
-          <label for="overviewInput">Overview / Synopsis</label>
-          <textarea name="overview" id="overviewInput" rows="4" placeholder="Story details..."></textarea>
-        </div>
-
-        <!-- Gofile Link -->
-        <div class="form-group">
-          <label for="gofileUrl">Gofile Link</label>
-          <input type="text" name="gofileUrl" id="gofileUrl" placeholder="https://gofile.io/d/XXXXXX" required>
-        </div>
-
-        <button type="submit" class="btn-submit">Publish to ERIVOX</button>
-      </form>
+  <div class="admin-container">
+    <div class="header-nav">
+      <h2>ERI<span>VOX</span> Admin</h2>
+      <a href="/">← Go to Site</a>
     </div>
+
+    <!-- AUTO-FETCH SECTION -->
+    <div style="background: #181818; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #222;">
+      <div class="form-group">
+        <label>Search TMDB Title</label>
+        <input type="text" id="fetchTitle" placeholder="e.g. Agent Kim, Breaking Bad">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="fetchType">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
+      </div>
+      <button type="button" class="btn-autofetch" onclick="autoFetch()">Auto-Fetch Info</button>
+      <span id="fetchStatus" style="font-size: 12px; margin-top: 5px; display: block;"></span>
+    </div>
+
+    <!-- PUBLISH FORM -->
+    <form action="/admin/add" method="POST">
+      <div class="form-group">
+        <label>Media Type</label>
+        <select name="type" id="typeSelect">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" id="title" required>
+      </div>
+
+      <div class="form-group">
+        <label>TMDB ID</label>
+        <input type="text" name="tmdbId" id="tmdbId">
+      </div>
+
+      <div class="form-group">
+        <label>Genre</label>
+        <input type="text" name="genre" id="genre">
+      </div>
+
+      <div class="form-group">
+        <label>Poster Image URL</label>
+        <input type="text" name="posterUrl" id="posterUrl">
+      </div>
+
+      <div class="form-group">
+        <label>Overview</label>
+        <textarea name="overview" id="overview"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Gofile / Download Link</label>
+        <input type="text" name="gofileUrl" placeholder="https://gofile.io/d/..." required>
+      </div>
+
+      <button type="submit" class="btn-publish">Publish to ERIVOX</button>
+    </form>
   </div>
 
   <script>
-  async function autoFetchFromTMDB() {
-    const titleInput = document.getElementById('fetchTitle').value.trim();
-    const typeSelect = document.getElementById('fetchType').value;
+    async function autoFetch() {
+      const title = document.getElementById('fetchTitle').value;
+      const type = document.getElementById('fetchType').value;
+      const status = document.getElementById('fetchStatus');
 
-    if (!titleInput) {
-      alert('Please type a title first!');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/admin/autofetch?title=${encodeURIComponent(titleInput)}&type=${typeSelect}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        document.getElementById('tmdbIdInput').value = data.tmdbId;
-        document.getElementById('posterUrlInput').value = data.posterPath;
-        document.getElementById('overviewInput').value = data.overview;
-        if (data.genres) {
-          document.getElementById('genreInput').value = data.genres;
-        }
-        alert(`Successfully fetched details for: ${data.title}`);
-      } else {
-        alert(data.error || 'Content not found on TMDB');
+      if (!title) {
+        status.style.color = 'red';
+        status.innerText = 'Please enter a title to search.';
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      alert('Failed to connect to backend server');
+
+      status.style.color = '#aaa';
+      status.innerText = 'Fetching...';
+
+      try {
+        const res = await fetch(`/admin/autofetch?title=${encodeURIComponent(title)}&type=${type}`);
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('title').value = data.title || '';
+          document.getElementById('tmdbId').value = data.tmdbId || '';
+          document.getElementById('genre').value = data.genres || '';
+          document.getElementById('posterUrl').value = data.posterPath || '';
+          document.getElementById('overview').value = data.overview || '';
+          document.getElementById('typeSelect').value = type;
+
+          status.style.color = '#00ff66';
+          status.innerText = 'Details fetched successfully!';
+        } else {
+          status.style.color = 'red';
+          status.innerText = data.error || 'Failed to fetch details.';
+        }
+      } catch (err) {
+        status.style.color = 'red';
+        status.innerText = 'Error connecting to server.';
+      }
     }
-  }
   </script>
 
 </body>

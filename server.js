@@ -16,7 +16,7 @@ if (MONGODB_URI && !MONGODB_URI.includes('your_actual_mongodb')) {
     .catch(err => console.error('MongoDB Connection Error:', err.message));
 }
 
-// Schema & Model
+// Media Schema & Model
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' }, // 'movie' or 'tv'
@@ -65,10 +65,7 @@ app.get('/', async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       mediaList = await Media.find().sort({ createdAt: -1 });
     }
-    res.render('index', { mediaList }, (err, html) => {
-      if (err) return res.status(500).send(`<h2>Error loading home view:</h2><p>${err.message}</p>`);
-      res.send(html);
-    });
+    res.render('index', { mediaList });
   } catch (err) {
     res.render('index', { mediaList: [] });
   }
@@ -81,22 +78,9 @@ app.get('/movies', async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       movies = await Media.find({ type: 'movie' }).sort({ createdAt: -1 });
     }
-    res.render('movie', { movies }, (err, html) => {
-      if (err) {
-        console.error('Render Error (movie.ejs):', err.message);
-        // Safe fallback render if movie.ejs is missing
-        return res.status(200).send(`
-          <!DOCTYPE html><html><head><title>ERIVOX - Movies</title>
-          <style>body{background:#0b0b0b;color:white;font-family:sans-serif;padding:40px;text-align:center;}
-          a{color:#e50914;font-weight:bold;text-decoration:none;}</style></head>
-          <body><h1>ERI<span style="color:#e50914">VOX</span> Movies</h1>
-          <p>No movies template active yet or no movies published.</p><p><a href="/">Back Home</a></p></body></html>
-        `);
-      }
-      res.send(html);
-    });
+    res.render('movie', { movies });
   } catch (err) {
-    res.redirect('/');
+    res.render('movie', { movies: [] });
   }
 });
 
@@ -107,39 +91,15 @@ app.get('/tvshows', async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       tvshows = await Media.find({ type: 'tv' }).sort({ createdAt: -1 });
     }
-    res.render('tvshows', { tvshows }, (err, html) => {
-      if (err) {
-        return res.status(200).send(`
-          <!DOCTYPE html><html><head><title>ERIVOX - TV Shows</title>
-          <style>body{background:#0b0b0b;color:white;font-family:sans-serif;padding:40px;text-align:center;}
-          a{color:#e50914;font-weight:bold;text-decoration:none;}</style></head>
-          <body><h1>ERI<span style="color:#e50914">VOX</span> TV Shows</h1>
-          <p><a href="/">Back Home</a></p></body></html>
-        `);
-      }
-      res.send(html);
-    });
+    res.render('tvshows', { tvshows });
   } catch (err) {
-    res.redirect('/');
+    res.render('tvshows', { tvshows: [] });
   }
 });
 
 // Login Page GET
 app.get('/login', (req, res) => {
-  res.render('login', { error: null }, (err, html) => {
-    if (err) {
-      return res.send(`
-        <!DOCTYPE html><html><head><title>ERIVOX - Admin Login</title>
-        <style>body{background:#0b0b0b;color:white;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}
-        .card{background:#181818;padding:30px;border-radius:8px;border:1px solid #282828;}
-        input,button{width:100%;padding:10px;margin-top:10px;box-sizing:border-box;}
-        button{background:#e50914;color:white;border:none;font-weight:bold;cursor:pointer;}</style></head>
-        <body><div class="card"><h2>ERI<span style="color:#e50914">VOX</span> Admin</h2>
-        <form action="/login" method="POST"><input type="password" name="password" placeholder="Password" required><button type="submit">Login</button></form></div></body></html>
-      `);
-    }
-    res.send(html);
-  });
+  res.render('login', { error: null });
 });
 
 // Login POST
@@ -149,7 +109,7 @@ app.post('/login', (req, res) => {
     req.session.isAdmin = true;
     return res.redirect('/admin');
   }
-  res.send('<p style="color:red;background:#0b0b0b;padding:20px;">Invalid password. <a href="/login" style="color:white;">Try again</a></p>');
+  res.send('<p style="color:red;background:#0b0b0b;padding:20px;font-family:sans-serif;">Invalid password. <a href="/login" style="color:white;">Try again</a></p>');
 });
 
 // Logout
@@ -163,10 +123,7 @@ app.get('/logout', (req, res) => {
 
 // Admin Dashboard
 app.get('/admin', requireAdmin, (req, res) => {
-  res.render('admin', (err, html) => {
-    if (err) return res.status(500).send(`<h2>Error loading admin dashboard:</h2><p>${err.message}</p>`);
-    res.send(html);
-  });
+  res.render('admin');
 });
 
 // Save Content
@@ -185,6 +142,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
         genre
       });
       await newMedia.save();
+      console.log(`[ERIVOX] Published ${type}: ${title}`);
     }
   } catch (err) {
     console.error('Save Error:', err.message);

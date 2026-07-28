@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX - Movies</title>
+  <title>ERIVOX - TV Shows</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; }
@@ -32,17 +32,17 @@
     <a href="/" class="logo">ERI<span>VOX</span></a>
     <nav>
       <a href="/">Home</a>
-      <a href="/movies" class="active">Movies</a>
-      <a href="/tvshows">TV Shows</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows" class="active">TV Shows</a>
       <a href="/admin">Admin Panel</a>
     </nav>
   </header>
 
   <div class="container">
-    <h2 class="section-title">Movies Collection</h2>
+    <h2 class="section-title">TV Shows Collection</h2>
     <div class="media-grid">
-      <% if (typeof movies !== 'undefined' && movies.length > 0) { %>
-        <% movies.forEach(item => { %>
+      <% if (typeof tvshows !== 'undefined' && tvshows.length > 0) { %>
+        <% tvshows.forEach(item => { %>
           <div class="media-card">
             <img class="poster" src="<%= item.posterUrl || 'https://via.placeholder.com/200x300?text=No+Poster' %>" alt="<%= item.title %>">
             <div class="card-body">
@@ -53,7 +53,7 @@
           </div>
         <% }) %>
       <% } else { %>
-        <div class="no-content">No movies added yet.</div>
+        <div class="no-content">No TV shows added yet.</div>
       <% } %>
     </div>
   </div>
