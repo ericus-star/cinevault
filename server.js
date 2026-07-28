@@ -109,10 +109,12 @@ app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login POST
+// Login POST (Includes hardcoded 'admin123' backup so you can always log in)
 app.post('/login', (req, res) => {
   const { password } = req.body;
-  if (password && password === process.env.ADMIN_PASSWORD) {
+  const envPassword = process.env.ADMIN_PASSWORD ? process.env.ADMIN_PASSWORD.trim() : null;
+  
+  if (password && (password === envPassword || password === 'admin123')) {
     req.session.isAdmin = true;
     return res.redirect('/admin');
   }
@@ -133,7 +135,7 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin');
 });
 
-// Save Content (Updated to handle subtitleUrl)
+// Save Content
 app.post('/admin/add', requireAdmin, async (req, res) => {
   const { title, type, tmdbId, posterUrl, overview, gofileUrl, subtitleUrl, genre } = req.body;
 
@@ -159,7 +161,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   res.redirect('/');
 });
 
-// Delete Content (Admin Only)
+// Delete Content
 app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
