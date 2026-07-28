@@ -23,6 +23,8 @@
     .card-genre { font-size: 12px; color: #e50914; margin-bottom: 10px; font-weight: 600; }
     .btn-download { margin-top: auto; background: #e50914; color: white; text-align: center; padding: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; }
     .btn-download:hover { background: #b80710; }
+    .btn-delete { width: 100%; background: #222; color: #ff4d4d; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; }
+    .btn-delete:hover { background: #ff4d4d; color: white; }
     .no-content { color: #888; text-align: center; grid-column: 1 / -1; padding: 40px; }
   </style>
 </head>
@@ -49,6 +51,12 @@
               <div class="card-title"><%= item.title %></div>
               <% if (item.genre) { %><div class="card-genre"><%= item.genre %></div><% } %>
               <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
+
+              <% if (isAdmin) { %>
+                <form action="/admin/delete/<%= item._id %>" method="POST">
+                  <button type="submit" onclick="return confirm('Delete <%= item.title %>?')" class="btn-delete">Delete Entry</button>
+                </form>
+              <% } %>
             </div>
           </div>
         <% }) %>

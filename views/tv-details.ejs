@@ -3,78 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= show.name || 'TV Show' %> - ERIVOX</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>ERIVOX - Details</title>
   <style>
-    .episode-card {
-      background: #252525;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .download-btn {
-      background: #e50914;
-      color: white;
-      padding: 8px 16px;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; }
+    header { background: #141414; border-bottom: 2px solid #e50914; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    .logo span { color: #e50914; }
+    nav a { color: #b3b3b3; text-decoration: none; margin-left: 20px; font-weight: 600; }
+    nav a:hover { color: #e50914; }
+    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: flex; gap: 30px; }
+    .poster-box img { width: 280px; border-radius: 8px; border: 1px solid #282828; }
+    .details-box { display: flex; flex-direction: column; justify-content: center; }
+    .title { font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+    .genre { color: #e50914; font-weight: bold; margin-bottom: 15px; }
+    .overview { color: #ccc; line-height: 1.6; margin-bottom: 25px; }
+    .btn-download { background: #e50914; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block; width: fit-content; }
+    .btn-download:hover { background: #b80710; }
+    @media (max-width: 600px) { .container { flex-direction: column; align-items: center; text-align: center; } }
   </style>
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">
-      <h1><a href="/" style="color:white; text-decoration:none;">ERI<span>VOX</span></a></h1>
-    </div>
+
+  <header>
+    <a href="/" class="logo">ERI<span>VOX</span></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+    </nav>
   </header>
 
-  <main class="details-container" style="max-width: 1000px; margin: 30px auto; padding: 0 20px;">
-    <a href="/tv" class="back-btn" style="color: #e50914; text-decoration: none; font-weight: bold;">&larr; Back to TV Shows</a>
-    
-    <div class="details-content" style="display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
-      <div class="details-poster">
-        <img src="https://image.tmdb.org/t/p/w500<%= show.poster_path %>" alt="<%= show.name %>" style="border-radius: 8px; width: 300px;">
+  <div class="container">
+    <% if (typeof item !== 'undefined') { %>
+      <div class="poster-box">
+        <img src="<%= item.posterUrl || 'https://via.placeholder.com/280x420?text=No+Poster' %>" alt="<%= item.title %>">
       </div>
-      
-      <div class="details-info" style="flex: 1;">
-        <h1><%= show.name %></h1>
-        <p class="meta" style="margin: 10px 0; color: #aaa;">
-          <strong>First Aired:</strong> <%= show.first_air_date %> | 
-          <strong>Seasons:</strong> <%= show.number_of_seasons %> |
-          <strong>Rating:</strong> ⭐ <%= show.vote_average ? show.vote_average.toFixed(1) : 'N/A' %>/10
-        </p>
-        
-        <p class="overview"><%= show.overview %></p>
-
-        <!-- TV Downloads Section -->
-        <div class="download-section" style="margin-top: 30px; padding: 20px; background: #1f1f1f; border-radius: 8px;">
-          <h3>📺 Available Episodes & Downloads</h3>
-          
-          <% if (typeof downloadLinks !== 'undefined' && downloadLinks.length > 0) { %>
-            <% downloadLinks.forEach(link => { %>
-              <div class="episode-card">
-                <div>
-                  <strong>Season <%= link.season %>, Episode <%= link.episode %></strong>
-                  <span style="color: #aaa; margin-left: 10px;">[<%= link.quality %> - <%= link.fileSize %>]</span>
-                </div>
-                <a href="<%= link.downloadUrl %>" target="_blank" class="download-btn">
-                  Download
-                </a>
-              </div>
-            <% }); %>
-          <% } else { %>
-            <p style="color: #aaa; margin: 10px 0 0 0;">No episode download links available for this series yet.</p>
-          <% } %>
-        </div>
-
+      <div class="details-box">
+        <h1 class="title"><%= item.title %></h1>
+        <% if (item.genre) { %><div class="genre"><%= item.genre %></div><% } %>
+        <p class="overview"><%= item.overview || 'No overview available.' %></p>
+        <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch Now</a>
       </div>
-    </div>
-  </main>
+    <% } else { %>
+      <div style="text-align: center; width: 100%; padding: 40px;">
+        <h2>Item not found</h2>
+        <a href="/" style="color: #e50914; text-decoration: none; margin-top: 10px; display: inline-block;">Return Home</a>
+      </div>
+    <% } %>
+  </div>
+
 </body>
 </html>

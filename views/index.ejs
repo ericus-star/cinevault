@@ -3,123 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX - Stream & Download Movies & TV Shows</title>
+  <title>ERIVOX - Home</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      background-color: #0b0b0b;
-      color: #ffffff;
-      min-height: 100vh;
-    }
-    header {
-      background: #141414;
-      border-bottom: 2px solid #e50914;
-      padding: 15px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-decoration: none;
-    }
-    .logo span {
-      color: #e50914;
-    }
-    nav a {
-      color: #b3b3b3;
-      text-decoration: none;
-      margin-left: 20px;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    nav a:hover, nav a.active {
-      color: #e50914;
-    }
-
-    /* Container & Media Grid */
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    .section-title {
-      font-size: 24px;
-      margin-bottom: 20px;
-      border-left: 4px solid #e50914;
-      padding-left: 10px;
-    }
-    .media-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-    }
-    .media-card {
-      background: #181818;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #282828;
-      transition: transform 0.2s, border-color 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-    .media-card:hover {
-      transform: translateY(-5px);
-      border-color: #e50914;
-    }
-    .poster {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      background: #222;
-    }
-    .card-body {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-    .card-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #ffffff;
-    }
-    .card-genre {
-      font-size: 12px;
-      color: #e50914;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    .btn-download {
-      margin-top: auto;
-      background: #e50914;
-      color: white;
-      text-align: center;
-      padding: 10px;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    .btn-download:hover {
-      background: #b80710;
-    }
-    .no-content {
-      color: #888;
-      font-size: 16px;
-      text-align: center;
-      grid-column: 1 / -1;
-      padding: 40px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; }
+    header { background: #141414; border-bottom: 2px solid #e50914; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    .logo span { color: #e50914; }
+    nav a { color: #b3b3b3; text-decoration: none; margin-left: 20px; font-weight: 600; }
+    nav a:hover, nav a.active { color: #e50914; }
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .section-title { font-size: 24px; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .media-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #282828; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
+    .media-card:hover { transform: translateY(-5px); border-color: #e50914; }
+    .poster { width: 100%; height: 300px; object-fit: cover; background: #222; }
+    .card-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+    .card-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #ffffff; }
+    .card-type { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 5px; font-weight: bold; }
+    .card-genre { font-size: 12px; color: #e50914; margin-bottom: 10px; font-weight: 600; }
+    .btn-download { margin-top: auto; background: #e50914; color: white; text-align: center; padding: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .btn-download:hover { background: #b80710; }
+    .btn-delete { width: 100%; background: #222; color: #ff4d4d; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; }
+    .btn-delete:hover { background: #ff4d4d; color: white; }
+    .no-content { color: #888; text-align: center; grid-column: 1 / -1; padding: 40px; }
   </style>
 </head>
 <body>
@@ -135,26 +42,28 @@
   </header>
 
   <div class="container">
-    <h2 class="section-title">Latest Releases</h2>
-
+    <h2 class="section-title">Latest Uploads</h2>
     <div class="media-grid">
-      <% if (mediaList && mediaList.length > 0) { %>
+      <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
         <% mediaList.forEach(item => { %>
           <div class="media-card">
             <img class="poster" src="<%= item.posterUrl || 'https://via.placeholder.com/200x300?text=No+Poster' %>" alt="<%= item.title %>">
             <div class="card-body">
+              <div class="card-type"><%= item.type === 'tv' ? 'TV Show' : 'Movie' %></div>
               <div class="card-title"><%= item.title %></div>
-              <% if (item.genre) { %>
-                <div class="card-genre"><%= item.genre %></div>
-              <% } %>
+              <% if (item.genre) { %><div class="card-genre"><%= item.genre %></div><% } %>
               <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
+
+              <% if (isAdmin) { %>
+                <form action="/admin/delete/<%= item._id %>" method="POST">
+                  <button type="submit" onclick="return confirm('Delete <%= item.title %>?')" class="btn-delete">Delete Entry</button>
+                </form>
+              <% } %>
             </div>
           </div>
         <% }) %>
       <% } else { %>
-        <div class="no-content">
-          No content published yet. Go to <a href="/admin" style="color:#e50914;">Admin Panel</a> to add movies or shows!
-        </div>
+        <div class="no-content">No content published yet.</div>
       <% } %>
     </div>
   </div>

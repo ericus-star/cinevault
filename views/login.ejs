@@ -1,42 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERIVOX - Admin Login</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-        .login-card { background: #1e293b; border: 1px solid #334155; padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .logo { text-align: center; font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 1.5rem; letter-spacing: 1px; }
-        .logo span { color: #38bdf8; }
-        
-        .form-group { margin-bottom: 1.2rem; }
-        label { display: block; margin-bottom: 0.5rem; color: #cbd5e1; font-weight: 600; font-size: 0.9rem; }
-        input { width: 100%; padding: 0.8rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 1rem; outline: none; }
-        input:focus { border-color: #38bdf8; }
-        
-        button { width: 100%; padding: 0.8rem; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #0369a1; }
-        
-        .error-msg { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; padding: 0.7rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 1.2rem; text-align: center; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERIVOX - Admin Login</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .login-card { background: #141414; padding: 40px; border-radius: 8px; border: 1px solid #282828; width: 100%; max-width: 380px; text-align: center; }
+    .logo { font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; display: block; margin-bottom: 25px; }
+    .logo span { color: #e50914; }
+    input[type="password"] { width: 100%; padding: 12px; background: #222; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 14px; margin-bottom: 20px; outline: none; }
+    input[type="password"]:focus { border-color: #e50914; }
+    button { width: 100%; background: #e50914; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; }
+    button:hover { background: #b80710; }
+    .back-link { display: block; margin-top: 20px; color: #888; text-decoration: none; font-size: 13px; }
+    .back-link:hover { color: #fff; }
+  </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="logo">ERI<span>VOX</span> ADMIN</div>
-        
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="error-msg"><%= error %></div>
-        <% } %>
 
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label>Admin Password</label>
-                <input type="password" name="password" placeholder="Enter password" required autofocus>
-            </div>
-            <button type="submit">Access Dashboard</button>
-        </form>
-    </div>
+  <div class="login-card">
+    <a href="/" class="logo">ERI<span>VOX</span></a>
+    <form action="/login" method="POST">
+      <input type="password" name="password" placeholder="Enter Admin Password" required autofocus>
+      <button type="submit">Access Dashboard</button>
+    </form>
+    <a href="/" class="back-link">← Back to Main Site</a>
+  </div>
+
 </body>
 </html>

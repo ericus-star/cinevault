@@ -54,6 +54,12 @@ function requireAdmin(req, res, next) {
   res.redirect('/login');
 }
 
+// Pass session data (isAdmin) to all views automatically
+app.use((req, res, next) => {
+  res.locals.isAdmin = !!(req.session && req.session.isAdmin);
+  next();
+});
+
 // -------------------------------------------------------------
 // PUBLIC NAVIGATION ROUTES
 // -------------------------------------------------------------
@@ -118,7 +124,7 @@ app.get('/logout', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// ADMIN & AUTO-FETCH ROUTES
+// ADMIN, SAVE, & DELETE ROUTES
 // -------------------------------------------------------------
 
 // Admin Dashboard
@@ -149,6 +155,19 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   }
 
   res.redirect('/');
+});
+
+// Delete Content (Admin Only)
+app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await Media.findByIdAndDelete(req.params.id);
+      console.log(`[ERIVOX] Deleted media ID: ${req.params.id}`);
+    }
+  } catch (err) {
+    console.error('Delete Error:', err.message);
+  }
+  res.redirect('back');
 });
 
 // TMDB Auto-Fetch
