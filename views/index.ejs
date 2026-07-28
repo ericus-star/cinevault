@@ -44,33 +44,81 @@
     nav a:hover, nav a.active {
       color: #e50914;
     }
-    .hero {
-      text-align: center;
-      padding: 100px 20px;
-      background: linear-gradient(180deg, rgba(20,20,20,0.8) 0%, rgba(11,11,11,1) 100%);
+
+    /* Container & Media Grid */
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
     }
-    .hero h1 {
-      font-size: 48px;
-      margin-bottom: 15px;
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      border-left: 4px solid #e50914;
+      padding-left: 10px;
     }
-    .hero p {
-      color: #aaa;
-      font-size: 18px;
-      max-width: 600px;
-      margin: 0 auto 30px;
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
     }
-    .btn-main {
+    .media-card {
+      background: #181818;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #282828;
+      transition: transform 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .media-card:hover {
+      transform: translateY(-5px);
+      border-color: #e50914;
+    }
+    .poster {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      background: #222;
+    }
+    .card-body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #ffffff;
+    }
+    .card-genre {
+      font-size: 12px;
+      color: #e50914;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .btn-download {
+      margin-top: auto;
       background: #e50914;
       color: white;
-      padding: 12px 30px;
+      text-align: center;
+      padding: 10px;
       text-decoration: none;
-      font-weight: bold;
       border-radius: 4px;
-      font-size: 16px;
-      transition: background 0.2s;
+      font-weight: bold;
+      font-size: 14px;
     }
-    .btn-main:hover {
+    .btn-download:hover {
       background: #b80710;
+    }
+    .no-content {
+      color: #888;
+      font-size: 16px;
+      text-align: center;
+      grid-column: 1 / -1;
+      padding: 40px;
     }
   </style>
 </head>
@@ -86,10 +134,29 @@
     </nav>
   </header>
 
-  <div class="hero">
-    <h1>Welcome to ERI<span>VOX</span></h1>
-    <p>Your portal for fast, direct media streaming and high-speed downloads.</p>
-    <a href="/admin" class="btn-main">Go to Admin Dashboard</a>
+  <div class="container">
+    <h2 class="section-title">Latest Releases</h2>
+
+    <div class="media-grid">
+      <% if (mediaList && mediaList.length > 0) { %>
+        <% mediaList.forEach(item => { %>
+          <div class="media-card">
+            <img class="poster" src="<%= item.posterUrl || 'https://via.placeholder.com/200x300?text=No+Poster' %>" alt="<%= item.title %>">
+            <div class="card-body">
+              <div class="card-title"><%= item.title %></div>
+              <% if (item.genre) { %>
+                <div class="card-genre"><%= item.genre %></div>
+              <% } %>
+              <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="no-content">
+          No content published yet. Go to <a href="/admin" style="color:#e50914;">Admin Panel</a> to add movies or shows!
+        </div>
+      <% } %>
+    </div>
   </div>
 
 </body>

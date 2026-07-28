@@ -1,13 +1,37 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const mongoose = require('mongoose');
 const axios = require('axios');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// View engine setup
+// Connect to MongoDB
+const MONGODB_URI = process.env.MONGODB_URI;
+if (MONGODB_URI && MONGODB_URI !== 'your_actual_mongodb_connection_string_here') {
+  mongoose.connect(MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB successfully'))
+    .catch(err => console.error('MongoDB Connection Error:', err.message));
+} else {
+  console.log('MongoDB URI missing or using default placeholder. Media will not be saved permanently until set.');
+}
+
+// Define Media Schema & Model
+const mediaSchema = new mongoose.Schema({
+  title: String,
+  tmdbId: String,
+  posterUrl: String,
+  overview: String,
+  gofileUrl: String,
+  genre: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Media = mongoose.models.Media || mongoose.model('Media', mediaSchema);
+
+// View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -16,7 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session setup
+// Session Setup
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox_secret_key_99',
   resave: false,
@@ -35,49 +59,44 @@ function requireAdmin(req, res, next) {
 // PUBLIC NAVIGATION ROUTES
 // -------------------------------------------------------------
 
-// Home
-app.get('/', (req, res) => {
-  res.render('index', (err, html) => {
-    if (err) {
-      console.error('Render Error (index.ejs):', err.message);
-      return res.status(200).send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>ERIVOX - Stream & Download</title>
-          <style>
-            body { background: #0b0b0b; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
-            h1 { font-size: 48px; letter-spacing: 2px; }
-            h1 span { color: #e50914; }
-            a { color: #e50914; font-weight: bold; text-decoration: none; font-size: 18px; }
-          </style>
-        </head>
-        <body>
-          <h1>ERI<span>VOX</span></h1>
-          <p style="margin: 20px 0; color: #aaa;">Welcome to ERIVOX. Movies and TV shows platform.</p>
-          <p><a href="/admin">Go to Admin Panel</a> | <a href="/login">Login</a></p>
-        </body>
-        </html>
-      `);
+// Home - Fetches all saved media from MongoDB and displays it
+app.get('/', async (req, res) => {
+  try {
+    let mediaList = [];
+    if (mongoose.connection.readyState === 1) {
+      mediaList = await Media.find().sort({ createdAt: -1 });
     }
-    res.send(html);
-  });
+    res.render('index', { mediaList });
+  } catch (err) {
+    console.error('Render Error (index.ejs):', err.message);
+    res.render('index', { mediaList: [] });
+  }
 });
 
 // Movies Page
-app.get('/movies', (req, res) => {
-  res.render('movie', (err, html) => {
-    if (err) return res.redirect('/');
-    res.send(html);
-  });
+app.get('/movies', async (req, res) => {
+  try {
+    let movies = [];
+    if (mongoose.connection.readyState === 1) {
+      movies = await Media.find().sort({ createdAt: -1 });
+    }
+    res.render('movie', { movies });
+  } catch (err) {
+    res.redirect('/');
+  }
 });
 
 // TV Shows Page
-app.get('/tvshows', (req, res) => {
-  res.render('tvshows', (err, html) => {
-    if (err) return res.redirect('/');
-    res.send(html);
-  });
+app.get('/tvshows', async (req, res) => {
+  try {
+    let tvshows = [];
+    if (mongoose.connection.readyState === 1) {
+      tvshows = await Media.find().sort({ createdAt: -1 });
+    }
+    res.render('tvshows', { tvshows });
+  } catch (err) {
+    res.redirect('/');
+  }
 });
 
 // Login Page GET
@@ -140,28 +159,33 @@ app.get('/logout', (req, res) => {
 
 // Admin Dashboard GET
 app.get('/admin', requireAdmin, (req, res) => {
-  res.render('admin', (err, html) => {
-    if (err) {
-      console.error('Render Error (admin.ejs):', err.message);
-      return res.status(500).send(`<h2>Error loading admin template:</h2><p>${err.message}</p>`);
-    }
-    res.send(html);
-  });
+  res.render('admin');
 });
 
-// Save Content POST
-app.post('/admin/add', requireAdmin, (req, res) => {
+// Save Content POST (Saves directly to MongoDB)
+app.post('/admin/add', requireAdmin, async (req, res) => {
   const { title, tmdbId, posterUrl, overview, gofileUrl, genre } = req.body;
 
-  console.log('--- NEW CONTENT ADDED ---');
-  console.log('Title:', title);
-  console.log('TMDB ID:', tmdbId);
-  console.log('Genre:', genre);
-  console.log('Poster:', posterUrl);
-  console.log('Overview:', overview);
-  console.log('Gofile Link:', gofileUrl);
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const newMedia = new Media({
+        title,
+        tmdbId,
+        posterUrl,
+        overview,
+        gofileUrl,
+        genre
+      });
+      await newMedia.save();
+      console.log('Saved to database:', title);
+    } else {
+      console.log('MongoDB not connected. Logged entry:', { title, tmdbId, gofileUrl });
+    }
+  } catch (err) {
+    console.error('Error saving media:', err.message);
+  }
 
-  res.redirect('/admin');
+  res.redirect('/');
 });
 
 // TMDB Auto-Fetch Endpoint
@@ -181,7 +205,6 @@ app.get('/admin/autofetch', requireAdmin, async (req, res) => {
 
     const mediaType = type === 'tv' ? 'tv' : 'movie';
 
-    // 1. Search TMDB
     const searchUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
     const searchRes = await axios.get(searchUrl);
     const results = searchRes.data.results;
@@ -190,7 +213,6 @@ app.get('/admin/autofetch', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'No matching media found on TMDB' });
     }
 
-    // 2. Fetch full details using first match ID
     const tmdbId = results[0].id;
     const detailsUrl = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${apiKey}`;
     const detailsRes = await axios.get(detailsUrl);
