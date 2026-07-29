@@ -6,13 +6,13 @@
   <title>ERIVOX - Movies</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #141414; border-bottom: 2px solid #e50914; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
     .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
     .logo span { color: #e50914; }
     nav a { color: #b3b3b3; text-decoration: none; margin-left: 20px; font-weight: 600; }
     nav a:hover, nav a.active { color: #e50914; }
-    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; flex-grow: 1; }
     .section-title { font-size: 24px; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
     .media-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #282828; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
@@ -28,6 +28,9 @@
     .btn-delete { width: 100%; background: #222; color: #ff4d4d; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; }
     .btn-delete:hover { background: #ff4d4d; color: white; }
     .no-content { color: #888; text-align: center; grid-column: 1 / -1; padding: 40px; }
+    footer { background: #141414; border-top: 1px solid #282828; text-align: center; padding: 20px; margin-top: 40px; color: #777; font-size: 13px; }
+    footer a { color: #e50914; text-decoration: none; margin-left: 10px; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -72,6 +75,10 @@
       <% } %>
     </div>
   </div>
+
+  <footer>
+    &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. | <a href="/dmca">DMCA Disclaimer</a>
+  </footer>
 
 </body>
 </html>

@@ -16,7 +16,7 @@ if (MONGODB_URI && !MONGODB_URI.includes('your_actual_mongodb')) {
     .catch(err => console.error('MongoDB Connection Error:', err.message));
 }
 
-// Media Schema & Model (Updated with subtitleUrl)
+// Media Schema & Model (Includes subtitleUrl)
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' }, // 'movie' or 'tv'
@@ -24,7 +24,7 @@ const mediaSchema = new mongoose.Schema({
   posterUrl: String,
   overview: String,
   gofileUrl: String,
-  subtitleUrl: String, // Added subtitle URL field
+  subtitleUrl: String, // Subtitle Download Link
   genre: String,
   createdAt: { type: Date, default: Date.now }
 });
@@ -104,12 +104,32 @@ app.get('/tvshows', async (req, res) => {
   }
 });
 
+// DMCA Disclaimer Page Route
+app.get('/dmca', (req, res) => {
+  res.render('dmca');
+});
+
+// Dynamic Sitemap Route for Google Indexing
+app.get('/sitemap.xml', async (req, res) => {
+  res.header('Content-Type', 'application/xml');
+  
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://erivox.onrender.com/</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://erivox.onrender.com/movies</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://erivox.onrender.com/tvshows</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://erivox.onrender.com/dmca</loc><changefreq>monthly</changefreq></url>
+</urlset>`;
+
+  res.send(xml);
+});
+
 // Login Page GET
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login POST (Includes hardcoded 'admin123' backup so you can always log in)
+// Login POST (Includes hardcoded 'admin123' backup so login always works)
 app.post('/login', (req, res) => {
   const { password } = req.body;
   const envPassword = process.env.ADMIN_PASSWORD ? process.env.ADMIN_PASSWORD.trim() : null;

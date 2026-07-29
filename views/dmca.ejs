@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERIVOX - DMCA & Copyright Disclaimer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #141414; border-bottom: 2px solid #e50914; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    .logo span { color: #e50914; }
+    nav a { color: #b3b3b3; text-decoration: none; margin-left: 20px; font-weight: 600; }
+    nav a:hover, nav a.active { color: #e50914; }
+    .container { max-width: 800px; margin: 40px auto; padding: 0 20px; flex-grow: 1; }
+    h1 { font-size: 26px; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
+    h2 { font-size: 18px; margin-top: 25px; margin-bottom: 10px; color: #e50914; }
+    p, ul { color: #cccccc; line-height: 1.6; font-size: 14px; margin-bottom: 15px; }
+    ul { margin-left: 20px; }
+    .dmca-box { background: #141414; border: 1px solid #282828; border-left: 4px solid #e50914; padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 14px; color: #ddd; }
+    footer { background: #141414; border-top: 1px solid #282828; text-align: center; padding: 20px; margin-top: 40px; color: #777; font-size: 13px; }
+    footer a { color: #e50914; text-decoration: none; margin-left: 10px; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo">ERI<span>VOX</span></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+      <a href="/admin">Admin Panel</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>DMCA & Copyright Disclaimer</h1>
+
+    <div class="dmca-box">
+      <strong>Important Notice:</strong> ERIVOX does not host, store, or upload any media files (videos, movies, or TV shows) on its web server. All content presented on this platform is hosted by non-affiliated third-party storage providers.
+    </div>
+
+    <h2>1. Content Indexing Policy</h2>
+    <p>ERIVOX operates strictly as a digital indexer and catalog of media links freely available across the public internet. We do not exercise control over external third-party hosts nor store copyrighted video files on our infrastructure.</p>
+
+    <h2>2. DMCA Compliance</h2>
+    <p>ERIVOX respects intellectual property rights and complies with the Digital Millennium Copyright Act (DMCA). It is our policy to respond promptly to valid notices of alleged copyright infringement.</p>
+
+    <h2>3. Submitting a Takedown Request</h2>
+    <p>If you are a copyright holder or an authorized agent and wish to request the removal of a specific media link listed on ERIVOX, please email us with:</p>
+    <ul>
+      <li>Identification of the copyrighted work claimed to be infringed.</li>
+      <li>The specific page URL(s) on ERIVOX containing the item link.</li>
+      <li>Contact information (Name, Organization, Email).</li>
+      <li>A formal statement confirming you are authorized to act on behalf of the copyright owner.</li>
+    </ul>
+
+    <h2>4. Removal Contact</h2>
+    <div class="dmca-box">
+      <strong>Administrative Contact Email:</strong> admin@erivox.onrender.com
+    </div>
+    <p>Upon receipt of a legitimate request, ERIVOX will process and remove the reported link from our database within 24 to 48 hours.</p>
+  </div>
+
+  <footer>
+    &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. | <a href="/dmca">DMCA Disclaimer</a>
+  </footer>
+
+</body>
+</html>
