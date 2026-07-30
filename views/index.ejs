@@ -28,16 +28,16 @@
     
     .nav-container { display: flex; align-items: center; gap: 25px; flex-wrap: wrap; }
     
-    /* Prominent Header Links */
+    /* Header Links */
     nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
     nav a { color: #cccccc; text-decoration: none; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s, transform 0.2s; }
     nav a:hover, nav a.active { color: #e50914; transform: scale(1.05); }
 
-    /* Genre Dropdown in Header Nav */
+    /* Genre Dropdown */
     .genre-select { background: #1a1a1e; color: #fff; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
     .genre-select:focus { border-color: #e50914; }
 
-    /* Working Search Bar */
+    /* Search Bar */
     .search-form { display: flex; align-items: center; }
     .search-input { background: #1a1a1e; border: 1px solid #333; color: #fff; padding: 10px 14px; border-radius: 6px 0 0 6px; outline: none; font-size: 15px; width: 220px; }
     .search-input:focus { border-color: #e50914; }
@@ -93,10 +93,14 @@
           <option value="Thriller">Thriller</option>
         </select>
 
-        <a href="/admin">Admin Panel</a>
+        <!-- HIDE ADMIN LINKS UNLESS LOGGED IN -->
+        <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+          <a href="/admin" style="color: #28a745;">Admin Panel</a>
+          <a href="/logout" style="color: #ff4d4d;">Logout</a>
+        <% } %>
       </nav>
 
-      <!-- Working Search Form -->
+      <!-- Search Form -->
       <form action="/" method="GET" class="search-form">
         <input type="text" name="search" placeholder="Search title or genre..." class="search-input" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
         <button type="submit" class="search-btn">Search</button>
