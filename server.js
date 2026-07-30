@@ -9,18 +9,16 @@ require('dotenv').config();
 const app = express();
 
 // --- 1. SECURITY HEADERS ---
-// Helmet secures HTTP headers and hides Express fingerprint ("X-Powered-By")
 app.use(helmet({
-  contentSecurityPolicy: false, // Prevents breaking external poster images (TMDB/placeholders)
+  contentSecurityPolicy: false,
 }));
 app.disable('x-powered-by');
 
 // --- 2. BRUTE-FORCE RATE LIMITING ---
-// Restrict login attempts: Max 5 failed/total attempts per 15-minute window per IP
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 5,
-  message: 'Too many login attempts from this IP. Please try again after 15 minutes.',
+  message: 'Too many login attempts. Please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -31,15 +29,15 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- 3. HARDENED SESSION COOKIES ---
+// --- 3. SESSION COOKIES ---
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox_super_secret_key_2026',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true, // Prevents client-side scripts from reading session cookies
-    sameSite: 'strict', // Protects against Cross-Site Request Forgery (CSRF)
-    maxAge: 1000 * 60 * 60 * 2 // 2 hour session expiry
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: 1000 * 60 * 60 * 2
   }
 }));
 
@@ -48,13 +46,18 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/erivox')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Schema & Model
+// --- MULTI-CLOUD SCHEMA ---
 const mediaSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, enum: ['movie', 'tv'], required: true },
   genre: String,
   posterUrl: String,
-  gofileUrl: { type: String, required: true },
+  // Array of cloud storage links (e.g. [{ name: 'Gofile', url: '...' }, { name: 'Mega', url: '...' }])
+  cloudLinks: [{
+    name: String,
+    url: String
+  }],
+  gofileUrl: String, // Kept for backwards compatibility with older entries
   subtitleUrl: String,
   createdAt: { type: Date, default: Date.now }
 });
@@ -71,7 +74,6 @@ const requireAdmin = (req, res, next) => {
 
 // --- PUBLIC ROUTES ---
 
-// 1. Homepage
 app.get('/', async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
@@ -98,7 +100,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// 2. Movies Page
 app.get('/movies', async (req, res) => {
   try {
     const mediaList = await Media.find({ type: 'movie' }).sort({ createdAt: -1 });
@@ -108,7 +109,6 @@ app.get('/movies', async (req, res) => {
   }
 });
 
-// 3. TV Shows Page
 app.get('/tvshows', async (req, res) => {
   try {
     const mediaList = await Media.find({ type: 'tv' }).sort({ createdAt: -1 });
@@ -118,21 +118,17 @@ app.get('/tvshows', async (req, res) => {
   }
 });
 
-// 4. DMCA Page
 app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// --- API ROUTES FOR TMDB AUTO-FETCH (RESTRICTED TO ADMIN ONLY) ---
-
+// --- API ROUTE FOR TMDB ---
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
     const { title, type } = req.query;
     const apiKey = process.env.TMDB_API_KEY;
 
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
+    if (!title) return res.status(400).json({ error: 'Title is required' });
 
     if (!apiKey) {
       return res.json({
@@ -167,14 +163,12 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
   }
 });
 
-// --- ADMIN & LOGIN ROUTES ---
+// --- AUTH & ADMIN ROUTES ---
 
-// Login Page (GET)
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login Action (POST) - RATE LIMITED
 app.post(['/login', '/admin/login'], loginLimiter, (req, res) => {
   const { password } = req.body;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -186,7 +180,6 @@ app.post(['/login', '/admin/login'], loginLimiter, (req, res) => {
   res.render('login', { error: 'Invalid password. Access denied.' });
 });
 
-// Admin Dashboard Page
 app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
   try {
     const mediaList = await Media.find().sort({ createdAt: -1 });
@@ -196,24 +189,29 @@ app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
   }
 });
 
-// Logout
 app.get(['/logout', '/admin/logout'], (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
-// Add New Media Entry (POST)
+// ADD MEDIA WITH MULTIPLE CLOUD LINKS
 app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   try {
-    const { title, type, genre, posterUrl, gofileUrl, subtitleUrl } = req.body;
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl, megaUrl, pixeldrainUrl } = req.body;
     
+    const cloudLinks = [];
+    if (gofileUrl && gofileUrl.trim()) cloudLinks.push({ name: 'Gofile', url: gofileUrl.trim() });
+    if (megaUrl && megaUrl.trim()) cloudLinks.push({ name: 'Mega', url: megaUrl.trim() });
+    if (pixeldrainUrl && pixeldrainUrl.trim()) cloudLinks.push({ name: 'Pixeldrain', url: pixeldrainUrl.trim() });
+
     await Media.create({
       title,
       type,
       genre,
       posterUrl,
-      gofileUrl,
-      subtitleUrl
+      subtitleUrl,
+      gofileUrl, // Fallback
+      cloudLinks
     });
 
     res.redirect('/admin');
@@ -223,7 +221,6 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Media Entry (POST)
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);
@@ -235,7 +232,6 @@ app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) =>
   }
 });
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

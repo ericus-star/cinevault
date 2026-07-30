@@ -52,8 +52,11 @@
     .card-type { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 4px; font-weight: 800; }
     .card-genre { font-size: 12px; color: #e50914; margin-bottom: 12px; font-weight: 700; }
     
-    .btn-download { margin-top: auto; background: #e50914; color: white; text-align: center; padding: 10px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; }
+    .btn-download { margin-top: 4px; background: #e50914; color: white; text-align: center; padding: 8px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12px; display: block; }
     .btn-download:hover { background: #b80710; }
+    .btn-download.alt { background: #22222a; border: 1px solid #444; color: #ddd; }
+    .btn-download.alt:hover { background: #333340; border-color: #e50914; }
+
     .btn-sub { background: #1c1c22; color: #28a745; text-align: center; padding: 8px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12px; margin-top: 8px; border: 1px solid rgba(40, 167, 69, 0.4); display: block; }
     .btn-sub:hover { background: #28a745; color: white; }
     .btn-delete { width: 100%; background: #1c1c22; color: #ff4d4d; border: 1px solid #333; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; }
@@ -113,7 +116,19 @@
               <div class="card-title"><%= item.title %></div>
               <% if (item.genre) { %><div class="card-genre"><%= item.genre %></div><% } %>
               
-              <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
+              <!-- RENDER MULTIPLE CLOUD STORAGE BUTTONS -->
+              <div style="margin-top: auto;">
+                <% if (item.cloudLinks && item.cloudLinks.length > 0) { %>
+                  <% item.cloudLinks.forEach((link, idx) => { %>
+                    <a href="<%= link.url %>" target="_blank" class="btn-download <%= idx > 0 ? 'alt' : '' %>">
+                      Server <%= idx + 1 %> (<%= link.name %>)
+                    </a>
+                  <% }) %>
+                <% } else if (item.gofileUrl) { %>
+                  <!-- Fallback for older uploads -->
+                  <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
+                <% } %>
+              </div>
 
               <% if (item.subtitleUrl && item.subtitleUrl.trim() !== '') { %>
                 <a href="<%= item.subtitleUrl %>" target="_blank" class="btn-sub">Download Subtitles</a>
@@ -137,12 +152,8 @@
     &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. | <a href="/dmca">DMCA Disclaimer</a>
   </footer>
 
-  <!-- FRONTEND PROTECTION: BLOCK DEVTOOLS & INSPECT shortcuts -->
   <script>
-    // 1. Disable Right-Click Context Menu
     document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // 2. Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (View Source)
     document.addEventListener('keydown', e => {
       if (
         e.key === 'F12' || 

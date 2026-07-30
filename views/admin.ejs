@@ -8,14 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
     body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     
-    header { 
-      background: #141417; 
-      border-bottom: 2px solid #e50914; 
-      padding: 20px 40px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-    }
+    header { background: #141417; border-bottom: 2px solid #e50914; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
     .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
     .logo span { color: #e50914; }
     .nav-links { display: flex; gap: 20px; align-items: center; }
@@ -39,7 +32,6 @@
     .error-msg { color: #ff4d4d; font-size: 13px; font-weight: bold; margin-top: 10px; }
     .success-msg { color: #28a745; font-size: 13px; font-weight: bold; margin-top: 10px; }
 
-    /* Existing Entries Table */
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { text-align: left; padding: 12px; border-bottom: 1px solid #222228; font-size: 14px; }
     th { color: #888; font-size: 12px; text-transform: uppercase; }
@@ -61,7 +53,7 @@
 
   <div class="container">
     
-    <!-- SECTION 1: AUTO FETCH -->
+    <!-- AUTO FETCH -->
     <div class="card">
       <h2>1. Auto-Fetch Movie/Show Details</h2>
       <div class="form-group">
@@ -81,9 +73,9 @@
       <div id="fetchStatus" class="error-msg"></div>
     </div>
 
-    <!-- SECTION 2: ADD ENTRY FORM -->
+    <!-- ADD ENTRY FORM WITH MULTI-CLOUD LINKS -->
     <div class="card">
-      <h2>2. Add Media Content</h2>
+      <h2>2. Add Media Content (Multi-Cloud Storage)</h2>
       <form action="/admin/add" method="POST">
         <div class="form-group">
           <label for="titleInput">Title</label>
@@ -108,9 +100,20 @@
           <input type="text" name="posterUrl" id="posterInput" class="input-field" placeholder="https://image.tmdb.org/...">
         </div>
 
+        <!-- CLOUD STORAGE MIRRORS -->
         <div class="form-group">
-          <label for="gofileUrl">Gofile / Download URL</label>
-          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" required placeholder="https://gofile.io/d/...">
+          <label for="gofileUrl">Cloud Server 1 (Gofile URL)</label>
+          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" placeholder="https://gofile.io/d/...">
+        </div>
+
+        <div class="form-group">
+          <label for="megaUrl">Cloud Server 2 (Mega URL - Optional)</label>
+          <input type="url" name="megaUrl" id="megaUrl" class="input-field" placeholder="https://mega.nz/file/...">
+        </div>
+
+        <div class="form-group">
+          <label for="pixeldrainUrl">Cloud Server 3 (Pixeldrain / Other - Optional)</label>
+          <input type="url" name="pixeldrainUrl" id="pixeldrainUrl" class="input-field" placeholder="https://pixeldrain.com/u/...">
         </div>
 
         <div class="form-group">
@@ -122,7 +125,7 @@
       </form>
     </div>
 
-    <!-- SECTION 3: RECENT CONTENT TABLE -->
+    <!-- LIBRARY TABLE -->
     <div class="card">
       <h2>3. Existing Library Entries</h2>
       <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
@@ -161,7 +164,6 @@
     &copy; <%= new Date().getFullYear() %> ERIVOX Management Console
   </footer>
 
-  <!-- SCRIPT FOR AUTO-FETCHING TMDB METADATA -->
   <script>
     async function autoFetchInfo() {
       const titleInput = document.getElementById('fetchTitle');
@@ -169,7 +171,6 @@
       const statusDiv = document.getElementById('fetchStatus');
 
       const title = titleInput.value.trim();
-      // Ensure 'tv' or 'movie' string mapping regardless of select label
       const rawType = typeSelect.value.toLowerCase();
       const type = rawType.includes('tv') ? 'tv' : 'movie';
 
@@ -184,22 +185,11 @@
 
       try {
         const response = await fetch(`/api/tmdb?title=${encodeURIComponent(title)}&type=${type}`);
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('No details found for this title on TMDB.');
-          } else {
-            throw new Error(`Server API error (${response.status})`);
-          }
-        }
+        if (!response.ok) throw new Error('No details found for this title.');
 
         const data = await response.json();
+        if (data.error) throw new Error(data.error);
 
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // Fill out the Add Entry Form
         document.getElementById('titleInput').value = data.title || title;
         document.getElementById('typeInput').value = type;
         document.getElementById('genreInput').value = data.genre || '';
@@ -207,9 +197,8 @@
 
         statusDiv.className = 'success-msg';
         statusDiv.innerText = 'Successfully fetched and populated details!';
-
       } catch (err) {
-        console.error('Fetch Error:', err);
+        console.error(err);
         statusDiv.className = 'error-msg';
         statusDiv.innerText = err.message || 'Error connecting to server route.';
       }
