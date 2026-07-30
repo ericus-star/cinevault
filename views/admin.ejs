@@ -3,138 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX - Admin Dashboard</title>
+  <title>ERIVOX Admin</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-    body { background-color: #0b0b0b; color: #ffffff; min-height: 100vh; padding: 20px; }
-    .admin-container { max-width: 600px; margin: 40px auto; background: #141414; padding: 30px; border-radius: 8px; border: 1px solid #282828; }
-    h2 { font-size: 24px; margin-bottom: 20px; color: #ffffff; }
-    h2 span { color: #e50914; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: #0d0d0f; color: #ffffff; padding: 40px 20px; }
+    .header { max-width: 900px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 28px; }
+    .header h1 span { color: #e50914; }
+    .header a { color: #e50914; text-decoration: none; font-weight: bold; }
+
+    .card { background: #141417; border: 1px solid #24242a; border-radius: 8px; padding: 25px; max-width: 900px; margin: 0 auto 30px; }
+    .card h2 { margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+    
     .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #b3b3b3; }
-    input, select, textarea { width: 100%; padding: 12px; background: #222; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 14px; }
-    textarea { height: 80px; resize: vertical; }
-    .btn-autofetch { background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-weight: bold; width: 100%; }
-    .btn-autofetch:hover { background: #444; }
-    .btn-publish { background: #e50914; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 15px; }
-    .btn-publish:hover { background: #b80710; }
-    .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #282828; padding-bottom: 15px; }
-    .header-nav a { color: #e50914; text-decoration: none; font-weight: bold; }
+    label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
+    input[type="text"], select { width: 100%; padding: 12px; background: #1a1a1e; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; }
+    input:focus, select:focus { border-color: #e50914; }
+    
+    .btn { background: #e50914; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn:hover { background: #b80710; }
+    .btn-secondary { background: #25252b; color: #fff; margin-bottom: 15px; }
+    .btn-secondary:hover { background: #33333d; }
+    
+    #status-msg { font-size: 13px; margin-top: 8px; color: #ff4d4d; }
+
+    .media-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .media-table th, .media-table td { text-align: left; padding: 12px; border-bottom: 1px solid #222; font-size: 14px; }
+    .media-table th { background: #1a1a1e; color: #888; }
+    .btn-del { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
   </style>
 </head>
 <body>
 
-  <div class="admin-container">
-    <div class="header-nav">
-      <h2>ERI<span>VOX</span> Admin</h2>
-      <a href="/">← Go to Site</a>
+  <div class="header">
+    <h1>ERI<span>VOX</span> Admin</h1>
+    <div>
+      <a href="/">← Go to Site</a> | 
+      <a href="/logout" style="color:#888;">Logout</a>
     </div>
+  </div>
 
-    <!-- AUTO-FETCH SECTION -->
-    <div style="background: #181818; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #222;">
+  <!-- Auto Fetch Tool -->
+  <div class="card">
+    <h2>1. Auto-Fetch Movie/Show Details</h2>
+    <div class="form-group">
+      <label>Search Title</label>
+      <input type="text" id="tmdb-query" placeholder="e.g. Avatar The Last Airbender">
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select id="tmdb-type">
+        <option value="tv">TV Show</option>
+        <option value="movie">Movie</option>
+      </select>
+    </div>
+    <button type="button" onclick="fetchTMDB()" class="btn btn-secondary">Auto-Fetch Info</button>
+    <div id="status-msg"></div>
+  </div>
+
+  <!-- Media Entry Form -->
+  <div class="card">
+    <h2>2. Save Entry</h2>
+    <form action="/admin/add" method="POST">
       <div class="form-group">
-        <label>Search TMDB Title</label>
-        <input type="text" id="fetchTitle" placeholder="e.g. Agent Kim, Breaking Bad">
+        <label>Title</label>
+        <input type="text" id="title" name="title" required placeholder="Title">
       </div>
       <div class="form-group">
         <label>Type</label>
-        <select id="fetchType">
+        <select id="type" name="type">
           <option value="movie">Movie</option>
           <option value="tv">TV Show</option>
         </select>
       </div>
-      <button type="button" class="btn-autofetch" onclick="autoFetch()">Auto-Fetch Info</button>
-      <span id="fetchStatus" style="font-size: 12px; margin-top: 5px; display: block;"></span>
-    </div>
-
-    <!-- PUBLISH FORM -->
-    <form action="/admin/add" method="POST">
-      <div class="form-group">
-        <label>Media Type</label>
-        <select name="type" id="typeSelect">
-          <option value="movie">Movie</option>
-          <option value="tv">TV Show</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" name="title" id="title" required>
-      </div>
-
-      <div class="form-group">
-        <label>TMDB ID</label>
-        <input type="text" name="tmdbId" id="tmdbId">
-      </div>
-
       <div class="form-group">
         <label>Genre</label>
-        <input type="text" name="genre" id="genre">
+        <input type="text" id="genre" name="genre" placeholder="Action, Drama, Sci-Fi">
       </div>
-
       <div class="form-group">
         <label>Poster Image URL</label>
-        <input type="text" name="posterUrl" id="posterUrl">
+        <input type="text" id="posterUrl" name="posterUrl" placeholder="https://image.tmdb.org/...">
       </div>
-
       <div class="form-group">
-        <label>Overview</label>
-        <textarea name="overview" id="overview"></textarea>
+        <label>Gofile Download Link (Required)</label>
+        <input type="text" name="gofileUrl" required placeholder="https://gofile.io/d/...">
       </div>
-
-      <div class="form-group">
-        <label>Gofile / Video Download Link</label>
-        <input type="text" name="gofileUrl" placeholder="https://gofile.io/d/..." required>
-      </div>
-
       <div class="form-group">
         <label>Subtitle Download Link (Optional)</label>
-        <input type="text" name="subtitleUrl" placeholder="https://gofile.io/d/... or .srt/.vtt link">
+        <input type="text" name="subtitleUrl" placeholder="https://...">
       </div>
-
-      <button type="submit" class="btn-publish">Publish to ERIVOX</button>
+      <button type="submit" class="btn">Add Media Entry</button>
     </form>
   </div>
 
-  <script>
-    async function autoFetch() {
-      const title = document.getElementById('fetchTitle').value;
-      const type = document.getElementById('fetchType').value;
-      const status = document.getElementById('fetchStatus');
+  <!-- Media List Table -->
+  <div class="card">
+    <h2>Existing Content (<%= typeof mediaList !== 'undefined' ? mediaList.length : 0 %>)</h2>
+    <table class="media-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Genre</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
+          <% mediaList.forEach(item => { %>
+            <tr>
+              <td><%= item.title %></td>
+              <td><%= item.type %></td>
+              <td><%= item.genre || 'N/A' %></td>
+              <td>
+                <form action="/admin/delete/<%= item._id %>" method="POST" style="display:inline;">
+                  <button type="submit" onclick="return confirm('Delete this?')" class="btn-del">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="4" style="color:#777;">No media entries added yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
 
-      if (!title) {
-        status.style.color = 'red';
+  <script>
+    async function fetchTMDB() {
+      const query = document.getElementById('tmdb-query').value.trim();
+      const type = document.getElementById('tmdb-type').value;
+      const status = document.getElementById('status-msg');
+
+      if (!query) {
         status.innerText = 'Please enter a title to search.';
         return;
       }
 
-      status.style.color = '#aaa';
-      status.innerText = 'Fetching...';
+      status.style.color = '#ccc';
+      status.innerText = 'Fetching info...';
 
       try {
-        const res = await fetch(`/admin/autofetch?title=${encodeURIComponent(title)}&type=${type}`);
+        const res = await fetch(`/api/tmdb?title=${encodeURIComponent(query)}&type=${type}`);
         const data = await res.json();
 
         if (res.ok) {
           document.getElementById('title').value = data.title || '';
-          document.getElementById('tmdbId').value = data.tmdbId || '';
-          document.getElementById('genre').value = data.genres || '';
-          document.getElementById('posterUrl').value = data.posterPath || '';
-          document.getElementById('overview').value = data.overview || '';
-          document.getElementById('typeSelect').value = type;
-
-          status.style.color = '#00ff66';
-          status.innerText = 'Details fetched successfully!';
+          document.getElementById('type').value = type;
+          document.getElementById('genre').value = data.genre || '';
+          document.getElementById('posterUrl').value = data.posterUrl || '';
+          status.style.color = '#28a745';
+          status.innerText = 'Successfully fetched metadata!';
         } else {
-          status.style.color = 'red';
-          status.innerText = data.error || 'Failed to fetch details.';
+          status.style.color = '#ff4d4d';
+          status.innerText = data.error || 'Could not find details.';
         }
       } catch (err) {
-        status.style.color = 'red';
-        status.innerText = 'Error connecting to server.';
+        status.style.color = '#ff4d4d';
+        status.innerText = 'Error connecting to server route.';
       }
     }
   </script>
-
 </body>
 </html>
