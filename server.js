@@ -42,7 +42,7 @@ const requireAdmin = (req, res, next) => {
   if (req.session && req.session.isAdmin) {
     return next();
   }
-  res.redirect('/admin/login');
+  res.redirect('/login');
 };
 
 // --- PUBLIC ROUTES ---
@@ -94,10 +94,10 @@ app.get('/tvshows', async (req, res) => {
   }
 });
 
-// --- ADMIN ROUTES ---
+// --- ADMIN & LOGIN ROUTES ---
 
 // Admin Dashboard / Management Page
-app.get('/admin', requireAdmin, async (req, res) => {
+app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
   try {
     const mediaList = await Media.find().sort({ createdAt: -1 });
     res.render('admin', { mediaList });
@@ -106,13 +106,13 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// Admin Login Page (GET)
-app.get('/admin/login', (req, res) => {
+// Login Page (GET) - Handles both /login and /admin/login
+app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
 
-// Admin Login Action (POST)
-app.post('/admin/login', (req, res) => {
+// Login Action (POST) - Handles both /login and /admin/login
+app.post(['/login', '/admin/login'], (req, res) => {
   const { password } = req.body;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -123,14 +123,14 @@ app.post('/admin/login', (req, res) => {
   res.render('login', { error: 'Invalid password. Access denied.' });
 });
 
-// Admin Logout
-app.get('/admin/logout', (req, res) => {
+// Logout
+app.get(['/logout', '/admin/logout'], (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
 // Add New Media Entry (POST)
-app.post('/admin/add', requireAdmin, async (req, res) => {
+app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   try {
     const { title, type, genre, posterUrl, gofileUrl, subtitleUrl } = req.body;
     
@@ -150,8 +150,8 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Media Entry (POST)
-app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
+// Delete Media Entry (POST) - Handles both /delete/:id and /admin/delete/:id
+app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);
     res.redirect('back');
