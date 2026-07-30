@@ -94,6 +94,11 @@ app.get('/tvshows', async (req, res) => {
   }
 });
 
+// 4. DMCA Disclaimer Page Route
+app.get('/dmca', (req, res) => {
+  res.render('dmca');
+});
+
 // --- API ROUTES FOR TMDB AUTO-FETCH ---
 
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
@@ -105,7 +110,6 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
 
-    // Fallback if no TMDB Key is set: return basic search object
     if (!apiKey) {
       return res.json({
         title: title,
@@ -127,7 +131,7 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
 
       return res.json({
         title: displayTitle,
-        genre: match.genre_ids ? 'Action' : '', // Simplified genre tag
+        genre: match.genre_ids ? 'Action' : '',
         posterUrl: posterPath
       });
     } else {
