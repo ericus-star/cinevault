@@ -3,166 +3,218 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX Admin</title>
+  <title>ERIVOX - Admin Panel</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: #0d0d0f; color: #ffffff; padding: 40px 20px; }
-    .header { max-width: 900px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 28px; }
-    .header h1 span { color: #e50914; }
-    .header a { color: #e50914; text-decoration: none; font-weight: bold; }
-
-    .card { background: #141417; border: 1px solid #24242a; border-radius: 8px; padding: 25px; max-width: 900px; margin: 0 auto 30px; }
-    .card h2 { margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     
+    header { 
+      background: #141417; 
+      border-bottom: 2px solid #e50914; 
+      padding: 20px 40px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    .logo span { color: #e50914; }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a { color: #ccc; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .nav-links a:hover { color: #e50914; }
+
+    .container { max-width: 900px; width: 100%; margin: 30px auto; padding: 0 20px; flex-grow: 1; }
+    .card { background: #151518; border: 1px solid #24242a; border-radius: 10px; padding: 25px; margin-bottom: 25px; }
+    h2 { font-size: 20px; margin-bottom: 18px; border-bottom: 1px solid #2a2a30; padding-bottom: 10px; color: #ffffff; }
+
     .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
-    input[type="text"], select { width: 100%; padding: 12px; background: #1a1a1e; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; }
-    input:focus, select:focus { border-color: #e50914; }
-    
-    .btn { background: #e50914; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-    .btn:hover { background: #b80710; }
-    .btn-secondary { background: #25252b; color: #fff; margin-bottom: 15px; }
-    .btn-secondary:hover { background: #33333d; }
-    
-    #status-msg { font-size: 13px; margin-top: 8px; color: #ff4d4d; }
+    label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #aaa; text-transform: uppercase; }
+    .input-field { width: 100%; background: #1a1a1e; border: 1px solid #333; color: #fff; padding: 10px 14px; border-radius: 6px; outline: none; font-size: 14px; }
+    .input-field:focus { border-color: #e50914; }
 
-    .media-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    .media-table th, .media-table td { text-align: left; padding: 12px; border-bottom: 1px solid #222; font-size: 14px; }
-    .media-table th { background: #1a1a1e; color: #888; }
-    .btn-del { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .btn { background: #e50914; color: #fff; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; width: 100%; transition: background 0.2s; }
+    .btn:hover { background: #b80710; }
+    .btn-secondary { background: #222228; border: 1px solid #444; margin-bottom: 15px; }
+    .btn-secondary:hover { background: #33333d; }
+
+    .error-msg { color: #ff4d4d; font-size: 13px; font-weight: bold; margin-top: 10px; }
+    .success-msg { color: #28a745; font-size: 13px; font-weight: bold; margin-top: 10px; }
+
+    /* Existing Entries Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #222228; font-size: 14px; }
+    th { color: #888; font-size: 12px; text-transform: uppercase; }
+    .btn-delete-sm { background: #1c1c22; color: #ff4d4d; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn-delete-sm:hover { background: #ff4d4d; color: #fff; }
+
+    footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 20px; color: #666; font-size: 13px; margin-top: auto; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>ERI<span>VOX</span> Admin</h1>
-    <div>
-      <a href="/">← Go to Site</a> | 
-      <a href="/logout" style="color:#888;">Logout</a>
+  <header>
+    <a href="/" class="logo">ERI<span>VOX</span> Admin</a>
+    <div class="nav-links">
+      <a href="/">← Go to Site</a>
+      <a href="/logout" style="color: #ff4d4d;">Logout</a>
     </div>
-  </div>
+  </header>
 
-  <!-- Auto Fetch Tool -->
-  <div class="card">
-    <h2>1. Auto-Fetch Movie/Show Details</h2>
-    <div class="form-group">
-      <label>Search Title</label>
-      <input type="text" id="tmdb-query" placeholder="e.g. Avatar The Last Airbender">
-    </div>
-    <div class="form-group">
-      <label>Type</label>
-      <select id="tmdb-type">
-        <option value="tv">TV Show</option>
-        <option value="movie">Movie</option>
-      </select>
-    </div>
-    <button type="button" onclick="fetchTMDB()" class="btn btn-secondary">Auto-Fetch Info</button>
-    <div id="status-msg"></div>
-  </div>
-
-  <!-- Media Entry Form -->
-  <div class="card">
-    <h2>2. Save Entry</h2>
-    <form action="/admin/add" method="POST">
+  <div class="container">
+    
+    <!-- SECTION 1: AUTO FETCH -->
+    <div class="card">
+      <h2>1. Auto-Fetch Movie/Show Details</h2>
       <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="title" name="title" required placeholder="Title">
+        <label for="fetchTitle">Search Title</label>
+        <input type="text" id="fetchTitle" class="input-field" placeholder="e.g., A Shop for Killers">
       </div>
+      
       <div class="form-group">
-        <label>Type</label>
-        <select id="type" name="type">
+        <label for="fetchType">Type</label>
+        <select id="fetchType" class="input-field">
           <option value="movie">Movie</option>
           <option value="tv">TV Show</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Genre</label>
-        <input type="text" id="genre" name="genre" placeholder="Action, Drama, Sci-Fi">
-      </div>
-      <div class="form-group">
-        <label>Poster Image URL</label>
-        <input type="text" id="posterUrl" name="posterUrl" placeholder="https://image.tmdb.org/...">
-      </div>
-      <div class="form-group">
-        <label>Gofile Download Link (Required)</label>
-        <input type="text" name="gofileUrl" required placeholder="https://gofile.io/d/...">
-      </div>
-      <div class="form-group">
-        <label>Subtitle Download Link (Optional)</label>
-        <input type="text" name="subtitleUrl" placeholder="https://...">
-      </div>
-      <button type="submit" class="btn">Add Media Entry</button>
-    </form>
-  </div>
 
-  <!-- Media List Table -->
-  <div class="card">
-    <h2>Existing Content (<%= typeof mediaList !== 'undefined' ? mediaList.length : 0 %>)</h2>
-    <table class="media-table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Type</th>
-          <th>Genre</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
-          <% mediaList.forEach(item => { %>
+      <button type="button" class="btn btn-secondary" onclick="autoFetchInfo()">Auto-Fetch Info</button>
+      <div id="fetchStatus" class="error-msg"></div>
+    </div>
+
+    <!-- SECTION 2: ADD ENTRY FORM -->
+    <div class="card">
+      <h2>2. Add Media Content</h2>
+      <form action="/admin/add" method="POST">
+        <div class="form-group">
+          <label for="titleInput">Title</label>
+          <input type="text" name="title" id="titleInput" class="input-field" required placeholder="Title">
+        </div>
+
+        <div class="form-group">
+          <label for="typeInput">Type</label>
+          <select name="type" id="typeInput" class="input-field" required>
+            <option value="movie">Movie</option>
+            <option value="tv">TV Show</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="genreInput">Genre</label>
+          <input type="text" name="genre" id="genreInput" class="input-field" placeholder="Action, Thriller">
+        </div>
+
+        <div class="form-group">
+          <label for="posterInput">Poster URL</label>
+          <input type="text" name="posterUrl" id="posterInput" class="input-field" placeholder="https://image.tmdb.org/...">
+        </div>
+
+        <div class="form-group">
+          <label for="gofileUrl">Gofile / Download URL</label>
+          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" required placeholder="https://gofile.io/d/...">
+        </div>
+
+        <div class="form-group">
+          <label for="subtitleUrl">Subtitle URL (Optional)</label>
+          <input type="url" name="subtitleUrl" id="subtitleUrl" class="input-field" placeholder="https://...">
+        </div>
+
+        <button type="submit" class="btn">Publish Content</button>
+      </form>
+    </div>
+
+    <!-- SECTION 3: RECENT CONTENT TABLE -->
+    <div class="card">
+      <h2>3. Existing Library Entries</h2>
+      <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
+        <table>
+          <thead>
             <tr>
-              <td><%= item.title %></td>
-              <td><%= item.type %></td>
-              <td><%= item.genre || 'N/A' %></td>
-              <td>
-                <form action="/admin/delete/<%= item._id %>" method="POST" style="display:inline;">
-                  <button type="submit" onclick="return confirm('Delete this?')" class="btn-del">Delete</button>
-                </form>
-              </td>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Genre</th>
+              <th>Action</th>
             </tr>
-          <% }) %>
-        <% } else { %>
-          <tr><td colspan="4" style="color:#777;">No media entries added yet.</td></tr>
-        <% } %>
-      </tbody>
-    </table>
+          </thead>
+          <tbody>
+            <% mediaList.forEach(item => { %>
+              <tr>
+                <td><strong><%= item.title %></strong></td>
+                <td><%= item.type === 'tv' ? 'TV Show' : 'Movie' %></td>
+                <td><%= item.genre || 'N/A' %></td>
+                <td>
+                  <form action="/admin/delete/<%= item._id %>" method="POST" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Delete <%= item.title %>?')" class="btn-delete-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p style="color: #777;">No media uploads found in the database.</p>
+      <% } %>
+    </div>
+
   </div>
 
-  <script>
-    async function fetchTMDB() {
-      const query = document.getElementById('tmdb-query').value.trim();
-      const type = document.getElementById('tmdb-type').value;
-      const status = document.getElementById('status-msg');
+  <footer>
+    &copy; <%= new Date().getFullYear() %> ERIVOX Management Console
+  </footer>
 
-      if (!query) {
-        status.innerText = 'Please enter a title to search.';
+  <!-- SCRIPT FOR AUTO-FETCHING TMDB METADATA -->
+  <script>
+    async function autoFetchInfo() {
+      const titleInput = document.getElementById('fetchTitle');
+      const typeSelect = document.getElementById('fetchType');
+      const statusDiv = document.getElementById('fetchStatus');
+
+      const title = titleInput.value.trim();
+      // Ensure 'tv' or 'movie' string mapping regardless of select label
+      const rawType = typeSelect.value.toLowerCase();
+      const type = rawType.includes('tv') ? 'tv' : 'movie';
+
+      if (!title) {
+        statusDiv.className = 'error-msg';
+        statusDiv.innerText = 'Please enter a search title first.';
         return;
       }
 
-      status.style.color = '#ccc';
-      status.innerText = 'Fetching info...';
+      statusDiv.className = 'success-msg';
+      statusDiv.innerText = 'Searching TMDB database...';
 
       try {
-        const res = await fetch(`/api/tmdb?title=${encodeURIComponent(query)}&type=${type}`);
-        const data = await res.json();
-
-        if (res.ok) {
-          document.getElementById('title').value = data.title || '';
-          document.getElementById('type').value = type;
-          document.getElementById('genre').value = data.genre || '';
-          document.getElementById('posterUrl').value = data.posterUrl || '';
-          status.style.color = '#28a745';
-          status.innerText = 'Successfully fetched metadata!';
-        } else {
-          status.style.color = '#ff4d4d';
-          status.innerText = data.error || 'Could not find details.';
+        const response = await fetch(`/api/tmdb?title=${encodeURIComponent(title)}&type=${type}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('No details found for this title on TMDB.');
+          } else {
+            throw new Error(`Server API error (${response.status})`);
+          }
         }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Fill out the Add Entry Form
+        document.getElementById('titleInput').value = data.title || title;
+        document.getElementById('typeInput').value = type;
+        document.getElementById('genreInput').value = data.genre || '';
+        document.getElementById('posterInput').value = data.posterUrl || '';
+
+        statusDiv.className = 'success-msg';
+        statusDiv.innerText = 'Successfully fetched and populated details!';
+
       } catch (err) {
-        status.style.color = '#ff4d4d';
-        status.innerText = 'Error connecting to server route.';
+        console.error('Fetch Error:', err);
+        statusDiv.className = 'error-msg';
+        statusDiv.innerText = err.message || 'Error connecting to server route.';
       }
     }
   </script>
+
 </body>
 </html>
