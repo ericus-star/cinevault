@@ -106,12 +106,12 @@ app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
   }
 });
 
-// Login Page (GET) - Handles both /login and /admin/login
+// Login Page (GET)
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login Action (POST) - Handles both /login and /admin/login
+// Login Action (POST)
 app.post(['/login', '/admin/login'], (req, res) => {
   const { password } = req.body;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -150,11 +150,12 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Media Entry (POST) - Handles both /delete/:id and /admin/delete/:id
+// Delete Media Entry (POST) - FIXED REDIRECT ISSUE
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);
-    res.redirect('back');
+    const backUrl = req.get('Referrer') || '/';
+    res.redirect(backUrl);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error deleting content');
