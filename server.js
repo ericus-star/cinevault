@@ -8,13 +8,13 @@ require('dotenv').config();
 
 const app = express();
 
-// --- 1. SECURITY HEADERS ---
+// Security Headers
 app.use(helmet({
   contentSecurityPolicy: false,
 }));
 app.disable('x-powered-by');
 
-// --- 2. BRUTE-FORCE RATE LIMITING ---
+// Brute-force Limiter
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -23,13 +23,13 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Middleware
+// Express Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- 3. SESSION COOKIES ---
+// Session Config
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox_super_secret_key_2026',
   resave: false,
@@ -46,18 +46,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/erivox')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// --- MULTI-CLOUD SCHEMA ---
+// MongoDB Schema
 const mediaSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, enum: ['movie', 'tv'], required: true },
   genre: String,
   posterUrl: String,
-  // Array of cloud storage links (e.g. [{ name: 'Gofile', url: '...' }, { name: 'Mega', url: '...' }])
   cloudLinks: [{
     name: String,
     url: String
   }],
-  gofileUrl: String, // Kept for backwards compatibility with older entries
+  gofileUrl: String,
   subtitleUrl: String,
   createdAt: { type: Date, default: Date.now }
 });
@@ -72,8 +71,7 @@ const requireAdmin = (req, res, next) => {
   res.redirect('/login');
 };
 
-// --- PUBLIC ROUTES ---
-
+// PUBLIC ROUTES
 app.get('/', async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
@@ -122,7 +120,7 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// --- API ROUTE FOR TMDB ---
+// TMDB API ROUTE
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
     const { title, type } = req.query;
@@ -163,8 +161,7 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
   }
 });
 
-// --- AUTH & ADMIN ROUTES ---
-
+// AUTH ROUTES
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
@@ -194,7 +191,7 @@ app.get(['/logout', '/admin/logout'], (req, res) => {
   res.redirect('/');
 });
 
-// ADD MEDIA WITH MULTIPLE CLOUD LINKS
+// ADD MEDIA ROUTE
 app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   try {
     const { title, type, genre, posterUrl, subtitleUrl, gofileUrl, megaUrl, pixeldrainUrl } = req.body;
@@ -210,7 +207,7 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
       genre,
       posterUrl,
       subtitleUrl,
-      gofileUrl, // Fallback
+      gofileUrl,
       cloudLinks
     });
 
@@ -221,6 +218,45 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   }
 });
 
+// EDIT MEDIA ROUTES
+app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
+  try {
+    const item = await Media.findById(req.params.id);
+    if (!item) return res.status(404).send('Media item not found');
+    res.render('edit', { item });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+
+app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
+  try {
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl, megaUrl, pixeldrainUrl } = req.body;
+    
+    const cloudLinks = [];
+    if (gofileUrl && gofileUrl.trim()) cloudLinks.push({ name: 'Gofile', url: gofileUrl.trim() });
+    if (megaUrl && megaUrl.trim()) cloudLinks.push({ name: 'Mega', url: megaUrl.trim() });
+    if (pixeldrainUrl && pixeldrainUrl.trim()) cloudLinks.push({ name: 'Pixeldrain', url: pixeldrainUrl.trim() });
+
+    await Media.findByIdAndUpdate(req.params.id, {
+      title,
+      type,
+      genre,
+      posterUrl,
+      subtitleUrl,
+      gofileUrl,
+      cloudLinks
+    });
+
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating content');
+  }
+});
+
+// DELETE MEDIA ROUTE
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);

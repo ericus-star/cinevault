@@ -35,6 +35,8 @@
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { text-align: left; padding: 12px; border-bottom: 1px solid #222228; font-size: 14px; }
     th { color: #888; font-size: 12px; text-transform: uppercase; }
+    .btn-edit-sm { background: #222228; color: #28a745; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; margin-right: 5px; }
+    .btn-edit-sm:hover { background: #28a745; color: #fff; }
     .btn-delete-sm { background: #1c1c22; color: #ff4d4d; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-delete-sm:hover { background: #ff4d4d; color: #fff; }
 
@@ -53,7 +55,7 @@
 
   <div class="container">
     
-    <!-- AUTO FETCH -->
+    <!-- 1. AUTO FETCH -->
     <div class="card">
       <h2>1. Auto-Fetch Movie/Show Details</h2>
       <div class="form-group">
@@ -73,9 +75,9 @@
       <div id="fetchStatus" class="error-msg"></div>
     </div>
 
-    <!-- ADD ENTRY FORM WITH MULTI-CLOUD LINKS -->
+    <!-- 2. ADD ENTRY FORM -->
     <div class="card">
-      <h2>2. Add Media Content (Multi-Cloud Storage)</h2>
+      <h2>2. Add Media Content</h2>
       <form action="/admin/add" method="POST">
         <div class="form-group">
           <label for="titleInput">Title</label>
@@ -100,19 +102,18 @@
           <input type="text" name="posterUrl" id="posterInput" class="input-field" placeholder="https://image.tmdb.org/...">
         </div>
 
-        <!-- CLOUD STORAGE MIRRORS -->
         <div class="form-group">
-          <label for="gofileUrl">Cloud Server 1 (Gofile URL)</label>
+          <label for="gofileUrl">Server 1 Link (Gofile)</label>
           <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" placeholder="https://gofile.io/d/...">
         </div>
 
         <div class="form-group">
-          <label for="megaUrl">Cloud Server 2 (Mega URL - Optional)</label>
+          <label for="megaUrl">Server 2 Link (Mega - Optional)</label>
           <input type="url" name="megaUrl" id="megaUrl" class="input-field" placeholder="https://mega.nz/file/...">
         </div>
 
         <div class="form-group">
-          <label for="pixeldrainUrl">Cloud Server 3 (Pixeldrain / Other - Optional)</label>
+          <label for="pixeldrainUrl">Server 3 Link (Pixeldrain / Other - Optional)</label>
           <input type="url" name="pixeldrainUrl" id="pixeldrainUrl" class="input-field" placeholder="https://pixeldrain.com/u/...">
         </div>
 
@@ -125,7 +126,7 @@
       </form>
     </div>
 
-    <!-- LIBRARY TABLE -->
+    <!-- 3. EXISTING ENTRIES TABLE WITH EDIT LINK -->
     <div class="card">
       <h2>3. Existing Library Entries</h2>
       <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
@@ -145,6 +146,7 @@
                 <td><%= item.type === 'tv' ? 'TV Show' : 'Movie' %></td>
                 <td><%= item.genre || 'N/A' %></td>
                 <td>
+                  <a href="/admin/edit/<%= item._id %>" class="btn-edit-sm">Edit</a>
                   <form action="/admin/delete/<%= item._id %>" method="POST" style="display:inline;">
                     <button type="submit" onclick="return confirm('Delete <%= item.title %>?')" class="btn-delete-sm">Delete</button>
                   </form>
