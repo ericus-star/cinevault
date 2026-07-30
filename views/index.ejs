@@ -18,7 +18,23 @@
     .search-input:focus { border-color: #e50914; }
     .search-btn { background: #e50914; color: #fff; border: none; padding: 8px 15px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; }
     .search-btn:hover { background: #b80710; }
-    .container { max-width: 1300px; width: 100%; margin: 40px auto; padding: 0 20px; flex-grow: 1; }
+
+    /* Trending Hero Carousel */
+    .hero-slider-section { max-width: 1300px; width: 100%; margin: 30px auto 10px; padding: 0 20px; }
+    .hero-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; display: flex; align-items: center; gap: 8px; }
+    .hero-title span { color: #e50914; }
+    .slider-container { overflow: hidden; width: 100%; border-radius: 12px; background: #141414; padding: 15px 0; border: 1px solid #222; }
+    .slider-track { display: flex; gap: 15px; width: calc(200px * 12); animation: scroll 30s linear infinite; }
+    .slider-track:hover { animation-play-state: paused; }
+    .slide-card { flex: 0 0 170px; height: 250px; border-radius: 8px; overflow: hidden; border: 1px solid #333; pointer-events: none; transition: transform 0.3s; }
+    .slide-card img { width: 100%; height: 100%; object-fit: cover; }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(-185px * 6)); }
+    }
+
+    .container { max-width: 1300px; width: 100%; margin: 20px auto 40px; padding: 0 20px; flex-grow: 1; }
     .section-title { font-size: 24px; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; width: 100%; }
     .media-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #282828; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
@@ -59,6 +75,30 @@
       </nav>
     </div>
   </header>
+
+  <!-- Trending Visual Banner Slider -->
+  <div class="hero-slider-section">
+    <div class="hero-title">🔥 <span>Trending</span> Right Now</div>
+    <div class="slider-container">
+      <div class="slider-track">
+        <!-- Featured Posters (Purely Visual) -->
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpEZWFLvukNIvhvE.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/rAiYTfKGqDCRIIqo6LEuPJevE7d.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/z11waYy40O5tq8p20pdvhz2r1eD.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/638r1eC98wQ0qO19q9aNl08wE7q.jpg" alt="Trending"></div>
+
+        <!-- Duplicated set for seamless loop -->
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpEZWFLvukNIvhvE.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/rAiYTfKGqDCRIIqo6LEuPJevE7d.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/z11waYy40O5tq8p20pdvhz2r1eD.jpg" alt="Trending"></div>
+        <div class="slide-card"><img src="https://image.tmdb.org/t/p/w500/638r1eC98wQ0qO19q9aNl08wE7q.jpg" alt="Trending"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="container">
     <h2 class="section-title"><%= typeof searchQuery !== 'undefined' && searchQuery ? 'Search Results for "' + searchQuery + '"' : 'Latest Uploads' %></h2>
