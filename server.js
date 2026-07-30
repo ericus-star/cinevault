@@ -2,9 +2,28 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
+
+// --- 1. SECURITY HEADERS ---
+// Helmet secures HTTP headers and hides Express fingerprint ("X-Powered-By")
+app.use(helmet({
+  contentSecurityPolicy: false, // Prevents breaking external poster images (TMDB/placeholders)
+}));
+app.disable('x-powered-by');
+
+// --- 2. BRUTE-FORCE RATE LIMITING ---
+// Restrict login attempts: Max 5 failed/total attempts per 15-minute window per IP
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: 'Too many login attempts from this IP. Please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -12,11 +31,16 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Session configuration
+// --- 3. HARDENED SESSION COOKIES ---
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'erivox_secret_key',
+  secret: process.env.SESSION_SECRET || 'erivox_super_secret_key_2026',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true, // Prevents client-side scripts from reading session cookies
+    sameSite: 'strict', // Protects against Cross-Site Request Forgery (CSRF)
+    maxAge: 1000 * 60 * 60 * 2 // 2 hour session expiry
+  }
 }));
 
 // MongoDB Connection
@@ -47,7 +71,7 @@ const requireAdmin = (req, res, next) => {
 
 // --- PUBLIC ROUTES ---
 
-// 1. Homepage (With Search & Genre Filter)
+// 1. Homepage
 app.get('/', async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
@@ -94,12 +118,12 @@ app.get('/tvshows', async (req, res) => {
   }
 });
 
-// 4. DMCA Disclaimer Page Route
+// 4. DMCA Page
 app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// --- API ROUTES FOR TMDB AUTO-FETCH ---
+// --- API ROUTES FOR TMDB AUTO-FETCH (RESTRICTED TO ADMIN ONLY) ---
 
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
@@ -145,23 +169,13 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
 
 // --- ADMIN & LOGIN ROUTES ---
 
-// Admin Dashboard / Management Page
-app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
-  try {
-    const mediaList = await Media.find().sort({ createdAt: -1 });
-    res.render('admin', { mediaList });
-  } catch (err) {
-    res.status(500).send('Server Error');
-  }
-});
-
 // Login Page (GET)
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
 
-// Login Action (POST)
-app.post(['/login', '/admin/login'], (req, res) => {
+// Login Action (POST) - RATE LIMITED
+app.post(['/login', '/admin/login'], loginLimiter, (req, res) => {
   const { password } = req.body;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -170,6 +184,16 @@ app.post(['/login', '/admin/login'], (req, res) => {
     return res.redirect('/admin');
   }
   res.render('login', { error: 'Invalid password. Access denied.' });
+});
+
+// Admin Dashboard Page
+app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
+  try {
+    const mediaList = await Media.find().sort({ createdAt: -1 });
+    res.render('admin', { mediaList });
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
 });
 
 // Logout

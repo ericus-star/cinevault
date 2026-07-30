@@ -6,9 +6,8 @@
   <title>ERIVOX - Home</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; user-select: none; }
     
-    /* Prominent Navigation Header */
     header { 
       background: #141417; 
       border-bottom: 2px solid #e50914; 
@@ -28,23 +27,19 @@
     
     .nav-container { display: flex; align-items: center; gap: 25px; flex-wrap: wrap; }
     
-    /* Header Links */
     nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
     nav a { color: #cccccc; text-decoration: none; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s, transform 0.2s; }
     nav a:hover, nav a.active { color: #e50914; transform: scale(1.05); }
 
-    /* Genre Dropdown */
     .genre-select { background: #1a1a1e; color: #fff; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
     .genre-select:focus { border-color: #e50914; }
 
-    /* Search Bar */
     .search-form { display: flex; align-items: center; }
     .search-input { background: #1a1a1e; border: 1px solid #333; color: #fff; padding: 10px 14px; border-radius: 6px 0 0 6px; outline: none; font-size: 15px; width: 220px; }
     .search-input:focus { border-color: #e50914; }
     .search-btn { background: #e50914; color: #fff; border: none; padding: 10px 20px; border-radius: 0 6px 6px 0; cursor: pointer; font-weight: 800; font-size: 14px; transition: background 0.2s; }
     .search-btn:hover { background: #b80710; }
 
-    /* Main Grid Area */
     .container { max-width: 1400px; width: 100%; margin: 30px auto 40px; padding: 0 25px; flex-grow: 1; }
     .section-title { font-size: 24px; margin-bottom: 25px; border-left: 5px solid #e50914; padding-left: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 25px; width: 100%; }
@@ -81,7 +76,6 @@
         <a href="/movies">Movies</a>
         <a href="/tvshows">TV Shows</a>
         
-        <!-- Quick Genre Filter -->
         <select class="genre-select" onchange="if (this.value) window.location.href='/?search=' + this.value;">
           <option value="">Genres</option>
           <option value="Action">Action</option>
@@ -93,14 +87,12 @@
           <option value="Thriller">Thriller</option>
         </select>
 
-        <!-- HIDE ADMIN LINKS UNLESS LOGGED IN -->
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
           <a href="/admin" style="color: #28a745;">Admin Panel</a>
           <a href="/logout" style="color: #ff4d4d;">Logout</a>
         <% } %>
       </nav>
 
-      <!-- Search Form -->
       <form action="/" method="GET" class="search-form">
         <input type="text" name="search" placeholder="Search title or genre..." class="search-input" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
         <button type="submit" class="search-btn">Search</button>
@@ -144,6 +136,23 @@
   <footer>
     &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. | <a href="/dmca">DMCA Disclaimer</a>
   </footer>
+
+  <!-- FRONTEND PROTECTION: BLOCK DEVTOOLS & INSPECT shortcuts -->
+  <script>
+    // 1. Disable Right-Click Context Menu
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // 2. Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (View Source)
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+        (e.ctrlKey && e.key === 'u')
+      ) {
+        e.preventDefault();
+      }
+    });
+  </script>
 
 </body>
 </html>
