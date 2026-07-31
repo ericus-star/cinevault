@@ -12,7 +12,7 @@ const app = express();
 app.use(helmet({ contentSecurityPolicy: false }));
 app.disable('x-powered-by');
 
-// Rate Limiter
+// Rate Limiter for Login
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -65,7 +65,36 @@ const requireAdmin = (req, res, next) => {
   res.redirect('/login');
 };
 
+// ==========================================
+// DYNAMIC SITEMAP ROUTE (Fixes 404 Error)
+// ==========================================
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const baseUrl = `${protocol}://${req.get('host')}`;
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    // Static Pages
+    xml += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${baseUrl}/movies</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${baseUrl}/tvshows</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${baseUrl}/dmca</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.3</priority>\n  </url>\n`;
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Sitemap Generation Error:', err);
+    res.status(500).end();
+  }
+});
+
+// ==========================================
 // PUBLIC ROUTES
+// ==========================================
 app.get('/', async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
@@ -114,7 +143,9 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// TMDB API FETCH ROUTE
+// ==========================================
+// TMDB API ROUTE
+// ==========================================
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
     const { title, type } = req.query;
@@ -143,7 +174,7 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
 
       return res.json({
         title: displayTitle,
-        genre: match.genre_ids ? 'Action' : '',
+        genre: 'Action',
         posterUrl: posterPath
       });
     } else {
@@ -155,7 +186,9 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
   }
 });
 
-// ADMIN AUTHENTICATION
+// ==========================================
+// ADMIN & AUTH ROUTES
+// ==========================================
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
@@ -185,7 +218,6 @@ app.get(['/logout', '/admin/logout'], (req, res) => {
   res.redirect('/');
 });
 
-// ADD CONTENT ROUTE
 app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   try {
     const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
@@ -206,7 +238,6 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   }
 });
 
-// EDIT CONTENT ROUTES
 app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   try {
     const item = await Media.findById(req.params.id);
@@ -238,7 +269,6 @@ app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   }
 });
 
-// DELETE CONTENT ROUTE
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);

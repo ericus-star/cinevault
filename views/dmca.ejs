@@ -6,78 +6,63 @@
   <title>DMCA Disclaimer - ERIVOX</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; user-select: none; }
+    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     
-    header { 
-      background: #141417; 
-      border-bottom: 2px solid #e50914; 
-      padding: 20px 40px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-    }
-    .logo { font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    header { background: #141417; border-bottom: 2px solid #e50914; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
     .logo span { color: #e50914; }
-    .nav-link { color: #e50914; text-decoration: none; font-weight: bold; font-size: 15px; }
-    .nav-link:hover { text-decoration: underline; }
+    .nav-links a { color: #ccc; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .nav-links a:hover { color: #e50914; }
 
-    .container { max-width: 900px; width: 100%; margin: 40px auto; padding: 0 25px; flex-grow: 1; }
-    .card { background: #151518; border: 1px solid #24242a; border-radius: 10px; padding: 35px; line-height: 1.7; }
-    h1 { font-size: 28px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 12px; color: #ffffff; }
-    p { color: #ccc; margin-bottom: 18px; font-size: 15px; }
-
-    .contact-box {
-      margin-top: 25px;
-      padding: 18px 20px;
-      background: #1c1c22;
-      border-left: 4px solid #e50914;
-      border-radius: 6px;
-    }
-    .contact-box strong { color: #ffffff; }
-    .contact-box a { color: #e50914; text-decoration: none; font-weight: bold; }
+    .container { max-width: 800px; width: 100%; margin: 40px auto; padding: 0 20px; flex-grow: 1; }
+    .card { background: #151518; border: 1px solid #24242a; border-radius: 10px; padding: 30px; }
+    h1 { font-size: 24px; color: #e50914; margin-bottom: 20px; border-bottom: 1px solid #2a2a30; padding-bottom: 10px; }
+    p { font-size: 15px; color: #ccc; line-height: 1.6; margin-bottom: 15px; }
+    ul { margin: 15px 0 20px 20px; color: #bbb; }
+    li { margin-bottom: 8px; font-size: 14px; }
+    .contact-box { background: #1a1a1e; border: 1px solid #333; padding: 15px; border-radius: 6px; margin-top: 20px; }
+    .contact-box a { color: #e50914; font-weight: bold; text-decoration: none; }
     .contact-box a:hover { text-decoration: underline; }
 
-    footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 25px; color: #666; font-size: 13px; margin-top: auto; }
+    footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 20px; color: #666; font-size: 13px; margin-top: auto; }
   </style>
 </head>
 <body>
 
   <header>
     <a href="/" class="logo">ERI<span>VOX</span></a>
-    <a href="/" class="nav-link">← Return to Home</a>
+    <div class="nav-links">
+      <a href="/">← Back to Home</a>
+    </div>
   </header>
 
   <div class="container">
     <div class="card">
-      <h1>DMCA Disclaimer</h1>
-      <p>ERIVOX does not store, host, or stream media files on its own servers. All content and links provided on this site are indexed from third-party services and publicly accessible file hosting platforms.</p>
-      <p>If you believe that any content linked on our platform infringes upon your copyright, please contact the third-party file hosting providers directly to request removal.</p>
-      <p>For any legitimate copyright inquiries or takedown notices regarding links displayed on this site, please send a detailed request with proof of ownership to our contact address below.</p>
+      <h1>DMCA & Copyright Policy</h1>
+      
+      <p><strong>ERIVOX</strong> respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act of 1998 (DMCA), ERIVOX will respond expeditiously to claims of copyright infringement that are reported to our designated agent.</p>
+      
+      <p>ERIVOX does not host any video files, media files, or copyright-protected content directly on its servers. All links and content hosted on this site are stored on non-affiliated third-party servers and cloud providers.</p>
+
+      <p>If you are a copyright owner or authorized agent and believe that content accessible on ERIVOX infringes upon your copyright, please send a formal removal request containing:</p>
+      
+      <ul>
+        <li>Identification of the copyrighted work claimed to have been infringed.</li>
+        <li>Identification of the material or URL that is claimed to be infringing.</li>
+        <li>Your contact information (email address, telephone number, and physical address).</li>
+        <li>A statement that you have a good-faith belief that use of the material is not authorized.</li>
+      </ul>
 
       <div class="contact-box">
-        <strong>Administrative Contact Email:</strong> 
-        <a href="mailto:eric.us0053@gmail.com">eric.us0053@gmail.com</a>
+        <p style="margin-bottom: 0;">Please send all DMCA takedown requests directly to: <br>
+        <a href="mailto:eric.us0053@gmail.com">eric.us0053@gmail.com</a></p>
       </div>
     </div>
   </div>
 
   <footer>
-    &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved.
+    &copy; <%= new Date().getFullYear() %> ERIVOX Management
   </footer>
-
-  <!-- FRONTEND PROTECTION: BLOCK DEVTOOLS & INSPECT SHORTCUTS -->
-  <script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (
-        e.key === 'F12' || 
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-        (e.ctrlKey && e.key === 'u')
-      ) {
-        e.preventDefault();
-      }
-    });
-  </script>
 
 </body>
 </html>
