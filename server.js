@@ -9,12 +9,10 @@ require('dotenv').config();
 const app = express();
 
 // Security Headers
-app.use(helmet({
-  contentSecurityPolicy: false,
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 app.disable('x-powered-by');
 
-// Brute-force Limiter
+// Rate Limiter
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -23,13 +21,13 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Express Middlewares
+// Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Session Config
+// Session Configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox_super_secret_key_2026',
   resave: false,
@@ -41,29 +39,25 @@ app.use(session({
   }
 }));
 
-// MongoDB Connection
+// Database Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/erivox')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// MongoDB Schema
+// Database Schema
 const mediaSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, enum: ['movie', 'tv'], required: true },
   genre: String,
   posterUrl: String,
-  cloudLinks: [{
-    name: String,
-    url: String
-  }],
-  gofileUrl: String,
+  gofileUrl: { type: String, required: true },
   subtitleUrl: String,
   createdAt: { type: Date, default: Date.now }
 });
 
 const Media = mongoose.model('Media', mediaSchema);
 
-// Admin Auth Middleware
+// Admin Authentication Middleware
 const requireAdmin = (req, res, next) => {
   if (req.session && req.session.isAdmin) {
     return next();
@@ -120,7 +114,7 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// TMDB API ROUTE
+// TMDB API FETCH ROUTE
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
     const { title, type } = req.query;
@@ -161,7 +155,7 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
   }
 });
 
-// AUTH ROUTES
+// ADMIN AUTHENTICATION
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
@@ -191,15 +185,10 @@ app.get(['/logout', '/admin/logout'], (req, res) => {
   res.redirect('/');
 });
 
-// ADD MEDIA ROUTE
+// ADD CONTENT ROUTE
 app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   try {
-    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl, megaUrl, pixeldrainUrl } = req.body;
-    
-    const cloudLinks = [];
-    if (gofileUrl && gofileUrl.trim()) cloudLinks.push({ name: 'Gofile', url: gofileUrl.trim() });
-    if (megaUrl && megaUrl.trim()) cloudLinks.push({ name: 'Mega', url: megaUrl.trim() });
-    if (pixeldrainUrl && pixeldrainUrl.trim()) cloudLinks.push({ name: 'Pixeldrain', url: pixeldrainUrl.trim() });
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
 
     await Media.create({
       title,
@@ -207,8 +196,7 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
       genre,
       posterUrl,
       subtitleUrl,
-      gofileUrl,
-      cloudLinks
+      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
     });
 
     res.redirect('/admin');
@@ -218,7 +206,7 @@ app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
   }
 });
 
-// EDIT MEDIA ROUTES
+// EDIT CONTENT ROUTES
 app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   try {
     const item = await Media.findById(req.params.id);
@@ -232,12 +220,7 @@ app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
 
 app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   try {
-    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl, megaUrl, pixeldrainUrl } = req.body;
-    
-    const cloudLinks = [];
-    if (gofileUrl && gofileUrl.trim()) cloudLinks.push({ name: 'Gofile', url: gofileUrl.trim() });
-    if (megaUrl && megaUrl.trim()) cloudLinks.push({ name: 'Mega', url: megaUrl.trim() });
-    if (pixeldrainUrl && pixeldrainUrl.trim()) cloudLinks.push({ name: 'Pixeldrain', url: pixeldrainUrl.trim() });
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
 
     await Media.findByIdAndUpdate(req.params.id, {
       title,
@@ -245,8 +228,7 @@ app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
       genre,
       posterUrl,
       subtitleUrl,
-      gofileUrl,
-      cloudLinks
+      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
     });
 
     res.redirect('/admin');
@@ -256,7 +238,7 @@ app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   }
 });
 
-// DELETE MEDIA ROUTE
+// DELETE CONTENT ROUTE
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);

@@ -103,18 +103,8 @@
         </div>
 
         <div class="form-group">
-          <label for="gofileUrl">Server 1 Link (Gofile)</label>
-          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" placeholder="https://gofile.io/d/...">
-        </div>
-
-        <div class="form-group">
-          <label for="megaUrl">Server 2 Link (Mega - Optional)</label>
-          <input type="url" name="megaUrl" id="megaUrl" class="input-field" placeholder="https://mega.nz/file/...">
-        </div>
-
-        <div class="form-group">
-          <label for="pixeldrainUrl">Server 3 Link (Pixeldrain / Other - Optional)</label>
-          <input type="url" name="pixeldrainUrl" id="pixeldrainUrl" class="input-field" placeholder="https://pixeldrain.com/u/...">
+          <label for="gofileUrl">Gofile Link</label>
+          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" required placeholder="https://gofile.io/d/...">
         </div>
 
         <div class="form-group">
@@ -126,7 +116,7 @@
       </form>
     </div>
 
-    <!-- 3. EXISTING ENTRIES TABLE WITH EDIT LINK -->
+    <!-- 3. LIBRARY TABLE WITH EDIT AND DELETE -->
     <div class="card">
       <h2>3. Existing Library Entries</h2>
       <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>

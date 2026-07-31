@@ -3,69 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERIVOX - Home</title>
+  <title>ERIVOX - Stream & Download Movies & TV Shows</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; user-select: none; }
+    body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     
-    header { 
-      background: #141417; 
-      border-bottom: 2px solid #e50914; 
-      padding: 20px 40px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      gap: 20px; 
-      flex-wrap: wrap; 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-    }
-    .logo { font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
+    header { background: #141417; border-bottom: 2px solid #e50914; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-decoration: none; }
     .logo span { color: #e50914; }
-    
-    .nav-container { display: flex; align-items: center; gap: 25px; flex-wrap: wrap; }
-    
-    nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-    nav a { color: #cccccc; text-decoration: none; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s, transform 0.2s; }
-    nav a:hover, nav a.active { color: #e50914; transform: scale(1.05); }
 
-    .genre-select { background: #1a1a1e; color: #fff; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
-    .genre-select:focus { border-color: #e50914; }
+    nav { display: flex; gap: 20px; align-items: center; }
+    nav a { color: #ccc; text-decoration: none; font-weight: bold; font-size: 15px; transition: color 0.2s; }
+    nav a:hover { color: #e50914; }
 
-    .search-form { display: flex; align-items: center; }
-    .search-input { background: #1a1a1e; border: 1px solid #333; color: #fff; padding: 10px 14px; border-radius: 6px 0 0 6px; outline: none; font-size: 15px; width: 220px; }
+    .search-form { display: flex; gap: 8px; }
+    .search-input { background: #1a1a1e; border: 1px solid #333; color: #fff; padding: 8px 14px; border-radius: 6px; outline: none; font-size: 14px; }
     .search-input:focus { border-color: #e50914; }
-    .search-btn { background: #e50914; color: #fff; border: none; padding: 10px 20px; border-radius: 0 6px 6px 0; cursor: pointer; font-weight: 800; font-size: 14px; transition: background 0.2s; }
-    .search-btn:hover { background: #b80710; }
+    .btn-search { background: #e50914; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-    .container { max-width: 1400px; width: 100%; margin: 30px auto 40px; padding: 0 25px; flex-grow: 1; }
-    .section-title { font-size: 24px; margin-bottom: 25px; border-left: 5px solid #e50914; padding-left: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 25px; width: 100%; }
+    .container { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; flex-grow: 1; }
+    .section-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid #e50914; padding-left: 10px; }
+
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+    .media-card { background: #151518; border: 1px solid #24242a; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; }
+    .media-card:hover { transform: translateY(-5px); border-color: #e50914; }
     
-    .media-card { background: #151518; border-radius: 10px; overflow: hidden; border: 1px solid #24242a; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
-    .media-card:hover { transform: translateY(-6px); border-color: #e50914; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.2); }
-    .poster { width: 100%; height: 300px; object-fit: cover; background: #1e1e24; }
+    .poster-container { position: relative; width: 100%; padding-top: 150%; background: #202025; }
+    .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .badge-type { position: absolute; top: 10px; right: 10px; background: #e50914; color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+
     .card-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
-    .card-type { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 4px; font-weight: 800; }
-    .card-genre { font-size: 12px; color: #e50914; margin-bottom: 12px; font-weight: 700; }
-    
-    .btn-download { margin-top: 4px; background: #e50914; color: white; text-align: center; padding: 8px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12px; display: block; }
-    .btn-download:hover { background: #b80710; }
-    .btn-download.alt { background: #22222a; border: 1px solid #444; color: #ddd; }
-    .btn-download.alt:hover { background: #333340; border-color: #e50914; }
+    .media-title { font-size: 16px; font-weight: bold; margin-bottom: 6px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .media-genre { font-size: 12px; color: #888; margin-bottom: 15px; }
 
-    .btn-sub { background: #1c1c22; color: #28a745; text-align: center; padding: 8px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12px; margin-top: 8px; border: 1px solid rgba(40, 167, 69, 0.4); display: block; }
-    .btn-sub:hover { background: #28a745; color: white; }
-    .btn-delete { width: 100%; background: #1c1c22; color: #ff4d4d; border: 1px solid #333; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; }
-    .btn-delete:hover { background: #ff4d4d; color: white; }
-    .no-content { color: #888; text-align: center; grid-column: 1 / -1; padding: 60px 0; font-size: 18px; }
-    
-    footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 25px; margin-top: 40px; color: #666; font-size: 13px; }
-    footer a { color: #e50914; text-decoration: none; margin-left: 10px; font-weight: bold; }
-    footer a:hover { text-decoration: underline; }
+    .btn-download { background: #e50914; color: #fff; text-align: center; text-decoration: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: auto; transition: background 0.2s; }
+    .btn-download:hover { background: #b80710; }
+    .btn-subtitle { background: #222228; color: #ccc; border: 1px solid #333; margin-top: 6px; }
+    .btn-subtitle:hover { background: #33333d; color: #fff; }
+
+    footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 20px; color: #666; font-size: 13px; margin-top: 40px; }
+    footer a { color: #888; text-decoration: none; margin-left: 10px; }
+    footer a:hover { color: #e50914; }
   </style>
 </head>
 <body>
@@ -73,97 +51,71 @@
   <header>
     <a href="/" class="logo">ERI<span>VOX</span></a>
     
-    <div class="nav-container">
-      <nav>
-        <a href="/" class="active">Home</a>
-        <a href="/movies">Movies</a>
-        <a href="/tvshows">TV Shows</a>
-        
-        <select class="genre-select" onchange="if (this.value) window.location.href='/?search=' + this.value;">
-          <option value="">Genres</option>
-          <option value="Action">Action</option>
-          <option value="Adventure">Adventure</option>
-          <option value="Comedy">Comedy</option>
-          <option value="Drama">Drama</option>
-          <option value="Horror">Horror</option>
-          <option value="Sci-Fi">Sci-Fi</option>
-          <option value="Thriller">Thriller</option>
-        </select>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/movies">Movies</a>
+      <a href="/tvshows">TV Shows</a>
+      <% if (isAdmin) { %>
+        <a href="/admin" style="color: #28a745;">Admin Panel</a>
+      <% } %>
+    </nav>
 
-        <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-          <a href="/admin" style="color: #28a745;">Admin Panel</a>
-          <a href="/logout" style="color: #ff4d4d;">Logout</a>
-        <% } %>
-      </nav>
-
-      <form action="/" method="GET" class="search-form">
-        <input type="text" name="search" placeholder="Search title or genre..." class="search-input" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
-        <button type="submit" class="search-btn">Search</button>
-      </form>
-    </div>
+    <form action="/" method="GET" class="search-form">
+      <input type="text" name="search" class="search-input" placeholder="Search movies, tv..." value="<%= searchQuery || '' %>">
+      <button type="submit" class="btn-search">Search</button>
+    </form>
   </header>
 
   <div class="container">
-    <h2 class="section-title"><%= typeof searchQuery !== 'undefined' && searchQuery ? 'Results for "' + searchQuery + '"' : 'Latest Uploads' %></h2>
-    
-    <div class="media-grid">
-      <% if (typeof mediaList !== 'undefined' && mediaList.length > 0) { %>
+    <h2 class="section-title">
+      <%= searchQuery ? 'Search Results for: "' + searchQuery + '"' : 'Latest Uploads' %>
+    </h2>
+
+    <% if (mediaList && mediaList.length > 0) { %>
+      <div class="media-grid">
         <% mediaList.forEach(item => { %>
           <div class="media-card">
-            <img class="poster" src="<%= item.posterUrl || 'https://via.placeholder.com/200x300?text=No+Poster' %>" alt="<%= item.title %>">
+            <div class="poster-container">
+              <img src="<%= item.posterUrl || 'https://via.placeholder.com/300x450?text=No+Poster' %>" alt="<%= item.title %>" class="poster-img" loading="lazy">
+              <span class="badge-type"><%= item.type === 'tv' ? 'TV Show' : 'Movie' %></span>
+            </div>
+            
             <div class="card-body">
-              <div class="card-type"><%= item.type === 'tv' ? 'TV Show' : 'Movie' %></div>
-              <div class="card-title"><%= item.title %></div>
-              <% if (item.genre) { %><div class="card-genre"><%= item.genre %></div><% } %>
+              <h3 class="media-title" title="<%= item.title %>"><%= item.title %></h3>
+              <p class="media-genre"><%= item.genre || 'Action / Drama' %></p>
               
-              <!-- RENDER MULTIPLE CLOUD STORAGE BUTTONS -->
-              <div style="margin-top: auto;">
-                <% if (item.cloudLinks && item.cloudLinks.length > 0) { %>
-                  <% item.cloudLinks.forEach((link, idx) => { %>
-                    <a href="<%= link.url %>" target="_blank" class="btn-download <%= idx > 0 ? 'alt' : '' %>">
-                      Server <%= idx + 1 %> (<%= link.name %>)
-                    </a>
-                  <% }) %>
-                <% } else if (item.gofileUrl) { %>
-                  <!-- Fallback for older uploads -->
-                  <a href="<%= item.gofileUrl %>" target="_blank" class="btn-download">Download / Watch</a>
-                <% } %>
-              </div>
+              <!-- Clean single Gofile download URL resolution -->
+              <% 
+                let downloadUrl = item.gofileUrl;
+                if (!downloadUrl && item.cloudLinks && item.cloudLinks.length > 0) {
+                  downloadUrl = item.cloudLinks[0].url;
+                }
+              %>
 
-              <% if (item.subtitleUrl && item.subtitleUrl.trim() !== '') { %>
-                <a href="<%= item.subtitleUrl %>" target="_blank" class="btn-sub">Download Subtitles</a>
+              <% if (downloadUrl) { %>
+                <a href="<%= downloadUrl %>" target="_blank" rel="noopener noreferrer" class="btn-download">
+                  Download (Gofile)
+                </a>
               <% } %>
 
-              <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                <form action="/delete/<%= item._id %>" method="POST">
-                  <button type="submit" onclick="return confirm('Delete <%= item.title %>?')" class="btn-delete">Delete Entry</button>
-                </form>
+              <% if (item.subtitleUrl) { %>
+                <a href="<%= item.subtitleUrl %>" target="_blank" rel="noopener noreferrer" class="btn-download btn-subtitle">
+                  Subtitle
+                </a>
               <% } %>
             </div>
           </div>
         <% }) %>
-      <% } else { %>
-        <div class="no-content">No content found matching your search.</div>
-      <% } %>
-    </div>
+      </div>
+    <% } else { %>
+      <p style="color: #888; text-align: center; margin-top: 40px;">No media found. Check back later!</p>
+    <% } %>
   </div>
 
   <footer>
-    &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. | <a href="/dmca">DMCA Disclaimer</a>
+    &copy; <%= new Date().getFullYear() %> ERIVOX. All rights reserved. 
+    <a href="/dmca">DMCA Disclaimer</a>
   </footer>
-
-  <script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (
-        e.key === 'F12' || 
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-        (e.ctrlKey && e.key === 'u')
-      ) {
-        e.preventDefault();
-      }
-    });
-  </script>
 
 </body>
 </html>

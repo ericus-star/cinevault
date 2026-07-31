@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Media Entry - ERIVOX Admin</title>
+  <title>Edit Entry - ERIVOX Admin</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
     body { background-color: #0d0d0f; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -61,33 +61,17 @@
           <input type="text" name="posterUrl" value="<%= item.posterUrl || '' %>" class="input-field">
         </div>
 
-        <% 
-          let server1 = item.gofileUrl || '';
-          let server2 = '';
-          let server3 = '';
-
-          if (item.cloudLinks && item.cloudLinks.length > 0) {
-            item.cloudLinks.forEach(link => {
-              if (link.name === 'Gofile') server1 = link.url;
-              if (link.name === 'Mega') server2 = link.url;
-              if (link.name === 'Pixeldrain') server3 = link.url;
-            });
+        <!-- Extract link cleanly from array or gofileUrl property -->
+        <%
+          let activeGofileUrl = item.gofileUrl || '';
+          if (!activeGofileUrl && item.cloudLinks && item.cloudLinks.length > 0) {
+            activeGofileUrl = item.cloudLinks[0].url || '';
           }
         %>
 
         <div class="form-group">
-          <label>Server 1 Link (Gofile)</label>
-          <input type="url" name="gofileUrl" value="<%= server1 %>" class="input-field" placeholder="https://gofile.io/d/...">
-        </div>
-
-        <div class="form-group">
-          <label>Server 2 Link (Mega)</label>
-          <input type="url" name="megaUrl" value="<%= server2 %>" class="input-field" placeholder="https://mega.nz/file/...">
-        </div>
-
-        <div class="form-group">
-          <label>Server 3 Link (Pixeldrain / Other)</label>
-          <input type="url" name="pixeldrainUrl" value="<%= server3 %>" class="input-field" placeholder="https://pixeldrain.com/u/...">
+          <label>Gofile Link</label>
+          <input type="url" name="gofileUrl" value="<%= activeGofileUrl %>" class="input-field" required placeholder="https://gofile.io/d/...">
         </div>
 
         <div class="form-group">
