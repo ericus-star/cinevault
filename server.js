@@ -2,274 +2,119 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 
-// Security Headers
-app.use(helmet({ contentSecurityPolicy: false }));
-app.disable('x-powered-by');
-
-// Rate Limiter for Login
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: 'Too many login attempts. Please try again after 15 minutes.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Middlewares
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session Configuration
+// Session Setup for Admin Authentication
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'erivox_super_secret_key_2026',
+  secret: process.env.SESSION_SECRET || 'erivox-fallback-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: 'strict',
-    maxAge: 1000 * 60 * 60 * 2
-  }
+  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
 
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/erivox')
-  .then(() => console.log('Connected to MongoDB'))
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB Connected Successfully'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Database Schema
-const mediaSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  type: { type: String, enum: ['movie', 'tv'], required: true },
+// Movie Schema
+const movieSchema = new mongoose.Schema({
+  title: String,
   genre: String,
-  posterUrl: String,
-  gofileUrl: { type: String, required: true },
-  subtitleUrl: String,
+  poster: String,
+  videoUrl: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-const Media = mongoose.model('Media', mediaSchema);
+const Movie = mongoose.model('Movie', movieSchema);
 
-// Admin Authentication Middleware
-const requireAdmin = (req, res, next) => {
+// Middleware to protect Admin Routes
+function requireAdmin(req, res, next) {
   if (req.session && req.session.isAdmin) {
     return next();
   }
-  res.redirect('/login');
-};
+  res.redirect('/admin/login');
+}
 
-// Dynamic Sitemap Route
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    const baseUrl = `${protocol}://${req.get('host')}`;
+// --- PUBLIC ROUTES ---
 
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    xml += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-    xml += `  <url>\n    <loc>${baseUrl}/movies</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-    xml += `  <url>\n    <loc>${baseUrl}/tvshows</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-    xml += `  <url>\n    <loc>${baseUrl}/dmca</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.3</priority>\n  </url>\n`;
-    xml += `</urlset>`;
-
-    res.header('Content-Type', 'application/xml');
-    res.status(200).send(xml);
-  } catch (err) {
-    console.error('Sitemap Generation Error:', err);
-    res.status(500).end();
-  }
-});
-
-// Public Routes
+// Homepage
 app.get('/', async (req, res) => {
   try {
-    const searchQuery = req.query.search || '';
-    let filter = {};
-    
-    if (searchQuery) {
-      filter = {
-        $or: [
-          { title: { $regex: searchQuery, $options: 'i' } },
-          { genre: { $regex: searchQuery, $options: 'i' } }
-        ]
-      };
-    }
-
-    const mediaList = await Media.find(filter).sort({ createdAt: -1 });
-    res.render('index', { 
-      mediaList, 
-      searchQuery,
-      isAdmin: req.session ? req.session.isAdmin : false 
-    });
+    const movies = await Movie.find().sort({ createdAt: -1 });
+    res.render('index', { movies });
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
   }
 });
 
-app.get('/movies', async (req, res) => {
+// Single Movie Details / Player Page
+app.get('/movie/:id', async (req, res) => {
   try {
-    const mediaList = await Media.find({ type: 'movie' }).sort({ createdAt: -1 });
-    res.render('index', { mediaList, searchQuery: '', isAdmin: req.session ? req.session.isAdmin : false });
-  } catch (err) {
-    res.status(500).send('Server Error');
-  }
-});
-
-app.get('/tvshows', async (req, res) => {
-  try {
-    const mediaList = await Media.find({ type: 'tv' }).sort({ createdAt: -1 });
-    res.render('index', { mediaList, searchQuery: '', isAdmin: req.session ? req.session.isAdmin : false });
-  } catch (err) {
-    res.status(500).send('Server Error');
-  }
-});
-
-app.get('/dmca', (req, res) => {
-  res.render('dmca');
-});
-
-// TMDB API Route
-app.get('/api/tmdb', requireAdmin, async (req, res) => {
-  try {
-    const { title, type } = req.query;
-    const apiKey = process.env.TMDB_API_KEY;
-
-    if (!title) return res.status(400).json({ error: 'Title is required' });
-
-    if (!apiKey) {
-      return res.json({
-        title: title,
-        genre: 'Action, Drama',
-        posterUrl: 'https://via.placeholder.com/300x450?text=' + encodeURIComponent(title)
-      });
-    }
-
-    const mediaType = type === 'tv' ? 'tv' : 'movie';
-    const tmdbUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
-    
-    const response = await fetch(tmdbUrl);
-    const data = await response.json();
-
-    if (data.results && data.results.length > 0) {
-      const match = data.results[0];
-      const posterPath = match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : '';
-      const displayTitle = match.title || match.name || title;
-
-      return res.json({
-        title: displayTitle,
-        genre: 'Action',
-        posterUrl: posterPath
-      });
-    } else {
-      return res.status(404).json({ error: 'No results found on TMDB' });
-    }
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).send('Movie not found');
+    res.render('movie', { movie });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch TMDB data' });
+    res.status(500).send('Server Error');
   }
 });
 
-// Admin & Auth Routes
-app.get(['/login', '/admin/login'], (req, res) => {
+// --- ADMIN ROUTES (SECURED) ---
+
+// Login GET
+app.get('/admin/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-app.post(['/login', '/admin/login'], loginLimiter, (req, res) => {
+// Login POST
+app.post('/admin/login', (req, res) => {
   const { password } = req.body;
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
-  if (password === ADMIN_PASSWORD) {
+  if (password === process.env.ADMIN_PASSWORD) {
     req.session.isAdmin = true;
-    return res.redirect('/admin');
+    res.redirect('/admin');
+  } else {
+    res.render('login', { error: 'Invalid Password' });
   }
-  res.render('login', { error: 'Invalid password. Access denied.' });
 });
 
-app.get(['/admin', '/dashboard'], requireAdmin, async (req, res) => {
+// Admin Dashboard (Protected)
+app.get('/admin', requireAdmin, async (req, res) => {
+  const movies = await Movie.find().sort({ createdAt: -1 });
+  res.render('admin', { movies });
+});
+
+// Add Movie POST (Protected)
+app.post('/admin/add', requireAdmin, async (req, res) => {
   try {
-    const mediaList = await Media.find().sort({ createdAt: -1 });
-    res.render('admin', { mediaList });
+    const { title, genre, poster, videoUrl } = req.body;
+    await Movie.create({ title, genre, poster, videoUrl });
+    res.redirect('/admin');
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send('Error adding movie');
   }
 });
 
-app.get(['/logout', '/admin/logout'], (req, res) => {
+// Logout
+app.get('/admin/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
-app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
-  try {
-    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
-
-    await Media.create({
-      title,
-      type,
-      genre,
-      posterUrl,
-      subtitleUrl,
-      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
-    });
-
-    res.redirect('/admin');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error adding content');
-  }
-});
-
-app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
-  try {
-    const item = await Media.findById(req.params.id);
-    if (!item) return res.status(404).send('Media item not found');
-    res.render('edit', { item });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
-  }
-});
-
-app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
-  try {
-    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
-
-    await Media.findByIdAndUpdate(req.params.id, {
-      title,
-      type,
-      genre,
-      posterUrl,
-      subtitleUrl,
-      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
-    });
-
-    res.redirect('/admin');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating content');
-  }
-});
-
-app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
-  try {
-    await Media.findByIdAndDelete(req.params.id);
-    const backUrl = req.get('Referrer') || '/';
-    res.redirect(backUrl);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error deleting content');
-  }
-});
-
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
