@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 const path = require('path');
 require('dotenv').config();
 
@@ -16,16 +15,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session Setup (Persistent Mongo Store)
+// Standard Session Setup (No external store needed)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox-secret-key',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    ttl: 14 * 24 * 60 * 60 // 14 days
-  }),
-  cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 }
+  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
 
 // MongoDB Connection
@@ -77,9 +72,9 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
-// --- LOGIN & AUTH ROUTES (Fixed endpoint matching) ---
+// --- LOGIN & AUTH ROUTES ---
 
-// Login GET (Handles both /login and /admin/login)
+// Login GET
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
@@ -87,7 +82,7 @@ app.get('/admin/login', (req, res) => {
   res.redirect('/login');
 });
 
-// Login POST (Matches <form action="/login">)
+// Login POST
 app.post('/login', (req, res) => {
   const { password } = req.body;
   if (password === process.env.ADMIN_PASSWORD) {
@@ -97,8 +92,15 @@ app.post('/login', (req, res) => {
     res.render('login', { error: 'Invalid Password' });
   }
 });
+
 app.post('/admin/login', (req, res) => {
-  res.redirect(307, '/login'); // Forward POST request
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    res.redirect('/admin');
+  } else {
+    res.render('login', { error: 'Invalid Password' });
+  }
 });
 
 // Logout
