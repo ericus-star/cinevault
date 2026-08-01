@@ -4,9 +4,6 @@ const session = require('express-session');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const multer = require('multer');
-const { PutObjectCommand } = require('@aws-sdk/client-s3');
-const r2Client = require('./config/r2'); // R2 helper configuration
 require('dotenv').config();
 
 const app = express();
@@ -23,30 +20,6 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-// Configure Multer for In-Memory File Buffer Storage (Cloudflare Uploads)
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 500 * 1024 * 1024 } // 500MB max limit
-});
-
-// Helper Function: Upload file buffer directly to Cloudflare R2 Bucket
-async function uploadToR2(file) {
-  if (!file) return null;
-
-  const cleanFileName = file.originalname.replace(/\s+/g, '-');
-  const fileKey = `${Date.now()}-${cleanFileName}`;
-
-  const uploadParams = {
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: fileKey,
-    Body: file.buffer,
-    ContentType: file.mimetype,
-  };
-
-  await r2Client.send(new PutObjectCommand(uploadParams));
-  return `${process.env.R2_PUBLIC_URL}/${fileKey}`;
-}
 
 // Middlewares
 app.use(express.urlencoded({ extended: true }));
@@ -93,9 +66,7 @@ const requireAdmin = (req, res, next) => {
   res.redirect('/login');
 };
 
-// ==========================================
-// DYNAMIC SITEMAP ROUTE
-// ==========================================
+// Dynamic Sitemap Route
 app.get('/sitemap.xml', async (req, res) => {
   try {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -103,13 +74,10 @@ app.get('/sitemap.xml', async (req, res) => {
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-
-    // Static Pages
     xml += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
     xml += `  <url>\n    <loc>${baseUrl}/movies</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     xml += `  <url>\n    <loc>${baseUrl}/tvshows</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     xml += `  <url>\n    <loc>${baseUrl}/dmca</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.3</priority>\n  </url>\n`;
-
     xml += `</urlset>`;
 
     res.header('Content-Type', 'application/xml');
@@ -120,9 +88,7 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
-// ==========================================
-// PUBLIC ROUTES
-// ==========================================
+// Public Routes
 app.get('/', async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
@@ -171,9 +137,7 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// ==========================================
-// TMDB API ROUTE
-// ==========================================
+// TMDB API Route
 app.get('/api/tmdb', requireAdmin, async (req, res) => {
   try {
     const { title, type } = req.query;
@@ -214,9 +178,7 @@ app.get('/api/tmdb', requireAdmin, async (req, res) => {
   }
 });
 
-// ==========================================
-// ADMIN & AUTH ROUTES
-// ==========================================
+// Admin & Auth Routes
 app.get(['/login', '/admin/login'], (req, res) => {
   res.render('login', { error: null });
 });
@@ -246,42 +208,25 @@ app.get(['/logout', '/admin/logout'], (req, res) => {
   res.redirect('/');
 });
 
-// Add Media Route with Cloudflare R2 Upload Support
-app.post(
-  ['/add', '/admin/add'], 
-  requireAdmin, 
-  upload.fields([{ name: 'posterFile', maxCount: 1 }, { name: 'mediaFile', maxCount: 1 }]), 
-  async (req, res) => {
-    try {
-      let finalPosterUrl = req.body.posterUrl || '';
-      let finalGofileUrl = req.body.gofileUrl ? req.body.gofileUrl.trim() : '';
+app.post(['/add', '/admin/add'], requireAdmin, async (req, res) => {
+  try {
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
 
-      // Upload poster file to Cloudflare R2 if attached
-      if (req.files && req.files.posterFile && req.files.posterFile[0]) {
-        finalPosterUrl = await uploadToR2(req.files.posterFile[0]);
-      }
+    await Media.create({
+      title,
+      type,
+      genre,
+      posterUrl,
+      subtitleUrl,
+      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
+    });
 
-      // Upload video/media file to Cloudflare R2 if attached
-      if (req.files && req.files.mediaFile && req.files.mediaFile[0]) {
-        finalGofileUrl = await uploadToR2(req.files.mediaFile[0]);
-      }
-
-      await Media.create({
-        title: req.body.title,
-        type: req.body.type,
-        genre: req.body.genre,
-        posterUrl: finalPosterUrl,
-        subtitleUrl: req.body.subtitleUrl,
-        gofileUrl: finalGofileUrl
-      });
-
-      res.redirect('/admin');
-    } catch (err) {
-      console.error('Add Content Error:', err);
-      res.status(500).send('Error adding content');
-    }
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error adding content');
   }
-);
+});
 
 app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   try {
@@ -294,42 +239,25 @@ app.get(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
   }
 });
 
-// Edit Media Route with Cloudflare R2 Upload Support
-app.post(
-  ['/admin/edit/:id', '/edit/:id'], 
-  requireAdmin, 
-  upload.fields([{ name: 'posterFile', maxCount: 1 }, { name: 'mediaFile', maxCount: 1 }]), 
-  async (req, res) => {
-    try {
-      let finalPosterUrl = req.body.posterUrl || '';
-      let finalGofileUrl = req.body.gofileUrl ? req.body.gofileUrl.trim() : '';
+app.post(['/admin/edit/:id', '/edit/:id'], requireAdmin, async (req, res) => {
+  try {
+    const { title, type, genre, posterUrl, subtitleUrl, gofileUrl } = req.body;
 
-      // Check if a new poster file was uploaded to R2
-      if (req.files && req.files.posterFile && req.files.posterFile[0]) {
-        finalPosterUrl = await uploadToR2(req.files.posterFile[0]);
-      }
+    await Media.findByIdAndUpdate(req.params.id, {
+      title,
+      type,
+      genre,
+      posterUrl,
+      subtitleUrl,
+      gofileUrl: gofileUrl ? gofileUrl.trim() : ''
+    });
 
-      // Check if a new video file was uploaded to R2
-      if (req.files && req.files.mediaFile && req.files.mediaFile[0]) {
-        finalGofileUrl = await uploadToR2(req.files.mediaFile[0]);
-      }
-
-      await Media.findByIdAndUpdate(req.params.id, {
-        title: req.body.title,
-        type: req.body.type,
-        genre: req.body.genre,
-        posterUrl: finalPosterUrl,
-        subtitleUrl: req.body.subtitleUrl,
-        gofileUrl: finalGofileUrl
-      });
-
-      res.redirect('/admin');
-    } catch (err) {
-      console.error('Update Content Error:', err);
-      res.status(500).send('Error updating content');
-    }
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating content');
   }
-);
+});
 
 app.post(['/delete/:id', '/admin/delete/:id'], requireAdmin, async (req, res) => {
   try {

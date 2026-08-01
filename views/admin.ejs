@@ -40,8 +40,6 @@
     .btn-delete-sm { background: #1c1c22; color: #ff4d4d; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-delete-sm:hover { background: #ff4d4d; color: #fff; }
 
-    .or-divider { font-size: 11px; color: #e50914; font-weight: bold; margin: 4px 0 8px 0; display: block; }
-
     footer { background: #101012; border-top: 1px solid #202025; text-align: center; padding: 20px; color: #666; font-size: 13px; margin-top: auto; }
   </style>
 </head>
@@ -80,8 +78,7 @@
     <!-- 2. ADD ENTRY FORM -->
     <div class="card">
       <h2>2. Add Media Content</h2>
-      <!-- Note: enctype="multipart/form-data" added for file uploads to Cloudflare R2 -->
-      <form action="/admin/add" method="POST" enctype="multipart/form-data">
+      <form action="/admin/add" method="POST">
         <div class="form-group">
           <label for="titleInput">Title</label>
           <input type="text" name="title" id="titleInput" class="input-field" required placeholder="Title">
@@ -100,20 +97,14 @@
           <input type="text" name="genre" id="genreInput" class="input-field" placeholder="Action, Thriller">
         </div>
 
-        <!-- POSTER SELECTION: URL OR FILE UPLOAD -->
         <div class="form-group">
-          <label for="posterInput">Poster Image URL</label>
-          <input type="text" name="posterUrl" id="posterInput" class="input-field" placeholder="https://image.tmdb.org/...">
-          <span class="or-divider">— OR UPLOAD TO CLOUDFLARE R2 —</span>
-          <input type="file" name="posterFile" accept="image/*" class="input-field">
+          <label for="posterInput">Poster Image URL (TMDB or R2 Public Link)</label>
+          <input type="text" name="posterUrl" id="posterInput" class="input-field" placeholder="https://pub-xxx.r2.dev/... or TMDB Link">
         </div>
 
-        <!-- MEDIA SELECTION: URL OR FILE UPLOAD -->
         <div class="form-group">
-          <label for="gofileUrl">Gofile / Direct Video Link</label>
-          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" placeholder="https://gofile.io/d/...">
-          <span class="or-divider">— OR UPLOAD VIDEO FILE TO CLOUDFLARE R2 —</span>
-          <input type="file" name="mediaFile" accept="video/*" class="input-field">
+          <label for="gofileUrl">Cloudflare R2 Video Stream/Download Link</label>
+          <input type="url" name="gofileUrl" id="gofileUrl" class="input-field" required placeholder="https://pub-95c821bb75f44bb99682161e9ae0be50.r2.dev/movies/...">
         </div>
 
         <div class="form-group">
