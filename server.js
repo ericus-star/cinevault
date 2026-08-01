@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Standard Session Setup (No external store needed)
+// Session Setup
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox-secret-key',
   resave: false,
@@ -60,7 +60,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Single Movie Player Page
+// Single Movie Details Page
 app.get('/movie/:id', async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -72,12 +72,13 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
-// --- LOGIN & AUTH ROUTES ---
+// --- AUTH ROUTES ---
 
 // Login GET
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
+
 app.get('/admin/login', (req, res) => {
   res.redirect('/login');
 });
@@ -108,14 +109,10 @@ app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
-app.get('/admin/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
-});
 
 // --- ADMIN DASHBOARD & CRUD ROUTES ---
 
-// Admin Dashboard (Protected)
+// Admin Dashboard
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
@@ -146,32 +143,6 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Error deleting movie');
-  }
-});
-
-// TMDB Fetch Endpoint
-app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
-  const title = req.query.title;
-  if (!title) return res.status(400).json({ error: 'Title required' });
-
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}`
-    );
-    const data = await response.json();
-
-    if (data.results && data.results.length > 0) {
-      const match = data.results[0];
-      res.json({
-        title: match.title,
-        poster: `https://image.tmdb.org/t/p/w500${match.poster_path}`
-      });
-    } else {
-      res.status(404).json({ error: 'Movie not found' });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch TMDB data' });
   }
 });
 
