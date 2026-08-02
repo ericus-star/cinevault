@@ -1,4 +1,4 @@
-/* Strict 2-Color Palette: Pure Black (#0d0d0d / #141414) & Netflix Red (#e50914) */
+/* General Reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -17,27 +17,37 @@ a {
   text-decoration: none;
 }
 
-/* Header & Navigation Bar */
+/* Header Grid Structure for Perfect Centering */
 header {
   background-color: #000000;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: 20px 60px;
   border-bottom: 2px solid #e50914;
 }
 
-header .logo a, header .logo {
+/* Two-Tone Brand Styling */
+header .logo a {
   font-size: 2.2rem;
   font-weight: 900;
-  color: #e50914 !important;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-/* Bigger Navigation Bar Items */
+.logo-white {
+  color: #ffffff;
+}
+
+.logo-red {
+  color: #e50914;
+}
+
+/* Centered Top Nav with Integrated Genre Selector */
 .top-nav {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 30px;
 }
 
@@ -50,6 +60,23 @@ header .logo a, header .logo {
 
 .top-nav a:hover, .top-nav a.active {
   color: #e50914;
+}
+
+/* Genre Selector inside Nav */
+.nav-genre-select {
+  padding: 8px 12px;
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-genre-select:focus {
+  outline: none;
+  border-color: #e50914;
 }
 
 /* Main Container */
