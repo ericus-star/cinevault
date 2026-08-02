@@ -6,7 +6,6 @@
   <title>Erivox - Watch & Download</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    /* Prevent text selection across the site */
     body {
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -21,32 +20,27 @@
   <header>
     <div class="logo"><a href="/" style="color: #e50914;">Erivox</a></div>
     
-    <!-- Top Bar Navigation Filters -->
+    <!-- Bigger Navigation Items -->
     <nav class="top-nav">
       <a href="/" class="<%= activeType === 'all' ? 'active' : '' %>">All</a>
       <a href="/?type=movie" class="<%= activeType === 'movie' ? 'active' : '' %>">Movies</a>
       <a href="/?type=tv" class="<%= activeType === 'tv' ? 'active' : '' %>">TV Shows</a>
     </nav>
-
-    <a href="/admin" class="admin-link">Admin Panel</a>
   </header>
 
   <main class="container">
     
     <!-- Search Bar & Genre Filter Row -->
     <div class="filter-bar" style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
-      
-      <!-- Search Form -->
       <form action="/" method="GET" style="flex: 1; display: flex; gap: 10px;">
         <% if (activeType !== 'all') { %><input type="hidden" name="type" value="<%= activeType %>"><% } %>
-        <input type="text" name="search" placeholder="Search movies or TV shows..." value="<%= activeSearch %>" style="flex: 1; padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
-        <button type="submit" style="padding: 10px 20px; background: #e50914; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+        <input type="text" name="search" placeholder="Search movies or TV shows..." value="<%= activeSearch %>" style="flex: 1; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 4px; font-size: 1rem;">
+        <button type="submit" style="padding: 12px 25px; background: #e50914; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Search</button>
       </form>
 
-      <!-- Genre Dropdown Filter -->
       <form action="/" method="GET">
         <% if (activeType !== 'all') { %><input type="hidden" name="type" value="<%= activeType %>"><% } %>
-        <select name="genre" onchange="this.form.submit()" style="padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
+        <select name="genre" onchange="this.form.submit()" style="padding: 12px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 4px; font-size: 1rem;">
           <option value="all" <%= activeGenre === 'all' ? 'selected' : '' %>>All Genres</option>
           <option value="Action" <%= activeGenre === 'Action' ? 'selected' : '' %>>Action</option>
           <option value="Comedy" <%= activeGenre === 'Comedy' ? 'selected' : '' %>>Comedy</option>
@@ -59,7 +53,7 @@
 
     <h2><%= activeType === 'movie' ? 'Movies' : activeType === 'tv' ? 'TV Shows' : 'Latest Uploads' %></h2>
 
-    <!-- Movie / Show Cards Grid -->
+    <!-- Movie Cards -->
     <div class="movie-grid">
       <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
@@ -73,23 +67,15 @@
           </div>
         <% }) %>
       <% } else { %>
-        <p>No content found.</p>
+        <p style="color: #888;">No content found.</p>
       <% } %>
     </div>
   </main>
 
-  <!-- Client-Side Protection & Defense Script -->
   <script>
-    // Disable right-click context menu
     document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // Disable common inspection shortcuts
     document.addEventListener('keydown', (e) => {
-      // Prevent F12
-      if (e.key === 'F12') {
-        e.preventDefault();
-      }
-      // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+      if (e.key === 'F12') e.preventDefault();
       if (e.ctrlKey && (e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || e.key.toUpperCase() === 'U') {
         e.preventDefault();
       }

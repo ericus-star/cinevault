@@ -31,7 +31,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Movie & TV Show Schema
 const mediaSchema = new mongoose.Schema({
   title: String,
-  type: { type: String, default: 'movie' }, // 'movie' or 'tv'
+  type: { type: String, default: 'movie' },
   genre: String,
   poster: String,
   videoUrl: String,
@@ -48,7 +48,6 @@ function requireAdmin(req, res, next) {
 
 // --- PUBLIC ROUTES ---
 
-// Homepage with Search, Type Filter (Movie/TV Show), and Genre Filter
 app.get('/', async (req, res) => {
   try {
     const { search, type, genre } = req.query;
@@ -77,7 +76,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Player / Detail Route
 app.get('/movie/:id', async (req, res) => {
   try {
     const movie = await Media.findById(req.params.id);
@@ -108,7 +106,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-// --- ADMIN ROUTES & TMDB AUTO-FETCH ---
+// --- ADMIN ROUTES ---
 
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
@@ -123,7 +121,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
 // TMDB API Search Endpoint
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
-  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (!title) return res.status(400).json({ error: 'Title required' });
 
   const mediaType = type === 'tv' ? 'tv' : 'movie';
   const apiKey = process.env.TMDB_API_KEY;
@@ -138,8 +136,7 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
       const match = data.results[0];
       res.json({
         title: match.title || match.name,
-        poster: match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : '',
-        overview: match.overview
+        poster: match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : ''
       });
     } else {
       res.status(404).json({ error: 'No results found on TMDB' });
@@ -162,7 +159,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Media
+// Delete Single Item
 app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   try {
     await Media.findByIdAndDelete(req.params.id);
@@ -170,6 +167,17 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Error deleting item');
+  }
+});
+
+// DELETE ALL MEDIA
+app.post('/admin/delete-all', requireAdmin, async (req, res) => {
+  try {
+    await Media.deleteMany({});
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error deleting all items');
   }
 });
 

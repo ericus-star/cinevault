@@ -1,4 +1,4 @@
-/* Dark Theme & General Reset */
+/* Strict 2-Color Palette: Pure Black (#0d0d0d / #141414) & Netflix Red (#e50914) */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,81 +6,94 @@
 }
 
 body {
-  background-color: #141414;
+  background-color: #0d0d0d;
   color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
 }
 
 a {
-  color: #e50914;
+  color: #ffffff;
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-/* Header & Nav */
+/* Header & Navigation Bar */
 header {
   background-color: #000000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 50px;
-  border-bottom: 1px solid #222;
+  padding: 20px 60px;
+  border-bottom: 2px solid #e50914;
 }
 
-header .logo {
-  font-size: 1.8rem;
-  font-weight: bold;
+header .logo a, header .logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #e50914 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Bigger Navigation Bar Items */
+.top-nav {
+  display: flex;
+  gap: 30px;
+}
+
+.top-nav a {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+.top-nav a:hover, .top-nav a.active {
   color: #e50914;
 }
 
-header nav a {
-  margin-left: 20px;
-  color: #fff;
-  font-weight: 500;
-}
-
-/* Container */
+/* Main Container */
 .container {
-  max-width: 1200px;
-  margin: 30px auto;
+  max-width: 1250px;
+  margin: 40px auto;
   padding: 0 20px;
 }
 
 h2 {
+  font-size: 1.6rem;
   margin-bottom: 20px;
-  font-weight: 600;
+  color: #ffffff;
+  border-left: 4px solid #e50914;
+  padding-left: 10px;
 }
 
-/* Admin Form Styling */
+/* Admin Form */
 .admin-form {
-  background: #1f1f1f;
-  padding: 25px;
+  background: #141414;
+  padding: 30px;
   border-radius: 8px;
-  max-width: 600px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  max-width: 650px;
+  border: 1px solid #222;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-  color: #ccc;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 600;
 }
 
 .form-group input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 4px;
   border: 1px solid #333;
-  background-color: #2b2b2b;
+  background-color: #1a1a1a;
   color: #fff;
   font-size: 1rem;
 }
@@ -92,15 +105,14 @@ h2 {
 
 .btn-submit {
   background-color: #e50914;
-  color: white;
+  color: #ffffff;
   border: none;
-  padding: 12px 20px;
+  padding: 14px;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
   width: 100%;
-  font-size: 1rem;
-  transition: background 0.2s ease;
+  font-size: 1.1rem;
 }
 
 .btn-submit:hover {
@@ -112,54 +124,57 @@ h2 {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background-color: #1f1f1f;
+  background-color: #141414;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .admin-table th, .admin-table td {
-  padding: 12px 15px;
+  padding: 14px 18px;
   text-align: left;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #222;
 }
 
 .admin-table th {
-  background-color: #2b2b2b;
-  color: #aaa;
-  font-size: 0.85rem;
+  background-color: #000000;
+  color: #e50914;
+  font-size: 0.95rem;
   text-transform: uppercase;
 }
 
 .btn-delete {
-  background-color: #ff3333;
+  background-color: #e50914;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
 }
 
-.btn-delete:hover {
-  background-color: #cc0000;
-}
-
-/* Movie Grid (Home Page) */
+/* Movie Grid & Cards */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 25px;
 }
 
 .movie-card {
-  background-color: #1f1f1f;
+  background-color: #141414;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border: 1px solid #222;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.movie-card:hover {
+  transform: translateY(-5px);
+  border-color: #e50914;
 }
 
 .movie-card img {
   width: 100%;
-  height: 280px;
+  height: 300px;
   object-fit: cover;
 }
 
@@ -173,11 +188,12 @@ h2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #ffffff;
 }
 
 .movie-info .genre {
   font-size: 0.85rem;
-  color: #aaa;
+  color: #888;
   margin-bottom: 15px;
 }
 
@@ -185,8 +201,13 @@ h2 {
   display: block;
   text-align: center;
   background-color: #e50914;
-  color: white;
-  padding: 8px 0;
+  color: #ffffff;
+  padding: 10px 0;
   border-radius: 4px;
   font-weight: bold;
+  font-size: 1rem;
+}
+
+.btn-download:hover {
+  background-color: #f40612;
 }

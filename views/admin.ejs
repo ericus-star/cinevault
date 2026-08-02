@@ -10,7 +10,7 @@
 
   <header>
     <div class="logo">Erivox Admin</div>
-    <nav>
+    <nav class="top-nav">
       <a href="/">View Site</a>
       <a href="/logout">Logout</a>
     </nav>
@@ -24,13 +24,13 @@
         <label for="title">Title</label>
         <div style="display: flex; gap: 10px;">
           <input type="text" id="title" name="title" placeholder="e.g. Deadpool & Wolverine" required>
-          <button type="button" id="btn-autofetch" style="padding: 10px 15px; cursor: pointer; white-space: nowrap;">Auto-Fetch TMDB</button>
+          <button type="button" id="btn-autofetch" style="padding: 10px 15px; background: #e50914; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; font-weight: bold;">Auto-Fetch TMDB</button>
         </div>
       </div>
 
       <div class="form-group">
         <label for="type">Content Type</label>
-        <select id="type" name="type" style="width: 100%; padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
+        <select id="type" name="type" style="width: 100%; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 4px;">
           <option value="movie">Movie</option>
           <option value="tv">TV Show</option>
         </select>
@@ -47,7 +47,7 @@
       </div>
 
       <div class="form-group">
-        <label for="videoUrl">Video / Cloud storage Link</label>
+        <label for="videoUrl">Video / Storage Link</label>
         <input type="url" id="videoUrl" name="videoUrl" placeholder="https://pub-....r2.dev/movies/file.mp4" required>
       </div>
 
@@ -56,7 +56,14 @@
 
     <hr style="margin: 30px 0; border: 1px solid #333;">
 
-    <h2>Manage Content</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>Manage Content</h2>
+      <!-- DELETE ALL BUTTON -->
+      <form action="/admin/delete-all" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to DELETE ALL MOVIES and TV SHOWS? This cannot be undone!');">
+        <button type="submit" style="background: #e50914; color: white; padding: 10px 18px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Delete All Media</button>
+      </form>
+    </div>
+
     <div class="admin-movie-list">
       <% if (movies && movies.length > 0) { %>
         <table class="admin-table">
@@ -86,7 +93,7 @@
           </tbody>
         </table>
       <% } else { %>
-        <p>No content in database yet.</p>
+        <p style="color: #888;">No content in database yet.</p>
       <% } %>
     </div>
   </main>
