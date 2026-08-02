@@ -5,70 +5,210 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Erivox Admin Panel</title>
   <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #ffffff;
+    }
+
+    .admin-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .admin-card {
+      background-color: #141414;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    /* Form Layout & Field Styling */
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      background: #1a1a1a;
+      color: #ffffff;
+      border: 1px solid #333;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: #e50914;
+    }
+
+    /* Input Row with Fetch Button */
+    .input-with-btn {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-fetch {
+      padding: 12px 20px;
+      background-color: #e50914;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+    }
+
+    .btn-fetch:hover {
+      background-color: #f40612;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background-color: #e50914;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #f40612;
+    }
+
+    /* Admin Table Styling */
+    .media-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #141414;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #222;
+    }
+
+    .media-table th, .media-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #222;
+    }
+
+    .media-table th {
+      background-color: #1a1a1a;
+      color: #e50914;
+    }
+
+    .btn-danger {
+      background-color: #333;
+      color: #ff4d4d;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-danger:hover {
+      background-color: #e50914;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
 
   <header>
     <div class="logo">
-      <a href="/"><span class="logo-white">ERI</span><span class="logo-red">VOX</span> Admin</a>
+      <a href="/"><span class="logo-white">ERI</span><span class="logo-red">VOX</span></a>
     </div>
     <nav class="top-nav">
-      <a href="/">View Site</a>
-      <a href="/logout">Logout</a>
+      <a href="/">Home</a>
+      <a href="/logout" style="color: #888;">Logout</a>
     </nav>
   </header>
 
-  <main class="container">
-    <h2>Add New Movie / TV Show</h2>
+  <main class="admin-container">
     
-    <form action="/admin/add" method="POST" class="admin-form">
-      <div class="form-group">
-        <label for="title">Title</label>
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="title" name="title" placeholder="e.g. Deadpool & Wolverine" required>
-          <button type="button" id="btn-autofetch" style="padding: 10px 15px; background: #e50914; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; font-weight: bold;">Auto-Fetch TMDB</button>
+    <!-- Add New Content Card -->
+    <div class="admin-card">
+      <h2>Add New Movie / TV Show</h2>
+      <br>
+
+      <form action="/admin/add" method="POST">
+        
+        <!-- Title & Fetch Button -->
+        <div class="form-group">
+          <label for="title">Title</label>
+          <div class="input-with-btn">
+            <input type="text" id="title" name="title" class="form-input" placeholder="e.g. Deadpool & Wolverine" required>
+            <button type="button" class="btn-fetch" onclick="fetchTMDB()">Auto-Fetch TMDB</button>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="type">Content Type</label>
-        <select id="type" name="type" style="width: 100%; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 4px;">
-          <option value="movie">Movie</option>
-          <option value="tv">TV Show</option>
-        </select>
-      </div>
+        <!-- Content Type -->
+        <div class="form-group">
+          <label for="type">Content Type</label>
+          <select id="type" name="type" class="form-select">
+            <option value="movie">Movie</option>
+            <option value="tv">TV Show</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="genre">Genre</label>
-        <input type="text" id="genre" name="genre" placeholder="e.g. Action, Sci-Fi" required>
-      </div>
+        <!-- Genre -->
+        <div class="form-group">
+          <label for="genre">Genre</label>
+          <input type="text" id="genre" name="genre" class="form-input" placeholder="e.g. Action, Sci-Fi" required>
+        </div>
 
-      <div class="form-group">
-        <label for="poster">Poster URL</label>
-        <input type="url" id="poster" name="poster" placeholder="https://image.tmdb.org/t/p/w500/..." required>
-      </div>
+        <!-- Poster URL -->
+        <div class="form-group">
+          <label for="poster">Poster URL</label>
+          <input type="text" id="poster" name="poster" class="form-input" placeholder="https://image.tmdb.org/t/p/w500/..." required>
+        </div>
 
-      <div class="form-group">
-        <label for="videoUrl">Video / Storage Link</label>
-        <input type="url" id="videoUrl" name="videoUrl" placeholder="https://pub-....r2.dev/movies/file.mp4" required>
-      </div>
+        <!-- Video / Cloudflare Storage Link -->
+        <div class="form-group">
+          <label for="videoUrl">Video / Storage Link</label>
+          <input type="text" id="videoUrl" name="videoUrl" class="form-input" placeholder="https://pub-....r2.dev/movies/..." required>
+        </div>
 
-      <button type="submit" class="btn-submit">Add Content</button>
-    </form>
-
-    <hr style="margin: 30px 0; border: 1px solid #333;">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2>Manage Content</h2>
-      <!-- DELETE ALL BUTTON -->
-      <form action="/admin/delete-all" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to DELETE ALL MOVIES and TV SHOWS? This cannot be undone!');">
-        <button type="submit" style="background: #e50914; color: white; padding: 10px 18px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Delete All Media</button>
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit">Add Content</button>
       </form>
     </div>
 
-    <div class="admin-movie-list">
+    <!-- Existing Content List -->
+    <div class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2>Existing Media (<%= movies.length %>)</h2>
+        <% if (movies.length > 0) { %>
+          <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Are you sure you want to DELETE ALL movies?');">
+            <button type="submit" class="btn-danger">Delete All</button>
+          </form>
+        <% } %>
+      </div>
+
       <% if (movies && movies.length > 0) { %>
-        <table class="admin-table">
+        <table class="media-table">
           <thead>
             <tr>
               <th>Poster</th>
@@ -81,13 +221,15 @@
           <tbody>
             <% movies.forEach(movie => { %>
               <tr>
-                <td><img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 50px; height: 75px; object-fit: cover;"></td>
-                <td><%= movie.title %></td>
-                <td><%= movie.type ? movie.type.toUpperCase() : 'MOVIE' %></td>
+                <td>
+                  <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 45px; height: 65px; object-fit: cover; border-radius: 4px;">
+                </td>
+                <td><strong><%= movie.title %></strong></td>
+                <td style="text-transform: uppercase; font-size: 0.85rem; color: #888;"><%= movie.type %></td>
                 <td><%= movie.genre %></td>
                 <td>
-                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Delete item?');">
-                    <button type="submit" class="btn-delete">Delete</button>
+                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Delete this movie?');">
+                    <button type="submit" class="btn-danger">Delete</button>
                   </form>
                 </td>
               </tr>
@@ -95,32 +237,38 @@
           </tbody>
         </table>
       <% } else { %>
-        <p style="color: #888;">No content in database yet.</p>
+        <p style="color: #888;">No movies in database yet.</p>
       <% } %>
     </div>
+
   </main>
 
   <script>
-    document.getElementById('btn-autofetch').addEventListener('click', async () => {
-      const title = document.getElementById('title').value;
-      const type = document.getElementById('type').value;
-      if (!title) return alert('Please enter a title first!');
+    async function fetchTMDB() {
+      const titleInput = document.getElementById('title');
+      const typeInput = document.getElementById('type');
+      const posterInput = document.getElementById('poster');
+      const query = titleInput.value.trim();
+
+      if (!query) {
+        alert('Please enter a title first!');
+        return;
+      }
 
       try {
-        const res = await fetch(`/admin/fetch-tmdb?title=${encodeURIComponent(title)}&type=${type}`);
-        const data = await res.json();
-        
-        if (data.poster) {
-          document.getElementById('poster').value = data.poster;
-          if (data.title) document.getElementById('title').value = data.title;
-          alert('Fetched details successfully from TMDB!');
+        const response = await fetch(`/admin/fetch-tmdb?title=${encodeURIComponent(query)}&type=${typeInput.value}`);
+        const data = await response.json();
+
+        if (response.ok && data.poster) {
+          posterInput.value = data.poster;
+          if (data.title) titleInput.value = data.title;
         } else {
-          alert(data.error || 'Movie/Show not found on TMDB');
+          alert(data.error || 'Movie not found on TMDB');
         }
       } catch (err) {
-        alert('Failed to connect to server endpoint.');
+        alert('Error fetching from TMDB: ' + err.message);
       }
-    });
+    }
   </script>
 
 </body>
