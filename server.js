@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 
-// View engine setup
+// View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -15,12 +15,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session Setup
+// Session Configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 // MongoDB Connection
@@ -28,43 +28,60 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Movie Schema
-const movieSchema = new mongoose.Schema({
+// Movie & TV Show Schema
+const mediaSchema = new mongoose.Schema({
   title: String,
+  type: { type: String, default: 'movie' }, // 'movie' or 'tv'
   genre: String,
   poster: String,
   videoUrl: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-const Movie = mongoose.model('Movie', movieSchema);
+const Media = mongoose.model('Media', mediaSchema);
 
 // Auth Middleware
 function requireAdmin(req, res, next) {
-  if (req.session && req.session.isAdmin) {
-    return next();
-  }
+  if (req.session && req.session.isAdmin) return next();
   res.redirect('/login');
 }
 
 // --- PUBLIC ROUTES ---
 
-// Homepage
+// Homepage with Search, Type Filter (Movie/TV Show), and Genre Filter
 app.get('/', async (req, res) => {
   try {
-    const movies = await Movie.find().sort({ createdAt: -1 });
-    res.render('index', { movies });
+    const { search, type, genre } = req.query;
+    let query = {};
+
+    if (search) {
+      query.title = { $regex: search, $options: 'i' };
+    }
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+    if (genre && genre !== 'all') {
+      query.genre = { $regex: genre, $options: 'i' };
+    }
+
+    const movies = await Media.find(query).sort({ createdAt: -1 });
+    res.render('index', { 
+      movies, 
+      activeSearch: search || '', 
+      activeType: type || 'all', 
+      activeGenre: genre || 'all' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
   }
 });
 
-// Single Movie Details Page
+// Player / Detail Route
 app.get('/movie/:id', async (req, res) => {
   try {
-    const movie = await Movie.findById(req.params.id);
-    if (!movie) return res.status(404).send('Movie not found');
+    const movie = await Media.findById(req.params.id);
+    if (!movie) return res.status(404).send('Media not found');
     res.render('movie', { movie });
   } catch (err) {
     console.error(err);
@@ -74,19 +91,11 @@ app.get('/movie/:id', async (req, res) => {
 
 // --- AUTH ROUTES ---
 
-// Login GET
-app.get('/login', (req, res) => {
-  res.render('login', { error: null });
-});
+app.get('/login', (req, res) => res.render('login', { error: null }));
+app.get('/admin/login', (req, res) => res.redirect('/login'));
 
-app.get('/admin/login', (req, res) => {
-  res.redirect('/login');
-});
-
-// Login POST
 app.post('/login', (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
+  if (req.body.password === process.env.ADMIN_PASSWORD) {
     req.session.isAdmin = true;
     res.redirect('/admin');
   } else {
@@ -94,28 +103,16 @@ app.post('/login', (req, res) => {
   }
 });
 
-app.post('/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    req.session.isAdmin = true;
-    res.redirect('/admin');
-  } else {
-    res.render('login', { error: 'Invalid Password' });
-  }
-});
-
-// Logout
 app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
-// --- ADMIN DASHBOARD & CRUD ROUTES ---
+// --- ADMIN ROUTES & TMDB AUTO-FETCH ---
 
-// Admin Dashboard
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
-    const movies = await Movie.find().sort({ createdAt: -1 });
+    const movies = await Media.find().sort({ createdAt: -1 });
     res.render('admin', { movies });
   } catch (err) {
     console.error(err);
@@ -123,31 +120,59 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// Add Movie
-app.post('/admin/add', requireAdmin, async (req, res) => {
+// TMDB API Search Endpoint
+app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
+  const { title, type } = req.query;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+
+  const mediaType = type === 'tv' ? 'tv' : 'movie';
+  const apiKey = process.env.TMDB_API_KEY;
+
   try {
-    const { title, genre, poster, videoUrl } = req.body;
-    await Movie.create({ title, genre, poster, videoUrl });
-    res.redirect('/admin');
+    const response = await fetch(
+      `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`
+    );
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const match = data.results[0];
+      res.json({
+        title: match.title || match.name,
+        poster: match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : '',
+        overview: match.overview
+      });
+    } else {
+      res.status(404).json({ error: 'No results found on TMDB' });
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error adding movie');
+    console.error('TMDB Error:', err);
+    res.status(500).json({ error: 'Failed to fetch from TMDB' });
   }
 });
 
-// Delete Movie
-app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
+// Add Media
+app.post('/admin/add', requireAdmin, async (req, res) => {
   try {
-    await Movie.findByIdAndDelete(req.params.id);
+    const { title, type, genre, poster, videoUrl } = req.body;
+    await Media.create({ title, type: type || 'movie', genre, poster, videoUrl });
     res.redirect('/admin');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error deleting movie');
+    res.status(500).send('Error adding item');
+  }
+});
+
+// Delete Media
+app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
+  try {
+    await Media.findByIdAndDelete(req.params.id);
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error deleting item');
   }
 });
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

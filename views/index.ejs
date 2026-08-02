@@ -3,35 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Erivox - Watch & Download Movies</title>
+  <title>Erivox - Watch & Download</title>
   <link rel="stylesheet" href="/style.css">
-  
-  <!-- Security CSS: Disable text & media selection -->
   <style>
+    /* Prevent text selection across the site */
     body {
-      -webkit-user-select: none; /* Safari */
-      -ms-user-select: none; /* IE 10+ */
-      user-select: none; /* Standard */
-    }
-    img, video {
-      pointer-events: none; /* Prevent dragging media elements */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header / Navigation -->
+  <!-- Top Header Navigation -->
   <header>
-    <div class="logo">Erivox</div>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/admin">Admin Panel</a>
+    <div class="logo"><a href="/" style="color: #e50914;">Erivox</a></div>
+    
+    <!-- Top Bar Navigation Filters -->
+    <nav class="top-nav">
+      <a href="/" class="<%= activeType === 'all' ? 'active' : '' %>">All</a>
+      <a href="/?type=movie" class="<%= activeType === 'movie' ? 'active' : '' %>">Movies</a>
+      <a href="/?type=tv" class="<%= activeType === 'tv' ? 'active' : '' %>">TV Shows</a>
     </nav>
+
+    <a href="/admin" class="admin-link">Admin Panel</a>
   </header>
 
-  <!-- Movie Grid Section -->
   <main class="container">
-    <h2>Latest Movies</h2>
+    
+    <!-- Search Bar & Genre Filter Row -->
+    <div class="filter-bar" style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+      
+      <!-- Search Form -->
+      <form action="/" method="GET" style="flex: 1; display: flex; gap: 10px;">
+        <% if (activeType !== 'all') { %><input type="hidden" name="type" value="<%= activeType %>"><% } %>
+        <input type="text" name="search" placeholder="Search movies or TV shows..." value="<%= activeSearch %>" style="flex: 1; padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
+        <button type="submit" style="padding: 10px 20px; background: #e50914; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+      </form>
+
+      <!-- Genre Dropdown Filter -->
+      <form action="/" method="GET">
+        <% if (activeType !== 'all') { %><input type="hidden" name="type" value="<%= activeType %>"><% } %>
+        <select name="genre" onchange="this.form.submit()" style="padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
+          <option value="all" <%= activeGenre === 'all' ? 'selected' : '' %>>All Genres</option>
+          <option value="Action" <%= activeGenre === 'Action' ? 'selected' : '' %>>Action</option>
+          <option value="Comedy" <%= activeGenre === 'Comedy' ? 'selected' : '' %>>Comedy</option>
+          <option value="Drama" <%= activeGenre === 'Drama' ? 'selected' : '' %>>Drama</option>
+          <option value="Sci-Fi" <%= activeGenre === 'Sci-Fi' ? 'selected' : '' %>>Sci-Fi</option>
+          <option value="Horror" <%= activeGenre === 'Horror' ? 'selected' : '' %>>Horror</option>
+        </select>
+      </form>
+    </div>
+
+    <h2><%= activeType === 'movie' ? 'Movies' : activeType === 'tv' ? 'TV Shows' : 'Latest Uploads' %></h2>
+
+    <!-- Movie / Show Cards Grid -->
     <div class="movie-grid">
       <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
@@ -40,35 +68,29 @@
             <div class="movie-info">
               <h3><%= movie.title %></h3>
               <p class="genre"><%= movie.genre || 'Action' %></p>
-              
-              <!-- Clean Download Button (Removed "(Gofile)" tag) -->
               <a href="/movie/<%= movie._id %>" class="btn-download">Download</a>
             </div>
           </div>
         <% }) %>
       <% } else { %>
-        <p>No movies uploaded yet.</p>
+        <p>No content found.</p>
       <% } %>
     </div>
   </main>
 
-  <!-- Security Script: Block Inspect Element & DevTools Shortcuts -->
+  <!-- Client-Side Protection & Defense Script -->
   <script>
-    // 1. Disable right-click context menu
+    // Disable right-click context menu
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // 2. Disable keyboard shortcuts for DevTools & Page Source
+    // Disable common inspection shortcuts
     document.addEventListener('keydown', (e) => {
       // Prevent F12
       if (e.key === 'F12') {
         e.preventDefault();
       }
-      // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
-      if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
-        e.preventDefault();
-      }
-      // Prevent Ctrl+U (View Page Source)
-      if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+      // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+      if (e.ctrlKey && (e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || e.key.toUpperCase() === 'U') {
         e.preventDefault();
       }
     });

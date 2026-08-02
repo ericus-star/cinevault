@@ -17,12 +17,23 @@
   </header>
 
   <main class="container">
-    <h2>Add New Movie</h2>
+    <h2>Add New Movie / TV Show</h2>
     
     <form action="/admin/add" method="POST" class="admin-form">
       <div class="form-group">
-        <label for="title">Movie Title</label>
-        <input type="text" id="title" name="title" placeholder="e.g. Deadpool & Wolverine" required>
+        <label for="title">Title</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="title" name="title" placeholder="e.g. Deadpool & Wolverine" required>
+          <button type="button" id="btn-autofetch" style="padding: 10px 15px; cursor: pointer; white-space: nowrap;">Auto-Fetch TMDB</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Content Type</label>
+        <select id="type" name="type" style="width: 100%; padding: 10px; background: #2b2b2b; color: white; border: 1px solid #333; border-radius: 4px;">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -36,16 +47,16 @@
       </div>
 
       <div class="form-group">
-        <label for="videoUrl">Video / Storage Link</label>
+        <label for="videoUrl">Video / Cloud storage Link</label>
         <input type="url" id="videoUrl" name="videoUrl" placeholder="https://pub-....r2.dev/movies/file.mp4" required>
       </div>
 
-      <button type="submit" class="btn-submit">Add Movie</button>
+      <button type="submit" class="btn-submit">Add Content</button>
     </form>
 
     <hr style="margin: 30px 0; border: 1px solid #333;">
 
-    <h2>Manage Existing Movies</h2>
+    <h2>Manage Content</h2>
     <div class="admin-movie-list">
       <% if (movies && movies.length > 0) { %>
         <table class="admin-table">
@@ -53,8 +64,8 @@
             <tr>
               <th>Poster</th>
               <th>Title</th>
+              <th>Type</th>
               <th>Genre</th>
-              <th>Video Link</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -63,10 +74,10 @@
               <tr>
                 <td><img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 50px; height: 75px; object-fit: cover;"></td>
                 <td><%= movie.title %></td>
+                <td><%= movie.type ? movie.type.toUpperCase() : 'MOVIE' %></td>
                 <td><%= movie.genre %></td>
-                <td><a href="<%= movie.videoUrl %>" target="_blank">View Link</a></td>
                 <td>
-                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this movie?');">
+                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Delete item?');">
                     <button type="submit" class="btn-delete">Delete</button>
                   </form>
                 </td>
@@ -75,10 +86,33 @@
           </tbody>
         </table>
       <% } else { %>
-        <p>No movies in database yet.</p>
+        <p>No content in database yet.</p>
       <% } %>
     </div>
   </main>
+
+  <script>
+    document.getElementById('btn-autofetch').addEventListener('click', async () => {
+      const title = document.getElementById('title').value;
+      const type = document.getElementById('type').value;
+      if (!title) return alert('Please enter a title first!');
+
+      try {
+        const res = await fetch(`/admin/fetch-tmdb?title=${encodeURIComponent(title)}&type=${type}`);
+        const data = await res.json();
+        
+        if (data.poster) {
+          document.getElementById('poster').value = data.poster;
+          if (data.title) document.getElementById('title').value = data.title;
+          alert('Fetched details successfully from TMDB!');
+        } else {
+          alert(data.error || 'Movie/Show not found on TMDB');
+        }
+      } catch (err) {
+        alert('Failed to connect to TMDB endpoint.');
+      }
+    });
+  </script>
 
 </body>
 </html>
