@@ -57,7 +57,7 @@
 
     <h2><%= activeType === 'movie' ? 'Movies' : activeType === 'tv' ? 'TV Shows' : 'Latest Uploads' %></h2>
 
-    <!-- Movie Cards -->
+    <!-- Movie Cards Grid -->
     <div class="movie-grid">
       <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
@@ -76,6 +76,15 @@
     </div>
   </main>
 
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-container">
+      <p>&copy; <%= new Date().getFullYear() %> <span style="color: #ffffff; font-weight: bold;">ERI</span><span style="color: #e50914; font-weight: bold;">VOX</span>. All rights reserved.</p>
+      <p>For copyright inquiries or DMCA issues, contact: <a href="mailto:eric.us0053@gmail.com" class="footer-email">eric.us0053@gmail.com</a></p>
+    </div>
+  </footer>
+
+  <!-- Protection Script -->
   <script>
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('keydown', (e) => {
