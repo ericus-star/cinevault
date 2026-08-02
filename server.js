@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 
-// View Engine
+// View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -76,6 +76,11 @@ app.get('/', async (req, res) => {
   }
 });
 
+// DMCA Route
+app.get('/dmca', (req, res) => {
+  res.render('dmca');
+});
+
 app.get('/movie/:id', async (req, res) => {
   try {
     const movie = await Media.findById(req.params.id);
@@ -118,7 +123,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// TMDB API Search Endpoint (With Improved Error Diagnostics)
+// TMDB API Search Endpoint
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
   if (!title) return res.status(400).json({ error: 'Title is required' });
@@ -127,7 +132,7 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const apiKey = process.env.TMDB_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'TMDB_API_KEY is missing in Render Environment Variables!' });
+    return res.status(500).json({ error: 'TMDB_API_KEY is missing in Environment Variables!' });
   }
 
   try {
@@ -135,7 +140,7 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
     const response = await fetch(tmdbUrl);
 
     if (!response.ok) {
-      return res.status(500).json({ error: `TMDB API error (Status ${response.status}). Check if TMDB_API_KEY is valid.` });
+      return res.status(500).json({ error: `TMDB API error (Status ${response.status}).` });
     }
 
     const data = await response.json();

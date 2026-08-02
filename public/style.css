@@ -20,7 +20,7 @@ a {
   text-decoration: none;
 }
 
-/* Header Grid Structure */
+/* Header Navigation */
 header {
   background-color: #000000;
   display: grid;
@@ -30,7 +30,6 @@ header {
   border-bottom: 2px solid #e50914;
 }
 
-/* Two-Tone Brand Styling */
 header .logo a {
   font-size: 2.2rem;
   font-weight: 900;
@@ -46,7 +45,6 @@ header .logo a {
   color: #e50914;
 }
 
-/* Centered Top Nav with Integrated Genre Selector */
 .top-nav {
   display: flex;
   align-items: center;
@@ -65,7 +63,6 @@ header .logo a {
   color: #e50914;
 }
 
-/* Genre Selector inside Nav */
 .nav-genre-select {
   padding: 8px 12px;
   background: #1a1a1a;
@@ -84,6 +81,7 @@ header .logo a {
 
 /* Main Container */
 .container {
+  width: 100%;
   max-width: 1250px;
   margin: 40px auto;
   padding: 0 20px;
@@ -98,11 +96,12 @@ h2 {
   padding-left: 10px;
 }
 
-/* Movie Grid & Cards */
+/* Sideways Movie Cards Grid */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 25px;
+  width: 100%;
 }
 
 .movie-card {
@@ -129,7 +128,7 @@ h2 {
 }
 
 .movie-info h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
@@ -158,6 +157,25 @@ h2 {
   background-color: #f40612;
 }
 
+/* DMCA Link Button */
+.btn-dmca {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #1a1a1a;
+  color: #888;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-dmca:hover {
+  background: #e50914;
+  color: #ffffff;
+  border-color: #e50914;
+}
+
 /* Footer Section */
 footer {
   background-color: #000000;
@@ -171,14 +189,4 @@ footer {
 
 .footer-container p {
   margin-bottom: 6px;
-}
-
-.footer-email {
-  color: #e50914;
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-.footer-email:hover {
-  color: #ffffff;
 }

@@ -18,18 +18,15 @@
 
   <!-- Top Header Navigation -->
   <header>
-    <!-- Two-Colored Brand Logo -->
     <div class="logo">
       <a href="/"><span class="logo-white">ERI</span><span class="logo-red">VOX</span></a>
     </div>
     
-    <!-- Centered Navigation Bar: Home, Movies, TV Shows, Genre -->
     <nav class="top-nav">
       <a href="/" class="<%= activeType === 'all' ? 'active' : '' %>">Home</a>
       <a href="/?type=movie" class="<%= activeType === 'movie' ? 'active' : '' %>">Movies</a>
       <a href="/?type=tv" class="<%= activeType === 'tv' ? 'active' : '' %>">TV Shows</a>
       
-      <!-- Genre Selector inside Nav -->
       <form action="/" method="GET" style="display: inline-block;">
         <% if (activeType !== 'all') { %><input type="hidden" name="type" value="<%= activeType %>"><% } %>
         <select name="genre" onchange="this.form.submit()" class="nav-genre-select">
@@ -57,7 +54,7 @@
 
     <h2><%= activeType === 'movie' ? 'Movies' : activeType === 'tv' ? 'TV Shows' : 'Latest Uploads' %></h2>
 
-    <!-- Movie Cards Grid -->
+    <!-- Sideways Movies Layout Grid -->
     <div class="movie-grid">
       <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
@@ -76,11 +73,13 @@
     </div>
   </main>
 
-  <!-- Footer Section -->
+  <!-- Clean Footer with DMCA Button -->
   <footer>
     <div class="footer-container">
       <p>&copy; <%= new Date().getFullYear() %> <span style="color: #ffffff; font-weight: bold;">ERI</span><span style="color: #e50914; font-weight: bold;">VOX</span>. All rights reserved.</p>
-      <p>For copyright inquiries or DMCA issues, contact: <a href="mailto:eric.us0053@gmail.com" class="footer-email">eric.us0053@gmail.com</a></p>
+      <div style="margin-top: 10px;">
+        <a href="/dmca" class="btn-dmca">DMCA Disclaimer</a>
+      </div>
     </div>
   </footer>
 
