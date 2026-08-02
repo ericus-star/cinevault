@@ -118,18 +118,26 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// TMDB API Search Endpoint
+// TMDB API Search Endpoint (With Improved Error Diagnostics)
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
-  if (!title) return res.status(400).json({ error: 'Title required' });
+  if (!title) return res.status(400).json({ error: 'Title is required' });
 
   const mediaType = type === 'tv' ? 'tv' : 'movie';
   const apiKey = process.env.TMDB_API_KEY;
 
+  if (!apiKey) {
+    return res.status(500).json({ error: 'TMDB_API_KEY is missing in Render Environment Variables!' });
+  }
+
   try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`
-    );
+    const tmdbUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
+    const response = await fetch(tmdbUrl);
+
+    if (!response.ok) {
+      return res.status(500).json({ error: `TMDB API error (Status ${response.status}). Check if TMDB_API_KEY is valid.` });
+    }
+
     const data = await response.json();
 
     if (data.results && data.results.length > 0) {
@@ -139,11 +147,11 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
         poster: match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : ''
       });
     } else {
-      res.status(404).json({ error: 'No results found on TMDB' });
+      res.status(404).json({ error: 'No matching titles found on TMDB.' });
     }
   } catch (err) {
-    console.error('TMDB Error:', err);
-    res.status(500).json({ error: 'Failed to fetch from TMDB' });
+    console.error('TMDB Fetch Error:', err);
+    res.status(500).json({ error: 'Server connection error: ' + err.message });
   }
 });
 
@@ -170,7 +178,7 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// DELETE ALL MEDIA
+// Delete All Media
 app.post('/admin/delete-all', requireAdmin, async (req, res) => {
   try {
     await Media.deleteMany({});

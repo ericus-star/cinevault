@@ -9,7 +9,9 @@
 <body>
 
   <header>
-    <div class="logo">Erivox Admin</div>
+    <div class="logo">
+      <a href="/"><span class="logo-white">ERI</span><span class="logo-red">VOX</span> Admin</a>
+    </div>
     <nav class="top-nav">
       <a href="/">View Site</a>
       <a href="/logout">Logout</a>
@@ -116,7 +118,7 @@
           alert(data.error || 'Movie/Show not found on TMDB');
         }
       } catch (err) {
-        alert('Failed to connect to TMDB endpoint.');
+        alert('Failed to connect to server endpoint.');
       }
     });
   </script>
