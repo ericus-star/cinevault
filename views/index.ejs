@@ -63,7 +63,11 @@
             <div class="movie-info">
               <h3><%= movie.title %></h3>
               <p class="genre"><%= movie.genre || 'Action' %></p>
-              <a href="/movie/<%= movie._id %>" class="btn-download">Download</a>
+              
+              <!-- Direct Storage Download Button -->
+              <a href="<%= movie.videoUrl %>" download target="_blank" rel="noopener noreferrer" class="btn-download">
+                Download
+              </a>
             </div>
           </div>
         <% }) %>
