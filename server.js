@@ -28,16 +28,16 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Movie & TV Show Schema (Supports both single link & episode arrays)
+// Media Schema (Supports Movies & TV Shows with Episodes/ZIP)
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' },
   genre: String,
   poster: String,
-  videoUrl: String, // Main download / Full Season ZIP link
+  videoUrl: String, // Full Movie or Season ZIP Link
   episodes: [
     {
-      title: String, // e.g. "Episode 1" or "S01E01"
+      title: String,
       videoUrl: String
     }
   ],
@@ -54,6 +54,7 @@ function requireAdmin(req, res, next) {
 
 // --- PUBLIC ROUTES ---
 
+// Home Page
 app.get('/', async (req, res) => {
   try {
     const { search, type, genre } = req.query;
@@ -76,7 +77,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Single Media View Page (Movies & TV Shows)
+// Single Media View Page (Details & Download Links)
 app.get('/media/:id', async (req, res) => {
   try {
     const item = await Media.findById(req.params.id);
@@ -88,9 +89,46 @@ app.get('/media/:id', async (req, res) => {
   }
 });
 
-// DMCA Route
+// DMCA Page
 app.get('/dmca', (req, res) => {
   res.render('dmca');
+});
+
+// Dynamic XML Sitemap for Google Search Console
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const movies = await Media.find();
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://erivox.onrender.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://erivox.onrender.com/dmca</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>`;
+
+    movies.forEach(item => {
+      xml += `
+  <url>
+    <loc>https://erivox.onrender.com/media/${item._id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    });
+
+    xml += `\n</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Sitemap Error:', err);
+    res.status(500).end();
+  }
 });
 
 // --- AUTH ROUTES ---
@@ -124,7 +162,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// TMDB Fetch Endpoint
+// TMDB Auto-Fetch Endpoint
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
   if (!title) return res.status(400).json({ error: 'Title is required' });
