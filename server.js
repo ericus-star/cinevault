@@ -28,13 +28,19 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Movie & TV Show Schema
+// Movie & TV Show Schema (Supports both single link & episode arrays)
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' },
   genre: String,
   poster: String,
-  videoUrl: String,
+  videoUrl: String, // Main download / Full Season ZIP link
+  episodes: [
+    {
+      title: String, // e.g. "Episode 1" or "S01E01"
+      videoUrl: String
+    }
+  ],
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -53,15 +59,9 @@ app.get('/', async (req, res) => {
     const { search, type, genre } = req.query;
     let query = {};
 
-    if (search) {
-      query.title = { $regex: search, $options: 'i' };
-    }
-    if (type && type !== 'all') {
-      query.type = type;
-    }
-    if (genre && genre !== 'all') {
-      query.genre = { $regex: genre, $options: 'i' };
-    }
+    if (search) query.title = { $regex: search, $options: 'i' };
+    if (type && type !== 'all') query.type = type;
+    if (genre && genre !== 'all') query.genre = { $regex: genre, $options: 'i' };
 
     const movies = await Media.find(query).sort({ createdAt: -1 });
     res.render('index', { 
@@ -76,20 +76,21 @@ app.get('/', async (req, res) => {
   }
 });
 
-// DMCA Route
-app.get('/dmca', (req, res) => {
-  res.render('dmca');
-});
-
-app.get('/movie/:id', async (req, res) => {
+// Single Media View Page (Movies & TV Shows)
+app.get('/media/:id', async (req, res) => {
   try {
-    const movie = await Media.findById(req.params.id);
-    if (!movie) return res.status(404).send('Media not found');
-    res.render('movie', { movie });
+    const item = await Media.findById(req.params.id);
+    if (!item) return res.status(404).send('Media not found');
+    res.render('movie', { item });
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
   }
+});
+
+// DMCA Route
+app.get('/dmca', (req, res) => {
+  res.render('dmca');
 });
 
 // --- AUTH ROUTES ---
@@ -123,7 +124,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// TMDB API Search Endpoint
+// TMDB Fetch Endpoint
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
   if (!title) return res.status(400).json({ error: 'Title is required' });
@@ -131,18 +132,11 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const mediaType = type === 'tv' ? 'tv' : 'movie';
   const apiKey = process.env.TMDB_API_KEY;
 
-  if (!apiKey) {
-    return res.status(500).json({ error: 'TMDB_API_KEY is missing in Environment Variables!' });
-  }
+  if (!apiKey) return res.status(500).json({ error: 'TMDB_API_KEY missing' });
 
   try {
     const tmdbUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
     const response = await fetch(tmdbUrl);
-
-    if (!response.ok) {
-      return res.status(500).json({ error: `TMDB API error (Status ${response.status}).` });
-    }
-
     const data = await response.json();
 
     if (data.results && data.results.length > 0) {
@@ -155,20 +149,33 @@ app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
       res.status(404).json({ error: 'No matching titles found on TMDB.' });
     }
   } catch (err) {
-    console.error('TMDB Fetch Error:', err);
-    res.status(500).json({ error: 'Server connection error: ' + err.message });
+    res.status(500).json({ error: 'TMDB Fetch Error: ' + err.message });
   }
 });
 
-// Add Media
+// Add New Media
 app.post('/admin/add', requireAdmin, async (req, res) => {
   try {
     const { title, type, genre, poster, videoUrl } = req.body;
-    await Media.create({ title, type: type || 'movie', genre, poster, videoUrl });
+    await Media.create({ title, type: type || 'movie', genre, poster, videoUrl, episodes: [] });
     res.redirect('/admin');
   } catch (err) {
     console.error(err);
     res.status(500).send('Error adding item');
+  }
+});
+
+// Add Single Episode to Existing Show
+app.post('/admin/add-episode/:id', requireAdmin, async (req, res) => {
+  try {
+    const { episodeTitle, episodeUrl } = req.body;
+    await Media.findByIdAndUpdate(req.params.id, {
+      $push: { episodes: { title: episodeTitle, videoUrl: episodeUrl } }
+    });
+    res.redirect('/admin');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error adding episode');
   }
 });
 
@@ -194,6 +201,5 @@ app.post('/admin/delete-all', requireAdmin, async (req, res) => {
   }
 });
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

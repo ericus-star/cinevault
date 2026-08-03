@@ -12,7 +12,7 @@
     }
 
     .admin-container {
-      max-width: 900px;
+      max-width: 950px;
       margin: 40px auto;
       padding: 0 20px;
     }
@@ -26,7 +26,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
-    /* Form Layout & Field Styling */
+    /* Form Styling */
     .form-group {
       margin-bottom: 20px;
       display: flex;
@@ -56,7 +56,6 @@
       border-color: #e50914;
     }
 
-    /* Input Row with Fetch Button */
     .input-with-btn {
       display: flex;
       gap: 10px;
@@ -111,6 +110,7 @@
       padding: 15px;
       text-align: left;
       border-bottom: 1px solid #222;
+      vertical-align: top;
     }
 
     .media-table th {
@@ -132,6 +132,42 @@
       background-color: #e50914;
       color: #fff;
     }
+
+    /* Inline Add Episode Form */
+    .add-ep-form {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #333;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ep-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ep-input-row input {
+      padding: 6px 10px;
+      background: #1a1a1a;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .btn-add-ep {
+      background: #e50914;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -148,18 +184,18 @@
 
   <main class="admin-container">
     
-    <!-- Add New Content Card -->
+    <!-- Form to Add Title -->
     <div class="admin-card">
       <h2>Add New Movie / TV Show</h2>
       <br>
 
       <form action="/admin/add" method="POST">
         
-        <!-- Title & Fetch Button -->
+        <!-- Title & TMDB Fetch -->
         <div class="form-group">
           <label for="title">Title</label>
           <div class="input-with-btn">
-            <input type="text" id="title" name="title" class="form-input" placeholder="e.g. Deadpool & Wolverine" required>
+            <input type="text" id="title" name="title" class="form-input" placeholder="e.g. Shōgun or Deadpool & Wolverine" required>
             <button type="button" class="btn-fetch" onclick="fetchTMDB()">Auto-Fetch TMDB</button>
           </div>
         </div>
@@ -176,7 +212,7 @@
         <!-- Genre -->
         <div class="form-group">
           <label for="genre">Genre</label>
-          <input type="text" id="genre" name="genre" class="form-input" placeholder="e.g. Action, Sci-Fi" required>
+          <input type="text" id="genre" name="genre" class="form-input" placeholder="e.g. Action, Drama, Sci-Fi" required>
         </div>
 
         <!-- Poster URL -->
@@ -185,13 +221,12 @@
           <input type="text" id="poster" name="poster" class="form-input" placeholder="https://image.tmdb.org/t/p/w500/..." required>
         </div>
 
-        <!-- Video / Cloudflare Storage Link -->
+        <!-- Video URL / Full Season ZIP -->
         <div class="form-group">
-          <label for="videoUrl">Video / Storage Link</label>
-          <input type="text" id="videoUrl" name="videoUrl" class="form-input" placeholder="https://pub-....r2.dev/movies/..." required>
+          <label for="videoUrl">Full Movie Link or Full Season (.ZIP) Link</label>
+          <input type="text" id="videoUrl" name="videoUrl" class="form-input" placeholder="https://pub-....r2.dev/seasons/shogun/Shogun_Season_1.zip">
         </div>
 
-        <!-- Submit Button -->
         <button type="submit" class="btn-submit">Add Content</button>
       </form>
     </div>
@@ -201,7 +236,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2>Existing Media (<%= movies.length %>)</h2>
         <% if (movies.length > 0) { %>
-          <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Are you sure you want to DELETE ALL movies?');">
+          <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Delete ALL content from database?');">
             <button type="submit" class="btn-danger">Delete All</button>
           </form>
         <% } %>
@@ -214,7 +249,7 @@
               <th>Poster</th>
               <th>Title</th>
               <th>Type</th>
-              <th>Genre</th>
+              <th>Episodes</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -222,13 +257,33 @@
             <% movies.forEach(movie => { %>
               <tr>
                 <td>
-                  <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 45px; height: 65px; object-fit: cover; border-radius: 4px;">
+                  <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;">
                 </td>
-                <td><strong><%= movie.title %></strong></td>
-                <td style="text-transform: uppercase; font-size: 0.85rem; color: #888;"><%= movie.type %></td>
-                <td><%= movie.genre %></td>
                 <td>
-                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Delete this movie?');">
+                  <strong><%= movie.title %></strong>
+                  <br><small style="color: #888;"><%= movie.genre %></small>
+                </td>
+                <td style="text-transform: uppercase; font-size: 0.85rem; color: #888;"><%= movie.type %></td>
+                <td>
+                  <% if (movie.type === 'tv') { %>
+                    <span style="font-size: 0.9rem; color: #ccc;">
+                      <%= movie.episodes ? movie.episodes.length : 0 %> Episode(s) Added
+                    </span>
+
+                    <!-- Quick Add Individual Episode Form -->
+                    <form action="/admin/add-episode/<%= movie._id %>" method="POST" class="add-ep-form">
+                      <div class="ep-input-row">
+                        <input type="text" name="episodeTitle" placeholder="e.g. Episode 1" required style="width: 100px;">
+                        <input type="text" name="episodeUrl" placeholder="R2 Direct Video URL" required style="flex: 1;">
+                      </div>
+                      <button type="submit" class="btn-add-ep">+ Add Episode</button>
+                    </form>
+                  <% else { %>
+                    <span style="color: #555;">N/A (Single Movie)</span>
+                  <% } %>
+                </td>
+                <td>
+                  <form action="/admin/delete/<%= movie._id %>" method="POST" onsubmit="return confirm('Delete this media item?');">
                     <button type="submit" class="btn-danger">Delete</button>
                   </form>
                 </td>
@@ -237,7 +292,7 @@
           </tbody>
         </table>
       <% } else { %>
-        <p style="color: #888;">No movies in database yet.</p>
+        <p style="color: #888;">No items added yet.</p>
       <% } %>
     </div>
 
@@ -263,7 +318,7 @@
           posterInput.value = data.poster;
           if (data.title) titleInput.value = data.title;
         } else {
-          alert(data.error || 'Movie not found on TMDB');
+          alert(data.error || 'Title not found on TMDB');
         }
       } catch (err) {
         alert('Error fetching from TMDB: ' + err.message);

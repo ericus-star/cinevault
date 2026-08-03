@@ -54,7 +54,7 @@
 
     <h2><%= activeType === 'movie' ? 'Movies' : activeType === 'tv' ? 'TV Shows' : 'Latest Uploads' %></h2>
 
-    <!-- Sideways Movies Layout Grid -->
+    <!-- Media Collection Grid -->
     <div class="movie-grid">
       <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
@@ -64,9 +64,9 @@
               <h3><%= movie.title %></h3>
               <p class="genre"><%= movie.genre || 'Action' %></p>
               
-              <!-- Direct Storage Download Button -->
-              <a href="<%= movie.videoUrl %>" download target="_blank" rel="noopener noreferrer" class="btn-download">
-                Download
+              <!-- Navigates to Details/Episode Download Page -->
+              <a href="/media/<%= movie._id %>" class="btn-download">
+                View / Download
               </a>
             </div>
           </div>
@@ -77,7 +77,7 @@
     </div>
   </main>
 
-  <!-- Clean Footer with DMCA Button -->
+  <!-- Footer with DMCA Disclaimer Button -->
   <footer>
     <div class="footer-container">
       <p>&copy; <%= new Date().getFullYear() %> <span style="color: #ffffff; font-weight: bold;">ERI</span><span style="color: #e50914; font-weight: bold;">VOX</span>. All rights reserved.</p>
@@ -87,7 +87,7 @@
     </div>
   </footer>
 
-  <!-- Protection Script -->
+  <!-- Basic Protection Script -->
   <script>
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('keydown', (e) => {
