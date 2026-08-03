@@ -26,7 +26,6 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
-    /* Form Styling */
     .form-group {
       margin-bottom: 20px;
       display: flex;
@@ -95,7 +94,6 @@
       background-color: #f40612;
     }
 
-    /* Admin Table Styling */
     .media-table {
       width: 100%;
       border-collapse: collapse;
@@ -133,7 +131,6 @@
       color: #fff;
     }
 
-    /* Inline Add Episode Form */
     .add-ep-form {
       margin-top: 10px;
       padding-top: 10px;
@@ -191,7 +188,6 @@
 
       <form action="/admin/add" method="POST">
         
-        <!-- Title & TMDB Fetch -->
         <div class="form-group">
           <label for="title">Title</label>
           <div class="input-with-btn">
@@ -200,7 +196,6 @@
           </div>
         </div>
 
-        <!-- Content Type -->
         <div class="form-group">
           <label for="type">Content Type</label>
           <select id="type" name="type" class="form-select">
@@ -209,19 +204,16 @@
           </select>
         </div>
 
-        <!-- Genre -->
         <div class="form-group">
           <label for="genre">Genre</label>
           <input type="text" id="genre" name="genre" class="form-input" placeholder="e.g. Action, Drama, Sci-Fi" required>
         </div>
 
-        <!-- Poster URL -->
         <div class="form-group">
           <label for="poster">Poster URL</label>
           <input type="text" id="poster" name="poster" class="form-input" placeholder="https://image.tmdb.org/t/p/w500/..." required>
         </div>
 
-        <!-- Video URL / Full Season ZIP -->
         <div class="form-group">
           <label for="videoUrl">Full Movie Link or Full Season (.ZIP) Link</label>
           <input type="text" id="videoUrl" name="videoUrl" class="form-input" placeholder="https://pub-....r2.dev/seasons/shogun/Shogun_Season_1.zip">
@@ -234,8 +226,8 @@
     <!-- Existing Content List -->
     <div class="admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2>Existing Media (<%= movies.length %>)</h2>
-        <% if (movies.length > 0) { %>
+        <h2>Existing Media (<%= movies ? movies.length : 0 %>)</h2>
+        <% if (movies && movies.length > 0) { %>
           <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Delete ALL content from database?');">
             <button type="submit" class="btn-danger">Delete All</button>
           </form>
@@ -257,7 +249,7 @@
             <% movies.forEach(movie => { %>
               <tr>
                 <td>
-                  <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;">
+                  <img src="<%= movie.poster || '/placeholder.jpg' %>" alt="<%= movie.title %>" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;">
                 </td>
                 <td>
                   <strong><%= movie.title %></strong>
@@ -267,10 +259,9 @@
                 <td>
                   <% if (movie.type === 'tv') { %>
                     <span style="font-size: 0.9rem; color: #ccc;">
-                      <%= movie.episodes ? movie.episodes.length : 0 %> Episode(s) Added
+                      <%= (movie.episodes && Array.isArray(movie.episodes)) ? movie.episodes.length : 0 %> Episode(s) Added
                     </span>
 
-                    <!-- Quick Add Individual Episode Form -->
                     <form action="/admin/add-episode/<%= movie._id %>" method="POST" class="add-ep-form">
                       <div class="ep-input-row">
                         <input type="text" name="episodeTitle" placeholder="e.g. Episode 1" required style="width: 100px;">
@@ -278,7 +269,7 @@
                       </div>
                       <button type="submit" class="btn-add-ep">+ Add Episode</button>
                     </form>
-                  <% else { %>
+                  <% } else { %>
                     <span style="color: #555;">N/A (Single Movie)</span>
                   <% } %>
                 </td>
@@ -288,7 +279,7 @@
                   </form>
                 </td>
               </tr>
-            <% }) %>
+            <% }); %>
           </tbody>
         </table>
       <% } else { %>
