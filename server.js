@@ -14,12 +14,18 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Security Middleware
 app.use(helmet({ contentSecurityPolicy: false })); // Secures HTTP headers
-app.use(mongoSanitize()); // Sanitizes user input to prevent NoSQL injection attacks
 
-// Standard Middleware
+// Express Standard Parsers (must come before sanitization if sanitizing req.body)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Safe Mongo Sanitization (prevents NoSQL injection without trying to reassign getter-only req.query)
+app.use((req, res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  next();
+});
 
 // Session Configuration
 app.use(session({
