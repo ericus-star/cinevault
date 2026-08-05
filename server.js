@@ -103,6 +103,7 @@ app.get('/', async (req, res) => {
 // Single Media View Page (Details & Download Links)
 app.get('/media/:id', async (req, res) => {
   try {
+    // Validate ObjectId format to prevent CastError server crashes
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).send('Media not found');
     }
