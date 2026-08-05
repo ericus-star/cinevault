@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
 require('dotenv').config();
 
 const app = express();
@@ -10,7 +12,11 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware
+// Security Middleware
+app.use(helmet({ contentSecurityPolicy: false })); // Secures HTTP headers
+app.use(mongoSanitize()); // Sanitizes user input to prevent NoSQL injection attacks
+
+// Standard Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,7 +30,8 @@ app.use(session({
 }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+const dbUri = process.env.DATABASE_URL || process.env.MONGODB_URI;
+mongoose.connect(dbUri)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 
@@ -60,9 +67,9 @@ app.get('/', async (req, res) => {
     const { search, type, genre } = req.query;
     let query = {};
 
-    if (search) query.title = { $regex: search, $options: 'i' };
-    if (type && type !== 'all') query.type = type;
-    if (genre && genre !== 'all') query.genre = { $regex: genre, $options: 'i' };
+    if (search) query.title = { $regex: String(search), $options: 'i' };
+    if (type && type !== 'all') query.type = String(type);
+    if (genre && genre !== 'all') query.genre = { $regex: String(genre), $options: 'i' };
 
     const movies = await Media.find(query).sort({ createdAt: -1 });
     res.render('index', { 

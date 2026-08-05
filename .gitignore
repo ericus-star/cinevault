@@ -1,1 +1,7 @@
 node_modules/ 
+# Ignore local environment files containing passwords
+.env
+.env.local
+
+# Ignore installed node dependencies
+node_modules/
