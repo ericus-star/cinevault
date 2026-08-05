@@ -15,12 +15,12 @@ app.set('views', path.join(__dirname, 'views'));
 // Security Middleware
 app.use(helmet({ contentSecurityPolicy: false })); // Secures HTTP headers
 
-// Standard Parsers (Must come before custom sanitization middleware)
+// Standard Parsers
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Safe Mongo Sanitization (Prevents NoSQL injection without reassigning getter-only req.query)
+// Safe Mongo Sanitization
 app.use((req, res, next) => {
   if (req.body) mongoSanitize.sanitize(req.body);
   if (req.params) mongoSanitize.sanitize(req.params);
@@ -35,29 +35,20 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// MongoDB Connection
-const dbUri = process.env.DATABASE_URL || process.env.MONGODB_URI;
+// MongoDB Connection (Hardcoded Fallback Connection String)
+const dbUri = process.env.DATABASE_URL || process.env.MONGODB_URI || "mongodb+srv://ericus-star:mancity2026@cluster0.rafwfnh.mongodb.net/erivox?appName=Cluster0";
 
-mongoose.set('bufferCommands', false); // Disable buffering so queries don't hang if disconnected
-
-mongoose.connect(dbUri, {
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 45000,
-})
+mongoose.connect(dbUri)
   .then(() => console.log('MongoDB Connected Successfully'))
-  .catch(err => console.error('MongoDB Initial Connection Error:', err));
+  .catch(err => console.error('MongoDB Connection Error:', err));
 
-mongoose.connection.on('error', err => {
-  console.error('MongoDB Runtime Connection Error:', err);
-});
-
-// Media Schema (Supports Movies & TV Shows with Episodes/ZIP)
+// Media Schema
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' },
   genre: String,
   poster: String,
-  videoUrl: String, // Full Movie or Season ZIP Link
+  videoUrl: String,
   episodes: [
     {
       title: String,
@@ -100,10 +91,9 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Single Media View Page (Details & Download Links)
+// Single Media View Page
 app.get('/media/:id', async (req, res) => {
   try {
-    // Validate ObjectId format to prevent CastError server crashes
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).send('Media not found');
     }
@@ -123,7 +113,7 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// Dynamic XML Sitemap for Google Search Console
+// Dynamic XML Sitemap
 app.get('/sitemap.xml', async (req, res) => {
   try {
     const movies = await Media.find();
