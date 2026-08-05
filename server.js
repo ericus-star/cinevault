@@ -15,12 +15,12 @@ app.set('views', path.join(__dirname, 'views'));
 // Security Middleware
 app.use(helmet({ contentSecurityPolicy: false })); // Secures HTTP headers
 
-// Express Standard Parsers (must come before sanitization if sanitizing req.body)
+// Standard Parsers (Must come before custom sanitization middleware)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Safe Mongo Sanitization (prevents NoSQL injection without trying to reassign getter-only req.query)
+// Safe Mongo Sanitization (Prevents NoSQL injection without reassigning getter-only req.query)
 app.use((req, res, next) => {
   if (req.body) mongoSanitize.sanitize(req.body);
   if (req.params) mongoSanitize.sanitize(req.params);
@@ -37,9 +37,19 @@ app.use(session({
 
 // MongoDB Connection
 const dbUri = process.env.DATABASE_URL || process.env.MONGODB_URI;
-mongoose.connect(dbUri)
+
+mongoose.set('bufferCommands', false); // Disable buffering so queries don't hang if disconnected
+
+mongoose.connect(dbUri, {
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+})
   .then(() => console.log('MongoDB Connected Successfully'))
-  .catch(err => console.error('MongoDB Connection Error:', err));
+  .catch(err => console.error('MongoDB Initial Connection Error:', err));
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB Runtime Connection Error:', err);
+});
 
 // Media Schema (Supports Movies & TV Shows with Episodes/ZIP)
 const mediaSchema = new mongoose.Schema({
@@ -85,7 +95,7 @@ app.get('/', async (req, res) => {
       activeGenre: genre || 'all' 
     });
   } catch (err) {
-    console.error(err);
+    console.error('Home Route Error:', err);
     res.status(500).send('Server Error');
   }
 });
@@ -93,11 +103,16 @@ app.get('/', async (req, res) => {
 // Single Media View Page (Details & Download Links)
 app.get('/media/:id', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).send('Media not found');
+    }
+
     const item = await Media.findById(req.params.id);
     if (!item) return res.status(404).send('Media not found');
+
     res.render('movie', { item });
   } catch (err) {
-    console.error(err);
+    console.error('Media Page Error:', err);
     res.status(500).send('Server Error');
   }
 });
@@ -170,7 +185,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
     const movies = await Media.find().sort({ createdAt: -1 });
     res.render('admin', { movies });
   } catch (err) {
-    console.error(err);
+    console.error('Admin Fetch Error:', err);
     res.status(500).send('Server Error');
   }
 });
@@ -211,7 +226,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
     await Media.create({ title, type: type || 'movie', genre, poster, videoUrl, episodes: [] });
     res.redirect('/admin');
   } catch (err) {
-    console.error(err);
+    console.error('Add Media Error:', err);
     res.status(500).send('Error adding item');
   }
 });
@@ -225,7 +240,7 @@ app.post('/admin/add-episode/:id', requireAdmin, async (req, res) => {
     });
     res.redirect('/admin');
   } catch (err) {
-    console.error(err);
+    console.error('Add Episode Error:', err);
     res.status(500).send('Error adding episode');
   }
 });
@@ -236,7 +251,7 @@ app.post('/admin/delete/:id', requireAdmin, async (req, res) => {
     await Media.findByIdAndDelete(req.params.id);
     res.redirect('/admin');
   } catch (err) {
-    console.error(err);
+    console.error('Delete Item Error:', err);
     res.status(500).send('Error deleting item');
   }
 });
@@ -247,7 +262,7 @@ app.post('/admin/delete-all', requireAdmin, async (req, res) => {
     await Media.deleteMany({});
     res.redirect('/admin');
   } catch (err) {
-    console.error(err);
+    console.error('Delete All Error:', err);
     res.status(500).send('Error deleting all items');
   }
 });
