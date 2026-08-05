@@ -12,10 +12,8 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Security Middleware
-app.use(helmet({ contentSecurityPolicy: false })); // Secures HTTP headers
-
-// Standard Parsers
+// Security & Body Parsing Middleware
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -27,7 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Session Configuration
+// Session Setup
 app.use(session({
   secret: process.env.SESSION_SECRET || 'erivox-secret-key',
   resave: false,
@@ -35,14 +33,20 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// MongoDB Connection (Hardcoded Fallback Connection String)
-const dbUri = process.env.DATABASE_URL || process.env.MONGODB_URI || "mongodb+srv://ericus-star:mancity2026@cluster0.rafwfnh.mongodb.net/erivox?appName=Cluster0";
+// MongoDB Connection String
+const dbUri = process.env.DATABASE_URL || 
+              process.env.MONGODB_URI || 
+              "mongodb+srv://ericus-star:mancity2026@cluster0.rafwfnh.mongodb.net/erivox?retryWrites=true&w=majority";
 
-mongoose.connect(dbUri)
-  .then(() => console.log('MongoDB Connected Successfully'))
-  .catch(err => console.error('MongoDB Connection Error:', err));
+// Mongoose Connection
+mongoose.connect(dbUri, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => console.log('Pinged your deployment. You successfully connected to MongoDB!'))
+.catch(err => console.error('MongoDB Connection Error:', err.message));
 
-// Media Schema
+// Media Schema & Model
 const mediaSchema = new mongoose.Schema({
   title: String,
   type: { type: String, default: 'movie' },
@@ -91,7 +95,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Single Media View Page
+// Single Media Route
 app.get('/media/:id', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -113,20 +117,24 @@ app.get('/dmca', (req, res) => {
   res.render('dmca');
 });
 
-// Dynamic XML Sitemap
+// Dynamic Sitemap
 app.get('/sitemap.xml', async (req, res) => {
   try {
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+    
     const movies = await Media.find();
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://erivox.onrender.com/</loc>
+    <loc>${baseUrl}/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://erivox.onrender.com/dmca</loc>
+    <loc>${baseUrl}/dmca</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>`;
@@ -134,7 +142,7 @@ app.get('/sitemap.xml', async (req, res) => {
     movies.forEach(item => {
       xml += `
   <url>
-    <loc>https://erivox.onrender.com/media/${item._id}</loc>
+    <loc>${baseUrl}/media/${item._id}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
@@ -181,7 +189,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// TMDB Auto-Fetch Endpoint
+// TMDB Fetch Endpoint
 app.get('/admin/fetch-tmdb', requireAdmin, async (req, res) => {
   const { title, type } = req.query;
   if (!title) return res.status(400).json({ error: 'Title is required' });
@@ -222,7 +230,7 @@ app.post('/admin/add', requireAdmin, async (req, res) => {
   }
 });
 
-// Add Single Episode to Existing Show
+// Add Single Episode
 app.post('/admin/add-episode/:id', requireAdmin, async (req, res) => {
   try {
     const { episodeTitle, episodeUrl } = req.body;
